@@ -1,0 +1,32 @@
+<view class="page outfit">
+  <view class="head anim-rise">
+    <view>
+      <view class="page-title">穿搭记录</view>
+      <view class="page-subtitle">按日期查看与记录穿搭</view>
+    </view>
+    <view class="head-btn" bindtap="goCreate">今日穿搭</view>
+  </view>
+
+  <view class="list" wx:if="{{list.length}}">
+    <view
+      class="item"
+      wx:for="{{list}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bindtap="goDetail"
+    >
+      <view class="item-top">
+        <text class="item-date">{{item.dateLabel}}</text>
+        <text class="item-count">×{{item.wearCount || 1}}</text>
+      </view>
+      <view class="item-clothes">
+        <text wx:for="{{item.clothes}}" wx:for-item="c" wx:key="id" class="cloth-line">{{c.name}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty" wx:else>
+    <view class="empty-title">还没有穿搭记录</view>
+    <view class="muted">记录今天的穿搭，开始你的衣橱日志</view>
+  </view>
+</view>

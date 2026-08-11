@@ -1,0 +1,42 @@
+.cover {
+  height: 360rpx;
+  overflow: hidden;
+  margin-bottom: 28rpx;
+  border-radius: 32rpx;
+  box-shadow: var(--shadow);
+}
+
+.cover image {
+  width: 100%;
+  height: 100%;
+}
+
+.cover-empty {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  color: var(--ink-soft);
+  font-weight: 600;
+  background: #f6f3f1;
+}
+
+.plus {
+  font-size: 56rpx;
+  line-height: 1;
+  color: var(--coral-deep);
+}
+
+.form {
+  padding: 28rpx;
+  margin-bottom: 40rpx;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 32rpx;
+  box-shadow: var(--shadow);
+}
+
+.picker {
+  color: var(--ink);
+}

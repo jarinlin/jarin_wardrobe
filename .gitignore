@@ -2,6 +2,13 @@
 node_modules/
 **/node_modules/
 
+# Go 构建产物
+**/bin/
+*.exe
+
+# 已废弃的 Node 后端（若本地仍保留）
+1111/_deprecated_server_node/
+
 # 环境变量与密钥
 .env
 .env.*
@@ -28,9 +35,8 @@ Desktop.ini
 *.swo
 *~
 
-# 微信小程序本地私有配置
-client/project.private.config.json
-client/**/project.private.config.json
+# 微信小程序本地私有配置（可按需保留；默认忽略本机差异）
+**/project.private.config.json
 
 # 上传产物 / 临时文件
 dist/
@@ -38,13 +44,13 @@ build/
 .tmp/
 temp/
 tmp/
+**/_tmp_misans/
 *.local
 
 # 覆盖率与测试缓存
 coverage/
 .nyc_output/
 
-# OS / 杂项
 *.pid
 *.seed
 *.pid.lock

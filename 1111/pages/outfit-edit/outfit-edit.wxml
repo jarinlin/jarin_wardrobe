@@ -1,0 +1,46 @@
+<view class="page outfit-edit">
+  <view class="date-row surface">
+    <text class="label">日期</text>
+    <picker mode="date" value="{{date}}" bindchange="onDateChange">
+      <text class="value">{{dateLabel}}</text>
+    </picker>
+  </view>
+
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">选用衣物</text>
+      <text class="section-action">已选 {{selectedIds.length}}</text>
+    </view>
+    <view class="clothes-grid">
+      <view
+        class="cloth {{item.selected ? 'selected' : ''}}"
+        wx:for="{{clothes}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        bindtap="toggleCloth"
+      >
+        <view class="cloth-cover">
+          <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" />
+          <view wx:else class="ph">{{item.categoryName}}</view>
+        </view>
+        <text class="cloth-name">{{item.name}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="form-item">
+    <text class="form-label">穿搭照片（可选）</text>
+    <view class="photo" bindtap="onChooseImage">
+      <image wx:if="{{imageUrl}}" src="{{imageUrl}}" mode="aspectFill" />
+      <text wx:else class="muted">点击添加</text>
+    </view>
+  </view>
+
+  <view class="form-item">
+    <text class="form-label">备注</text>
+    <textarea class="form-textarea" placeholder="如：轻松上班" value="{{note}}" bindinput="onNote" />
+  </view>
+
+  <view class="btn-primary" bindtap="onSubmit">保存穿搭</view>
+  <view class="safe-bottom"></view>
+</view>

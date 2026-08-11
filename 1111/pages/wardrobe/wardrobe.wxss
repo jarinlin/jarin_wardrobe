@@ -1,0 +1,168 @@
+.wardrobe {
+  padding-top: 8rpx;
+}
+
+.head {
+  margin-bottom: 24rpx;
+}
+
+.head-title {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 44rpx;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.head-sub {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.toolbar {
+  display: flex;
+  gap: 16rpx;
+  align-items: center;
+  margin-bottom: 18rpx;
+}
+
+.search-box {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: var(--radius-lg);
+  padding: 0 28rpx;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  border: 2rpx solid var(--line);
+  box-shadow: var(--shadow);
+}
+
+.search-input {
+  width: 100%;
+  font-size: 28rpx;
+  font-family: var(--font);
+}
+
+.add-btn {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: var(--radius-lg);
+  background: var(--coral);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+  line-height: 1;
+  box-shadow: 0 10rpx 24rpx rgba(232, 93, 117, 0.22);
+}
+
+.cat-scroll {
+  white-space: nowrap;
+  margin-bottom: 28rpx;
+  display: flex;
+  gap: 12rpx;
+  width: 100%;
+}
+
+.chip.manage {
+  background: var(--moss-soft);
+  color: var(--mint-deep);
+  font-weight: 500;
+  border-color: transparent;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+}
+
+.card {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  animation: rise-in 0.45s var(--ease) both;
+}
+
+.cover {
+  height: 300rpx;
+}
+
+.cover.tone-0 {
+  background: #fceef1;
+}
+
+.cover.tone-1 {
+  background: #eaf7f2;
+}
+
+.cover.tone-2 {
+  background: #faf4df;
+}
+
+.cover.tone-3 {
+  background: #eef2fa;
+}
+
+.cover image {
+  width: 100%;
+  height: 100%;
+}
+
+.cover-ph {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  padding: 24rpx;
+}
+
+.ph-cat {
+  font-size: 22rpx;
+  color: var(--muted);
+}
+
+.ph-name {
+  font-family: var(--font-display);
+  font-size: 30rpx;
+  font-weight: 500;
+  color: var(--ink);
+  text-align: center;
+}
+
+.meta {
+  padding: 18rpx 20rpx 22rpx;
+}
+
+.name {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 6rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sub {
+  font-size: 22rpx;
+  color: var(--muted);
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 24rpx;
+}
+
+.empty-btn {
+  margin-top: 32rpx;
+}

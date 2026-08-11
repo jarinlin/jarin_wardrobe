@@ -1,0 +1,58 @@
+<view class="page home">
+  <view class="hero anim-rise">
+    <view class="brand-row">
+      <text class="brand">Jarin</text>
+      <text class="brand-cn">衣柜</text>
+    </view>
+    <text class="tagline">你好，{{userInfo.nickname || '访客'}} · 整理与记录今天的穿搭</text>
+
+    <view class="cta" bindtap="goWardrobe">
+      <view class="cta-text">
+        <text class="cta-main">打开衣柜</text>
+        <text class="cta-sub">已收录 {{stats.total || 0}} 件</text>
+      </view>
+      <text class="cta-go">→</text>
+    </view>
+  </view>
+
+  <view class="panel anim-rise-delay">
+    <view class="section-head">
+      <text class="section-title">今日穿搭</text>
+      <text class="section-action" bindtap="goOutfitEdit">{{todayOutfit ? '查看' : '去记录'}}</text>
+    </view>
+
+    <view class="today" wx:if="{{todayOutfit}}" bindtap="goOutfitDetail">
+      <view class="today-date">{{todayLabel}}</view>
+      <view class="today-tags">
+        <text wx:for="{{todayOutfit.clothes}}" wx:key="id" class="tag">{{item.name}}</text>
+        <text wx:if="{{!todayOutfit.clothes.length}}" class="muted">尚未添加衣物</text>
+      </view>
+      <text class="today-foot">穿搭次数 · {{todayOutfit.wearCount || 1}}</text>
+    </view>
+
+    <view class="today empty-today" wx:else bindtap="goOutfitEdit">
+      <text class="empty-line">今天还没记录穿搭</text>
+      <text class="muted">从衣柜选几件，记下今天的搭配</text>
+    </view>
+
+    <view class="stats">
+      <view class="stat coral" bindtap="goWardrobe">
+        <text class="num">{{stats.total || 0}}</text>
+        <text class="label">衣物</text>
+      </view>
+      <view class="stat mint">
+        <text class="num">{{statsValue}}</text>
+        <text class="label">总价值</text>
+      </view>
+      <view class="stat lemon" bindtap="goOutfit">
+        <text class="num">{{outfitCount}}</text>
+        <text class="label">穿搭</text>
+      </view>
+    </view>
+
+    <view class="login-bar" wx:if="{{!loggedIn}}" bindtap="goLogin">
+      <text>登录后同步你的衣柜</text>
+      <text class="login-go">去登录</text>
+    </view>
+  </view>
+</view>

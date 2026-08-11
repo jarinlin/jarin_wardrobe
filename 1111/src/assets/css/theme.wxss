@@ -1,0 +1,41 @@
+page {
+  /* Jarin 衣柜 — 克制多巴胺：珊瑚 / 薄荷 / 柠檬 */
+  --bg: #faf7f5;
+  --bg-deep: #f3ebe6;
+  --paper: #ffffff;
+  --ink: #1f1d24;
+  --ink-soft: #5a5566;
+  --muted: #918a9a;
+
+  --coral: #e85d75;
+  --coral-deep: #d94864;
+  --mint: #2bb894;
+  --mint-deep: #1fa37f;
+  --lemon: #e8c547;
+  --sky: #6a9adf;
+  --lavender: #9b8bc9;
+
+  --line: rgba(31, 29, 36, 0.08);
+  --danger: #e05454;
+
+  --radius: 20rpx;
+  --radius-lg: 28rpx;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --font: 'MiSans', 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', sans-serif;
+  --font-display: 'MiSans', 'PingFang SC', sans-serif;
+
+  /* 兼容旧变量 */
+  --text: var(--ink);
+  --text-secondary: var(--ink-soft);
+  --text-muted: var(--muted);
+  --surface: var(--paper);
+  --accent: var(--coral);
+  --accent-soft: #fce8ec;
+  --bg-elevated: #f7f1ed;
+  --shadow: 0 8rpx 28rpx rgba(40, 28, 36, 0.06);
+  --cedar: var(--coral);
+  --cedar-soft: #fce8ec;
+  --moss: var(--mint-deep);
+  --moss-soft: #e5f6f0;
+}

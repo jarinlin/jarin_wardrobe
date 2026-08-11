@@ -1,0 +1,29 @@
+<view class="page login">
+  <view class="panel">
+    <text class="brand">Jarin衣柜</text>
+    <text class="slogan">登录后同步衣柜与穿搭记录</text>
+
+    <view class="profile">
+      <view class="avatar-wrap">
+        <button class="avatar-btn" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
+          <image class="avatar" src="{{avatarUrl || defaultAvatar}}" mode="aspectFill" />
+        </button>
+      </view>
+      <view class="nickname-wrap">
+        <input
+          class="nickname"
+          type="nickname"
+          placeholder="填写昵称"
+          value="{{nickname}}"
+          bindblur="onNickname"
+          bindinput="onNickname"
+        />
+      </view>
+    </view>
+
+    <view class="btn-primary {{loading ? 'disabled' : ''}}" bindtap="onLogin">
+      {{loading ? '登录中…' : '微信一键登录'}}
+    </view>
+    <view class="tip">使用微信授权登录，数据将同步到你的衣柜</view>
+  </view>
+</view>

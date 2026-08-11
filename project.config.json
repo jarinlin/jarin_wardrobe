@@ -1,0 +1,43 @@
+{
+  "description": "Jarin衣柜",
+  "packOptions": {
+    "ignore": [
+      { "value": "1111/server", "type": "folder" },
+      { "value": "1111/_deprecated_server_node", "type": "folder" },
+      { "value": "1111/backend", "type": "folder" },
+      { "value": "1111/Projectprogress.md", "type": "file" },
+      { "value": "1111/.gitignore", "type": "file" },
+      { "value": "server", "type": "folder" },
+      { "value": ".git", "type": "folder" }
+    ],
+    "include": []
+  },
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "coverView": true,
+    "compileHotReLoad": true,
+    "minifyWXML": true,
+    "minifyWXSS": true,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    },
+    "packNpmRelationList": [],
+    "useCompilerPlugins": false
+  },
+  "compileType": "miniprogram",
+  "libVersion": "3.17.0",
+  "appid": "wx2d9b0046273333db",
+  "projectname": "jarin-wardrobe",
+  "miniprogramRoot": "1111/",
+  "condition": {},
+  "editorSetting": {
+    "tabIndent": "insertSpaces",
+    "tabSize": 2
+  }
+}

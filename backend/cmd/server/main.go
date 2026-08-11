@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"jarin-wardrobe/internal/config"
+	cosclient "jarin-wardrobe/internal/cos"
 	"jarin-wardrobe/internal/db"
 	"jarin-wardrobe/internal/handler"
 	"jarin-wardrobe/internal/middleware"
@@ -19,12 +20,28 @@ func main() {
 	}
 	defer db.Close()
 
+	cosCli, err := cosclient.New(cfg)
+	if err != nil {
+		log.Fatalf("[cos] 初始化失败: %v", err)
+	}
+	if cosCli.Enabled() {
+		log.Println("[cos] 腾讯云 COS 已启用")
+	} else {
+		log.Println("[cos] 未配置 COS，上传接口将不可用")
+	}
+
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	r.Use(gin.Recovery(), gin.Logger(), corsMiddleware())
+	r.MaxMultipartMemory = 12 << 20 // 12MB
 
 	r.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"ok": true, "name": "Jarin衣柜 API", "runtime": "go"})
+		c.JSON(http.StatusOK, gin.H{
+			"ok":      true,
+			"name":    "Jarin衣柜 API",
+			"runtime": "go",
+			"cos":     cosCli.Enabled(),
+		})
 	})
 
 	auth := handler.AuthHandler{Cfg: cfg}
@@ -32,6 +49,7 @@ func main() {
 	clothes := handler.ClothesHandler{}
 	outfits := handler.OutfitsHandler{}
 	stats := handler.StatsHandler{}
+	upload := handler.UploadHandler{COS: cosCli}
 	authMw := middleware.AuthRequired(cfg)
 
 	api := r.Group("/api")
@@ -57,6 +75,8 @@ func main() {
 
 		api.GET("/stats", authMw, stats.Get)
 		api.GET("/tags", authMw, stats.Tags)
+
+		api.POST("/upload", authMw, upload.Upload)
 	}
 
 	addr := "0.0.0.0:" + cfg.Port

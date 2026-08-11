@@ -1,12 +1,14 @@
 /**
  * 运行模式：
- * - mock: 本地假数据，不连后端（新手先玩界面）
- * - local: 本地/自建服务器，用 wx.request + BASE_URL
- * - cloud: 微信云托管，用 wx.cloud.callContainer（推荐上线方式）
+ * - mock: 本地假数据，不连后端
+ * - local: 调本机 Go 后端（当前联调使用这个）
+ * - cloud: 微信云托管 callContainer
+ *
+ * 后端已启动时请保持 local，勿改回 mock。
  */
 const RUN_MODE = 'local' // 'mock' | 'local' | 'cloud'
 
-/** local 模式：本机或局域网后端地址（真机调试请改成电脑 IP） */
+/** local：Go API 地址（真机预览请改成电脑局域网 IP） */
 const BASE_URL = 'http://127.0.0.1:3000'
 
 /**

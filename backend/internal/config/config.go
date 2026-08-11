@@ -21,6 +21,14 @@ type Config struct {
 	WXAppID         string
 	WXSecret        string
 	AllowMockLogin  bool
+
+	// 腾讯云 COS（对象存储，俗称腾讯云 OSS）
+	COSSecretID  string
+	COSSecretKey string
+	COSBucket    string
+	COSRegion    string
+	COSPrefix    string
+	COSCDNDomain string
 }
 
 func Load() Config {
@@ -37,7 +45,17 @@ func Load() Config {
 		WXAppID:         getEnv("WX_APPID", ""),
 		WXSecret:        getEnv("WX_SECRET", ""),
 		AllowMockLogin:  getEnvBool("ALLOW_MOCK_LOGIN", true),
+		COSSecretID:     getEnv("COS_SECRET_ID", ""),
+		COSSecretKey:    getEnv("COS_SECRET_KEY", ""),
+		COSBucket:       getEnv("COS_BUCKET", ""),
+		COSRegion:       getEnv("COS_REGION", "ap-guangzhou"),
+		COSPrefix:       getEnv("COS_PREFIX", "wardrobe"),
+		COSCDNDomain:    getEnv("COS_CDN_DOMAIN", ""),
 	}
+}
+
+func (c Config) COSEnabled() bool {
+	return c.COSSecretID != "" && c.COSSecretKey != "" && c.COSBucket != "" && c.COSRegion != ""
 }
 
 func (c Config) SSLMode() string {

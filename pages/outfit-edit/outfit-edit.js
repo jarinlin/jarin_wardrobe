@@ -1,5 +1,6 @@
 const api = require('../../src/assets/js/api')
 const util = require('../../src/assets/js/util')
+const upload = require('../../src/assets/js/upload')
 
 Page({
   data: {
@@ -78,8 +79,8 @@ Page({
 
   async onChooseImage() {
     try {
-      const paths = await util.chooseImage(1)
-      if (paths[0]) this.setData({ imageUrl: paths[0] })
+      const urls = await upload.chooseAndUploadImage(1)
+      if (urls[0]) this.setData({ imageUrl: urls[0] })
     } catch (e) {}
   },
 

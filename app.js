@@ -1,5 +1,5 @@
 const auth = require('./src/assets/js/auth')
-const { BASE_URL, USE_CLOUD, CLOUD_ENV } = require('./src/assets/js/config')
+const { BASE_URL, USE_CLOUD, CLOUD_ENV, USE_MOCK, RUN_MODE } = require('./src/assets/js/config')
 const { loadMiSans } = require('./src/assets/js/fonts')
 
 App({
@@ -7,10 +7,19 @@ App({
     userInfo: null,
     baseUrl: BASE_URL,
     cloudReady: false,
-    fontReady: false
+    fontReady: false,
+    runMode: RUN_MODE
   },
 
   onLaunch() {
+    console.log('[wardrobe] RUN_MODE =', RUN_MODE, 'BASE_URL =', BASE_URL)
+
+    // local/cloud 下清掉 Mock 残留登录态，避免带着假 token 调真实接口
+    if (auth.purgeStaleMockSession(USE_MOCK)) {
+      console.warn('[wardrobe] 已清除 Mock 登录态，请重新登录')
+      this.globalData.userInfo = null
+    }
+
     loadMiSans().then((results) => {
       this.globalData.fontReady = results.some(Boolean)
     })

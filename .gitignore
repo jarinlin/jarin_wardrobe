@@ -6,9 +6,6 @@ node_modules/
 **/bin/
 *.exe
 
-# 已废弃的 Node 后端（若本地仍保留）
-1111/_deprecated_server_node/
-
 # 环境变量与密钥
 .env
 .env.*
@@ -35,7 +32,7 @@ Desktop.ini
 *.swo
 *~
 
-# 微信小程序本地私有配置（可按需保留；默认忽略本机差异）
+# 微信小程序本地私有配置
 **/project.private.config.json
 
 # 上传产物 / 临时文件
@@ -44,10 +41,16 @@ build/
 .tmp/
 temp/
 tmp/
+_tmp_misans/
 **/_tmp_misans/
 *.local
 
-# 覆盖率与测试缓存
+# 已废弃 / 残留目录
+_deprecated_server_node/
+_trash_1111/
+1111/
+
+# 覆盖率
 coverage/
 .nyc_output/
 

@@ -75,6 +75,43 @@ func (h AuthHandler) Login(c *gin.Context) {
 	})
 }
 
+type profileBody struct {
+	NickName  string `json:"nickName"`
+	AvatarURL string `json:"avatarUrl"`
+}
+
+// UpdateProfile 登录后更新昵称/头像（用于 chooseAvatar 临时文件上传 COS 后回写）
+func (h AuthHandler) UpdateProfile(c *gin.Context) {
+	uid := middleware.UserID(c)
+	var body profileBody
+	_ = c.ShouldBindJSON(&body)
+
+	_, err := db.Pool.Exec(c.Request.Context(),
+		`UPDATE users SET
+			nickname = COALESCE(NULLIF($1,''), nickname),
+			avatar_url = COALESCE(NULLIF($2,''), avatar_url)
+		 WHERE id=$3`, body.NickName, body.AvatarURL, uid)
+	if err != nil {
+		response.Fail(c, err.Error(), 1, http.StatusOK)
+		return
+	}
+
+	var u userRow
+	if err := db.Pool.QueryRow(c.Request.Context(),
+		`SELECT id, openid, nickname, avatar_url FROM users WHERE id=$1`, uid,
+	).Scan(&u.ID, &u.OpenID, &u.Nickname, &u.AvatarURL); err != nil {
+		response.Fail(c, err.Error(), 1, http.StatusOK)
+		return
+	}
+
+	response.OK(c, gin.H{
+		"id":        u.ID,
+		"nickname":  u.Nickname,
+		"avatarUrl": u.AvatarURL,
+		"openid":    u.OpenID,
+	})
+}
+
 func (h AuthHandler) code2Session(code string) (string, error) {
 	if h.Cfg.WXAppID == "" || h.Cfg.WXSecret == "" {
 		if h.Cfg.AllowMockLogin {

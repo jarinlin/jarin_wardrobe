@@ -105,6 +105,26 @@ function loginWithCode(code, profile = {}) {
   })
 }
 
+function updateProfile(profile = {}) {
+  if (USE_MOCK) {
+    const user = {
+      ...(auth.getUserInfo() || {}),
+      nickname: profile.nickName || (auth.getUserInfo() && auth.getUserInfo().nickname) || 'Jarin',
+      avatarUrl: profile.avatarUrl || (auth.getUserInfo() && auth.getUserInfo().avatarUrl) || ''
+    }
+    auth.setUserInfo(user)
+    return Promise.resolve(user)
+  }
+  return request({
+    url: '/api/auth/profile',
+    method: 'PUT',
+    data: profile
+  }).then((user) => {
+    auth.setUserInfo(user)
+    return user
+  })
+}
+
 /** ---------- 衣物 ---------- */
 function fetchClothes(params = {}) {
   if (USE_MOCK) {
@@ -312,6 +332,7 @@ function fetchStats() {
 module.exports = {
   request,
   loginWithCode,
+  updateProfile,
   fetchClothes,
   fetchClothingDetail,
   createClothing,

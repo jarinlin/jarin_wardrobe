@@ -55,6 +55,7 @@ func main() {
 	api := r.Group("/api")
 	{
 		api.POST("/auth/login", auth.Login)
+		api.PUT("/auth/profile", authMw, auth.UpdateProfile)
 
 		api.GET("/categories", authMw, cats.List)
 		api.POST("/categories", authMw, cats.Create)

@@ -9,14 +9,16 @@
           <image class="avatar" src="{{avatarUrl || defaultAvatar}}" mode="aspectFill" />
         </button>
       </view>
+      <text class="avatar-hint">点击头像，选择微信头像</text>
       <view class="nickname-wrap">
         <input
           class="nickname"
           type="nickname"
-          placeholder="填写昵称"
+          placeholder="点击填写微信昵称"
           value="{{nickname}}"
           bindblur="onNickname"
           bindinput="onNickname"
+          bindchange="onNickname"
         />
       </view>
     </view>
@@ -24,6 +26,6 @@
     <view class="btn-primary {{loading ? 'disabled' : ''}}" bindtap="onLogin">
       {{loading ? '登录中…' : '微信一键登录'}}
     </view>
-    <view class="tip">使用微信授权登录，数据将同步到你的衣柜</view>
+    <view class="tip">微信不再自动返回头像昵称，需你点选一次；账号仍用微信身份登录</view>
   </view>
 </view>

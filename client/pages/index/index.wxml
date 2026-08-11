@@ -1,0 +1,63 @@
+<view class="page home">
+  <view class="hero">
+    <view class="hero-top">
+      <image class="avatar" src="{{userInfo.avatarUrl || defaultAvatar}}" mode="aspectFill" />
+      <view class="hero-text">
+        <text class="brand">Jarin衣柜</text>
+        <text class="hello">{{userInfo.nickname || '访客'}}的私人衣橱</text>
+      </view>
+    </view>
+    <view class="hero-bg"></view>
+  </view>
+
+  <view class="entry surface" bindtap="goWardrobe">
+    <view class="entry-copy">
+      <text class="entry-title">打开衣柜</text>
+      <text class="entry-desc">共 {{stats.total || 0}} 件衣物</text>
+    </view>
+    <text class="entry-arrow">→</text>
+  </view>
+
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">今日穿搭</text>
+      <text class="section-action" bindtap="goOutfitEdit">{{todayOutfit ? '查看' : '去记录'}}</text>
+    </view>
+    <view class="today surface" wx:if="{{todayOutfit}}" bindtap="goOutfitDetail">
+      <view class="today-date">{{todayLabel}}</view>
+      <view class="today-clothes">
+        <text wx:for="{{todayOutfit.clothes}}" wx:key="id" class="today-item">{{item.name}}</text>
+        <text wx:if="{{!todayOutfit.clothes.length}}" class="muted">尚未添加衣物</text>
+      </view>
+    </view>
+    <view class="today surface empty-today" wx:else bindtap="goOutfitEdit">
+      <text class="empty-title">今天还没记录穿搭</text>
+      <text class="muted">从衣柜挑选今天的衣服吧</text>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">衣柜速览</text>
+    </view>
+    <view class="quick-grid">
+      <view class="quick surface" bindtap="goWardrobe">
+        <text class="quick-num">{{stats.total || 0}}</text>
+        <text class="quick-label">衣物</text>
+      </view>
+      <view class="quick surface">
+        <text class="quick-num">{{statsValue}}</text>
+        <text class="quick-label">总价值</text>
+      </view>
+      <view class="quick surface" bindtap="goOutfit">
+        <text class="quick-num">{{outfitCount}}</text>
+        <text class="quick-label">穿搭记录</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="hint" wx:if="{{!loggedIn}}">
+    <text>登录后同步你的衣柜数据</text>
+    <view class="btn-primary hint-btn" bindtap="goLogin">微信登录</view>
+  </view>
+</view>

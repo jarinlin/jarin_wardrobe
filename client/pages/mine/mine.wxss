@@ -1,0 +1,83 @@
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  padding: 36rpx 32rpx;
+}
+
+.avatar {
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 50%;
+  background: #ddd6cb;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.name {
+  font-size: 36rpx;
+  font-weight: 600;
+}
+
+.desc {
+  font-size: 24rpx;
+  color: var(--text-secondary);
+}
+
+.stats {
+  margin-top: 24rpx;
+  padding: 32rpx 16rpx;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.stat {
+  text-align: center;
+}
+
+.num {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 600;
+  margin-bottom: 8rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 8rpx;
+}
+
+.label {
+  font-size: 22rpx;
+  color: var(--text-muted);
+}
+
+.menu {
+  margin-top: 24rpx;
+  overflow: hidden;
+}
+
+.menu-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32rpx;
+  border-bottom: 1rpx solid var(--line);
+  font-size: 28rpx;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+.arrow {
+  color: var(--text-muted);
+  font-size: 36rpx;
+}
+
+.logout {
+  margin-top: 40rpx;
+}

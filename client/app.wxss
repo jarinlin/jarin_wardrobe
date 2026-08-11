@@ -1,0 +1,34 @@
+@import './src/assets/css/common.wxss';
+@import './src/assets/css/theme.wxss';
+
+page {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', sans-serif;
+  font-size: 28rpx;
+  line-height: 1.5;
+  min-height: 100%;
+  box-sizing: border-box;
+}
+
+view,
+text,
+image,
+button,
+input,
+textarea,
+scroll-view {
+  box-sizing: border-box;
+}
+
+button {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  line-height: inherit;
+}
+
+button::after {
+  border: none;
+}

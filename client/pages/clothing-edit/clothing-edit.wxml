@@ -1,0 +1,58 @@
+<view class="page edit">
+  <view class="cover surface" bindtap="onChooseImage">
+    <image wx:if="{{form.imageUrl}}" src="{{form.imageUrl}}" mode="aspectFill" />
+    <view wx:else class="cover-empty">
+      <text class="plus">＋</text>
+      <text>拍照 / 相册添加</text>
+    </view>
+  </view>
+
+  <view class="form surface">
+    <view class="form-item">
+      <text class="form-label">名称</text>
+      <input class="form-input" placeholder="如：白色T恤" value="{{form.name}}" data-key="name" bindinput="onInput" />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">分类</text>
+      <picker mode="selector" range="{{categoryNames}}" value="{{categoryIndex}}" bindchange="onCategoryChange">
+        <view class="form-input picker">{{categoryNames[categoryIndex] || '请选择'}}</view>
+      </picker>
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">品牌</text>
+      <input class="form-input" placeholder="可选" value="{{form.brand}}" data-key="brand" bindinput="onInput" />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">颜色</text>
+      <input class="form-input" placeholder="如：黑色" value="{{form.color}}" data-key="color" bindinput="onInput" />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">尺码</text>
+      <input class="form-input" placeholder="如：M / 42" value="{{form.size}}" data-key="size" bindinput="onInput" />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">购买时间</text>
+      <picker mode="date" value="{{form.buyDate}}" bindchange="onDateChange">
+        <view class="form-input picker">{{form.buyDate || '选择日期'}}</view>
+      </picker>
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">购买价格</text>
+      <input class="form-input" type="digit" placeholder="0" value="{{form.price}}" data-key="price" bindinput="onInput" />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">备注</text>
+      <textarea class="form-textarea" placeholder="可选备注" value="{{form.remark}}" data-key="remark" bindinput="onInput" />
+    </view>
+  </view>
+
+  <view class="btn-primary" bindtap="onSubmit">{{id ? '保存修改' : '添加到衣柜'}}</view>
+  <view class="safe-bottom"></view>
+</view>

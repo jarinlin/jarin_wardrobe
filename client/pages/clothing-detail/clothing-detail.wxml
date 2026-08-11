@@ -1,0 +1,27 @@
+<view class="page detail" wx:if="{{item}}">
+  <view class="cover">
+    <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" />
+    <view wx:else class="cover-placeholder">{{item.categoryName}}</view>
+  </view>
+
+  <view class="body surface">
+    <view class="title">{{item.name}}</view>
+    <view class="meta">{{item.brand || '未填品牌'}} · {{item.color || '未填颜色'}} · {{item.size || '未填尺码'}}</view>
+
+    <view class="rows">
+      <view class="row"><text class="k">分类</text><text class="v">{{item.categoryName}}</text></view>
+      <view class="row"><text class="k">购买时间</text><text class="v">{{item.buyDate || '—'}}</text></view>
+      <view class="row"><text class="k">购买价格</text><text class="v">{{priceText}}</text></view>
+      <view class="row"><text class="k">使用次数</text><text class="v">{{item.wearCount || 0}} 次</text></view>
+      <view class="row block" wx:if="{{item.remark}}">
+        <text class="k">备注</text>
+        <text class="v">{{item.remark}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="actions">
+    <view class="btn-ghost" bindtap="onEdit">编辑</view>
+    <view class="btn-danger" bindtap="onDelete">删除</view>
+  </view>
+</view>

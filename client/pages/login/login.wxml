@@ -1,0 +1,25 @@
+<view class="page login">
+  <view class="panel">
+    <text class="brand">Jarin衣柜</text>
+    <text class="slogan">让每件衣服被看见，让每天穿搭更简单</text>
+
+    <view class="profile">
+      <button class="avatar-btn" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
+        <image class="avatar" src="{{avatarUrl || defaultAvatar}}" mode="aspectFill" />
+      </button>
+      <input
+        class="nickname"
+        type="nickname"
+        placeholder="填写昵称"
+        value="{{nickname}}"
+        bindblur="onNickname"
+        bindinput="onNickname"
+      />
+    </view>
+
+    <view class="btn-primary {{loading ? 'disabled' : ''}}" bindtap="onLogin">
+      {{loading ? '登录中…' : '微信一键登录'}}
+    </view>
+    <view class="tip">MVP 阶段支持本地模拟登录，无需真实 AppID</view>
+  </view>
+</view>

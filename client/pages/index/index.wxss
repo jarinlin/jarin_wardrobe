@@ -1,0 +1,149 @@
+.home {
+  padding-bottom: 60rpx;
+}
+
+.hero {
+  position: relative;
+  padding: 20rpx 8rpx 48rpx;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(61, 107, 90, 0.16), transparent 55%),
+    linear-gradient(160deg, #ebe6de 0%, #f3f0eb 55%, #e8efe9 100%);
+  border-radius: 0 0 40rpx 40rpx;
+  z-index: 0;
+}
+
+.hero-top {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+}
+
+.avatar {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+  background: #ddd6cb;
+  border: 4rpx solid rgba(255, 255, 255, 0.8);
+}
+
+.hero-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.brand {
+  font-size: 48rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+  color: var(--text);
+}
+
+.hello {
+  font-size: 26rpx;
+  color: var(--text-secondary);
+}
+
+.entry {
+  margin-top: 8rpx;
+  padding: 36rpx 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background:
+    linear-gradient(135deg, #2c2a28 0%, #3d3832 100%);
+  color: #fff;
+}
+
+.entry-title {
+  display: block;
+  font-size: 36rpx;
+  font-weight: 600;
+  margin-bottom: 8rpx;
+}
+
+.entry-desc {
+  font-size: 24rpx;
+  opacity: 0.72;
+}
+
+.entry-arrow {
+  font-size: 44rpx;
+  opacity: 0.8;
+}
+
+.today {
+  padding: 28rpx 32rpx;
+}
+
+.today-date {
+  font-size: 26rpx;
+  color: var(--text-secondary);
+  margin-bottom: 16rpx;
+}
+
+.today-clothes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx 20rpx;
+}
+
+.today-item {
+  font-size: 30rpx;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.empty-today {
+  text-align: center;
+  padding: 48rpx 32rpx;
+}
+
+.muted {
+  color: var(--text-muted);
+  font-size: 24rpx;
+}
+
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
+}
+
+.quick {
+  padding: 28rpx 16rpx;
+  text-align: center;
+}
+
+.quick-num {
+  display: block;
+  font-size: 34rpx;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8rpx;
+}
+
+.quick-label {
+  font-size: 22rpx;
+  color: var(--text-muted);
+}
+
+.hint {
+  margin-top: 48rpx;
+  padding: 32rpx;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 26rpx;
+}
+
+.hint-btn {
+  margin-top: 24rpx;
+}

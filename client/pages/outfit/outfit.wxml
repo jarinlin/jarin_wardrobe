@@ -1,0 +1,33 @@
+<view class="page outfit">
+  <view class="head">
+    <view>
+      <view class="page-title">穿搭记录</view>
+      <view class="page-subtitle">记录每天穿什么</view>
+    </view>
+    <view class="btn-primary head-btn" bindtap="goCreate">今日穿搭</view>
+  </view>
+
+  <view class="list" wx:if="{{list.length}}">
+    <view
+      class="item surface"
+      wx:for="{{list}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bindtap="goDetail"
+    >
+      <view class="item-date">{{item.dateLabel}}</view>
+      <view class="item-clothes">
+        <text wx:for="{{item.clothes}}" wx:for-item="c" wx:key="id" class="pill">{{c.name}}</text>
+      </view>
+      <view class="item-foot">
+        <text class="muted">这套穿搭 · {{item.wearCount || 1}} 次</text>
+        <text class="link">详情</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty" wx:else>
+    <view class="empty-title">还没有穿搭记录</view>
+    <view class="muted">从今天开始，留下你的第一套搭配</view>
+  </view>
+</view>

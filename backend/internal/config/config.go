@@ -29,6 +29,12 @@ type Config struct {
 	COSRegion    string
 	COSPrefix    string
 	COSCDNDomain string
+
+	// AI（OpenAI 兼容中转，如 https://open.lastoken.cn/v1）
+	AIBaseURL     string
+	AIAPIKey      string
+	AIModel       string
+	AITimeoutSec  int
 }
 
 func Load() Config {
@@ -51,11 +57,19 @@ func Load() Config {
 		COSRegion:       getEnv("COS_REGION", "ap-guangzhou"),
 		COSPrefix:       getEnv("COS_PREFIX", "wardrobe"),
 		COSCDNDomain:    getEnv("COS_CDN_DOMAIN", ""),
+		AIBaseURL:       strings.TrimRight(getEnv("AI_BASE_URL", "https://open.lastoken.cn/v1"), "/"),
+		AIAPIKey:        getEnv("AI_API_KEY", ""),
+		AIModel:         getEnv("AI_MODEL", "qwen3.5-plus"),
+		AITimeoutSec:    getEnvInt("AI_TIMEOUT_SEC", 60),
 	}
 }
 
 func (c Config) COSEnabled() bool {
 	return c.COSSecretID != "" && c.COSSecretKey != "" && c.COSBucket != "" && c.COSRegion != ""
+}
+
+func (c Config) AIEnabled() bool {
+	return c.AIBaseURL != "" && c.AIAPIKey != "" && c.AIModel != ""
 }
 
 func (c Config) SSLMode() string {
@@ -95,4 +109,16 @@ func getEnvBool(key string, fallback bool) bool {
 		return fallback
 	}
 	return b
+}
+
+func getEnvInt(key string, fallback int) int {
+	v := strings.TrimSpace(os.Getenv(key))
+	if v == "" {
+		return fallback
+	}
+	n, err := strconv.Atoi(v)
+	if err != nil {
+		return fallback
+	}
+	return n
 }

@@ -47,10 +47,6 @@ Page({
     wx.showToast({ title: '标签管理二期开放', icon: 'none' })
   },
 
-  onBackup() {
-    wx.showToast({ title: '数据备份二期开放', icon: 'none' })
-  },
-
   onSettings() {
     wx.showToast({ title: '设置页即将上线', icon: 'none' })
   },

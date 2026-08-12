@@ -1,6 +1,9 @@
 const api = require('../../src/assets/js/api')
-const util = require('../../src/assets/js/util')
 const upload = require('../../src/assets/js/upload')
+
+function isEmpty(v) {
+  return v === null || v === undefined || String(v).trim() === ''
+}
 
 Page({
   data: {
@@ -8,6 +11,9 @@ Page({
     categories: [],
     categoryNames: [],
     categoryIndex: 0,
+    analyzing: false,
+    priceEstimated: false,
+    priceNote: '',
     form: {
       name: '',
       categoryId: null,
@@ -49,6 +55,8 @@ Page({
     )
     this.setData({
       categoryIndex,
+      priceEstimated: false,
+      priceNote: '',
       form: {
         name: item.name || '',
         categoryId: item.categoryId,
@@ -65,7 +73,12 @@ Page({
 
   onInput(e) {
     const key = e.currentTarget.dataset.key
-    this.setData({ [`form.${key}`]: e.detail.value })
+    const patch = { [`form.${key}`]: e.detail.value }
+    if (key === 'price') {
+      patch.priceEstimated = false
+      patch.priceNote = ''
+    }
+    this.setData(patch)
   },
 
   onCategoryChange(e) {
@@ -84,8 +97,57 @@ Page({
   async onChooseImage() {
     try {
       const urls = await upload.chooseAndUploadImage(1)
-      if (urls[0]) this.setData({ 'form.imageUrl': urls[0] })
+      if (!urls[0]) return
+      this.setData({
+        'form.imageUrl': urls[0],
+        priceEstimated: false,
+        priceNote: ''
+      })
+      await this.runAnalyze(urls[0])
     } catch (e) {}
+  },
+
+  async runAnalyze(imageUrl) {
+    if (!imageUrl || this.data.analyzing) return
+    this.setData({ analyzing: true })
+    wx.showLoading({ title: 'AI 识别中', mask: true })
+    try {
+      const result = await api.analyzeClothing(imageUrl)
+      this.applyAnalyzeResult(result)
+    } catch (e) {
+      // api.request 已 toast；保留手填
+    } finally {
+      wx.hideLoading()
+      this.setData({ analyzing: false })
+    }
+  },
+
+  applyAnalyzeResult(result) {
+    if (!result) return
+    const form = { ...this.data.form }
+    const patch = {}
+
+    if (isEmpty(form.name) && result.name) form.name = result.name
+    if (isEmpty(form.brand) && result.brand) form.brand = result.brand
+    if (isEmpty(form.color) && result.color) form.color = result.color
+    if (isEmpty(form.size) && result.size) form.size = result.size
+    if (isEmpty(form.price) && result.price != null && result.price !== '') {
+      form.price = String(result.price)
+      patch.priceEstimated = !!result.priceEstimated
+      patch.priceNote = result.priceNote || (result.priceEstimated ? '估算参考，可修改' : '')
+    }
+
+    // 换图识别时采用 AI 分类（用户之后仍可改 picker）
+    if (result.categoryId != null) {
+      const idx = this.data.categories.findIndex((c) => String(c.id) === String(result.categoryId))
+      if (idx >= 0) {
+        form.categoryId = result.categoryId
+        patch.categoryIndex = idx
+      }
+    }
+
+    patch.form = form
+    this.setData(patch)
   },
 
   async onSubmit() {

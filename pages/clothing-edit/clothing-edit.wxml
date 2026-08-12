@@ -4,7 +4,9 @@
     <view wx:else class="cover-empty">
       <text class="plus">＋</text>
       <text>拍照 / 相册添加</text>
+      <text class="cover-hint">上传后自动 AI 识别</text>
     </view>
+    <view class="analyzing-mask" wx:if="{{analyzing}}">AI 识别中…</view>
   </view>
 
   <view class="form surface">
@@ -45,6 +47,7 @@
     <view class="form-item">
       <text class="form-label">购买价格</text>
       <input class="form-input" type="digit" placeholder="0" value="{{form.price}}" data-key="price" bindinput="onInput" />
+      <text class="price-hint" wx:if="{{priceEstimated}}">{{priceNote || '估算参考，可修改'}}</text>
     </view>
 
     <view class="form-item">

@@ -46,3 +46,4 @@ wardrobe/                         ← 微信开发者工具打开这里
 | 2026-08-12 | 修复 MiSans 路径：改为根绝对路径，避免相对页面解析 500 |
 | 2026-08-12 | 「我的」页移除数据备份入口 |
 | 2026-08-12 | 产出 AI 衣物识别设计：docs/superpowers/specs/2026-08-12-ai-clothing-recognize-design.md |
+| 2026-08-12 | 实现 AI 衣物识别：POST /api/ai/clothing/analyze + 选图自动回填（qwen3.5-plus） |

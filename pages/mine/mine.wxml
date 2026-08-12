@@ -31,10 +31,6 @@
       <text class="menu-label">标签管理</text>
       <text class="arrow">→</text>
     </view>
-    <view class="menu-item" bindtap="onBackup">
-      <text class="menu-label">数据备份</text>
-      <text class="arrow">→</text>
-    </view>
     <view class="menu-item" bindtap="onSettings">
       <text class="menu-label">设置</text>
       <text class="arrow">→</text>

@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"jarin-wardrobe/internal/ai"
 	"jarin-wardrobe/internal/config"
 	cosclient "jarin-wardrobe/internal/cos"
 	"jarin-wardrobe/internal/db"
@@ -50,12 +51,20 @@ func main() {
 	outfits := handler.OutfitsHandler{}
 	stats := handler.StatsHandler{}
 	upload := handler.UploadHandler{COS: cosCli}
+	aiClient := ai.NewClient(cfg)
+	aiH := handler.AIHandler{Cfg: cfg, Client: aiClient}
+	if cfg.AIEnabled() {
+		log.Printf("[ai] 已启用 model=%s base=%s", cfg.AIModel, cfg.AIBaseURL)
+	} else {
+		log.Println("[ai] 未配置 AI_API_KEY，衣物识别接口将不可用")
+	}
 	authMw := middleware.AuthRequired(cfg)
 
 	api := r.Group("/api")
 	{
 		api.POST("/auth/login", auth.Login)
 		api.PUT("/auth/profile", authMw, auth.UpdateProfile)
+		api.POST("/ai/clothing/analyze", authMw, aiH.AnalyzeClothing)
 
 		api.GET("/categories", authMw, cats.List)
 		api.POST("/categories", authMw, cats.Create)

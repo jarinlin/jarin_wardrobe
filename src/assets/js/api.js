@@ -329,10 +329,35 @@ function fetchStats() {
   return request({ url: '/api/stats' })
 }
 
+/** ---------- AI ---------- */
+function analyzeClothing(imageUrl) {
+  if (USE_MOCK) {
+    return Promise.resolve({
+      name: '示例白色T恤',
+      categoryId: 1,
+      categoryName: '上衣',
+      brand: '',
+      color: '白色',
+      size: 'M',
+      price: 99,
+      priceEstimated: true,
+      priceNote: '估算（Mock）',
+      confidence: {},
+      rawTags: []
+    })
+  }
+  return request({
+    url: '/api/ai/clothing/analyze',
+    method: 'POST',
+    data: { imageUrl }
+  })
+}
+
 module.exports = {
   request,
   loginWithCode,
   updateProfile,
+  analyzeClothing,
   fetchClothes,
   fetchClothingDetail,
   createClothing,

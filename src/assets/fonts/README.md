@@ -5,3 +5,4 @@
 - `MiSans-Regular.woff` / `MiSans-Medium.woff`：基于官方 TTF，裁剪为常用汉字（GB2312 一级约 3755 字）+ 拉丁/标点，以控制小程序包体积。
 - 完整字库请从官网下载：https://hyperos.mi.com/font-download/MiSans.zip
 - 加载方式：`src/assets/js/fonts.js` → `wx.loadFontFace`（见 `app.js`）
+- `source` 必须写根绝对路径：`url("/src/assets/fonts/xxx.woff")`，勿写相对路径

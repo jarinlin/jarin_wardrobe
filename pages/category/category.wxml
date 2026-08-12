@@ -1,5 +1,5 @@
 <view class="page category">
-  <view class="page-subtitle" style="margin-bottom: 24rpx;">默认分类可改名，也可新增自定义分类</view>
+  <view class="hint">默认分类可改名，也可新增自定义分类</view>
 
   <view class="list surface">
     <view class="item" wx:for="{{list}}" wx:key="id">
@@ -9,10 +9,20 @@
         <text class="op danger" data-id="{{item.id}}" bindtap="onDelete">删除</text>
       </view>
     </view>
+    <view class="empty-inline" wx:if="{{!list.length}}">暂无分类</view>
   </view>
 
-  <view class="add-row">
-    <input class="form-input" placeholder="新分类名称" value="{{newName}}" bindinput="onInput" />
-    <view class="btn-primary add-btn" bindtap="onAdd">添加</view>
+  <view class="add-bar">
+    <input
+      class="add-input"
+      placeholder="输入分类名称"
+      placeholder-class="add-placeholder"
+      value="{{newName}}"
+      maxlength="20"
+      confirm-type="done"
+      bindinput="onInput"
+      bindconfirm="onAdd"
+    />
+    <view class="add-btn {{!newName ? 'disabled' : ''}}" bindtap="onAdd">添加</view>
   </view>
 </view>

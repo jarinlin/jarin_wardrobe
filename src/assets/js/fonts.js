@@ -3,15 +3,16 @@
  * 来源：https://hyperos.mi.com/font/zh/
  * 本项目已在界面与文档中注明使用了 MiSans。
  */
+// 必须用小程序根路径（前导 /）。写成相对路径会被解析成 pages/xxx/src/assets/...
 const FACES = [
   {
     family: 'MiSans',
-    source: 'url("src/assets/fonts/MiSans-Regular.woff")',
+    source: 'url("/src/assets/fonts/MiSans-Regular.woff")',
     desc: { style: 'normal', weight: '400' }
   },
   {
     family: 'MiSans',
-    source: 'url("src/assets/fonts/MiSans-Medium.woff")',
+    source: 'url("/src/assets/fonts/MiSans-Medium.woff")',
     desc: { style: 'normal', weight: '500' }
   }
 ]

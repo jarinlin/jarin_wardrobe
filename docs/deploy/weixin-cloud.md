@@ -47,13 +47,14 @@ git push -u origin main
 
 后端已强制 `tcp4`。若仍失败（无 IPv4 地址），请改用 **Supabase Connection Pooler**（免费项目直连常仅 IPv6）：
 
-1. Supabase Dashboard → Project Settings → Database → Connection string → **Session mode**（或 Transaction）Pooler
-2. 云托管环境变量示例（按控制台实际值改）：
-   - `DB_HOST` = `aws-0-<region>.pooler.supabase.com`（不要用 `db.xxx.supabase.co`）
-   - `DB_PORT` = `"5432"`（Session）或 `"6543"`（Transaction）
-   - `DB_USER` = `postgres.<project-ref>`（注意带项目 ref 后缀）
-   - `DB_PASSWORD` / `DB_NAME` 不变
-3. 或在 Supabase 购买/开启 **IPv4 add-on** 后继续用直连主机
+1. Supabase Dashboard → 项目页顶部 **Connect** → **Session pooler**（以页面复制为准，不要手猜 `aws-0`）
+2. 本项目实测可用（ap-northeast-2）：
+   - `DB_HOST` = `aws-1-ap-northeast-2.pooler.supabase.com`（**不是** `aws-0-...`，tenant 会 ENOTFOUND）
+   - `DB_PORT` = `"5432"`（Session；Transaction 用 `"6543"`）
+   - `DB_USER` = `postgres.auxtanmkhzfwelytbslw`（必须带 project ref；只写 `postgres` 会报 no tenant identifier）
+   - `DB_PASSWORD` / `DB_NAME` 不变（如 `jarin_wardrobe`）
+3. 常见误判：Host 用 `db.xxx.supabase.co` → 仅 IPv6；Host 用错 `aws-0` → tenant not found；User 未带 ref → no tenant identifier
+4. 或购买 **IPv4 add-on** 后继续用直连主机
 
 ## 隐私与定位
 - 小程序后台配置《用户隐私保护指引》，声明「模糊位置」用途

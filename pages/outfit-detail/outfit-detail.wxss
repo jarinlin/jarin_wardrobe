@@ -90,6 +90,41 @@
   color: var(--muted);
 }
 
+.share-row {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 28rpx;
+}
+
+.share-btn {
+  flex: 1;
+  height: 84rpx;
+  margin: 0;
+  padding: 0;
+  border-radius: 20rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 84rpx;
+}
+
+.share-btn::after {
+  border: none;
+}
+
+.share-btn.primary {
+  background: var(--coral);
+  color: #fff;
+  box-shadow: 0 10rpx 24rpx rgba(232, 93, 117, 0.2);
+}
+
+.share-btn.ghost {
+  background: #efe8e3;
+  color: var(--ink-soft);
+}
+
 .btn-danger {
-  margin-top: 40rpx;
+  margin-top: 24rpx;
 }

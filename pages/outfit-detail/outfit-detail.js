@@ -5,7 +5,10 @@ Page({
   data: {
     id: null,
     item: null,
-    dateLabel: ''
+    clothesCount: 0,
+    dateLabel: '',
+    shareTitle: '',
+    shareText: ''
   },
 
   onLoad(query) {
@@ -16,13 +19,51 @@ Page({
   async loadDetail() {
     try {
       const item = await api.fetchOutfitDetail(this.data.id)
+      const clothes = item.clothes || []
+      const count = clothes.length
+      const dateLabel = util.formatDisplayDate(item.date)
+      const shareTitle = `${dateLabel}穿搭 · ${count}件单品`
+      const names = clothes
+        .map((c) => c.name)
+        .filter(Boolean)
+        .slice(0, 6)
+        .join('、')
+      let shareText = shareTitle
+      if (names) shareText += `\n单品：${names}`
+      if (item.note) shareText += `\n备注：${item.note}`
+      shareText += '\n——来自 Jarin衣柜'
       this.setData({
         item,
-        dateLabel: util.formatDisplayDate(item.date)
+        clothesCount: count,
+        dateLabel,
+        shareTitle,
+        shareText
       })
     } catch (e) {
       wx.showToast({ title: '记录不存在', icon: 'none' })
     }
+  },
+
+  onShareAppMessage() {
+    const item = this.data.item || {}
+    const title = this.data.shareTitle || '我的穿搭'
+    const path = `/pages/outfit-detail/outfit-detail?id=${this.data.id}`
+    const imageUrl = item.imageUrl || ''
+    const payload = { title, path }
+    if (imageUrl) payload.imageUrl = imageUrl
+    return payload
+  },
+
+  onCopyShare() {
+    const text = this.data.shareText || this.data.shareTitle
+    if (!text) {
+      wx.showToast({ title: '暂无可分享内容', icon: 'none' })
+      return
+    }
+    wx.setClipboardData({
+      data: text,
+      success: () => wx.showToast({ title: '文案已复制', icon: 'success' })
+    })
   },
 
   onDelete() {

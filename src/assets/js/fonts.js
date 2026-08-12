@@ -4,15 +4,17 @@
  * 本项目已在界面与文档中注明使用了 MiSans。
  */
 // 必须用小程序根路径（前导 /）。写成相对路径会被解析成 pages/xxx/src/assets/...
+// 只打 Regular，避免主包超 2MB；500 字重复用同一文件
+const REGULAR = 'url("/src/assets/fonts/MiSans-Regular.woff")'
 const FACES = [
   {
     family: 'MiSans',
-    source: 'url("/src/assets/fonts/MiSans-Regular.woff")',
+    source: REGULAR,
     desc: { style: 'normal', weight: '400' }
   },
   {
     family: 'MiSans',
-    source: 'url("/src/assets/fonts/MiSans-Medium.woff")',
+    source: REGULAR,
     desc: { style: 'normal', weight: '500' }
   }
 ]

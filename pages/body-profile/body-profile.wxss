@@ -2,6 +2,17 @@
   margin-bottom: 28rpx;
 }
 
+.picker {
+  color: var(--ink);
+}
+
+.age-hint {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 22rpx;
+  color: var(--muted);
+}
+
 .form {
   padding: 28rpx;
   margin-bottom: 24rpx;

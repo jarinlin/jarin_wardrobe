@@ -15,10 +15,20 @@
     </view>
   </view>
 
+  <view class="alerts anim-rise-delay" wx:if="{{loggedIn && alerts.length}}">
+    <view
+      class="alert-item"
+      wx:for="{{alerts}}"
+      wx:key="id"
+      data-action="{{item.action}}"
+      bindtap="onAlertTap"
+    >{{item.text}}</view>
+  </view>
+
   <view class="suggest anim-rise-delay" wx:if="{{loggedIn}}">
     <view class="section-head">
       <text class="section-title">今日建议</text>
-      <text class="section-action" bindtap="onRefreshSuggest">{{suggestLoading ? '获取中…' : '刷新'}}</text>
+      <text class="section-action" bindtap="onRefreshSuggest">{{suggestActionLabel}}</text>
     </view>
 
     <view class="weather-line" wx:if="{{weather}}">
@@ -49,8 +59,13 @@
       </view>
     </scroll-view>
 
-    <view class="suggest-actions">
-      <view class="btn-ghost suggest-btn" bindtap="goOutfitEdit">记为今日穿搭</view>
+    <view class="suggest-empty" wx:elif="{{!suggestLoading}}">
+      <text class="muted">衣柜里还没有可匹配的单品，先添加几件有标签的衣物</text>
+      <text class="loc-action" bindtap="goWardrobe">去衣柜添加</text>
+    </view>
+
+    <view class="suggest-actions" wx:if="{{suggest.items.length}}">
+      <view class="btn-ghost suggest-btn" bindtap="goOutfitFromSuggest">记为今日穿搭</view>
     </view>
   </view>
 

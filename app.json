@@ -58,6 +58,9 @@
   "permission": {
     "scope.userFuzzyLocation": {
       "desc": "用于获取所在城市的模糊位置，展示本地天气并给出今日穿搭建议"
+    },
+    "scope.camera": {
+      "desc": "用于拍摄衣物、穿搭与餐食照片"
     }
   },
   "requiredPrivateInfos": [

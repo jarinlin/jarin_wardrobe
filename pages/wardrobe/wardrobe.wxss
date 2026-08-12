@@ -52,6 +52,20 @@
   box-shadow: 0 10rpx 24rpx rgba(232, 93, 117, 0.22);
 }
 
+.status-scroll {
+  margin-top: -12rpx;
+}
+
+.status-chip.on {
+  background: var(--moss-soft);
+  color: var(--mint-deep);
+}
+
+.occasion-chip.on {
+  background: #faf4df;
+  color: #8a6a2a;
+}
+
 .tag-filter {
   display: flex;
   align-items: center;
@@ -60,6 +74,33 @@
   padding: 16rpx 22rpx;
   border-radius: 16rpx;
   background: #fceef1;
+}
+
+.tag-filter.soft {
+  background: #f7f1e4;
+}
+
+.retag-hint {
+  margin: -4rpx 0 20rpx;
+  padding: 16rpx 22rpx;
+  border-radius: 16rpx;
+  background: var(--accent-soft);
+  color: var(--coral-deep);
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
+.status-badge {
+  position: absolute;
+  left: 12rpx;
+  bottom: 12rpx;
+  padding: 6rpx 12rpx;
+  border-radius: 10rpx;
+  background: rgba(31, 29, 36, 0.72);
+  color: #fff;
+  font-size: 20rpx;
+  font-weight: 500;
+  z-index: 1;
 }
 
 .tag-filter-label {
@@ -136,6 +177,7 @@
 }
 
 .cover {
+  position: relative;
   height: 300rpx;
 }
 

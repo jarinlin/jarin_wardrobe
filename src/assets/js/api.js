@@ -148,6 +148,14 @@ function fetchClothes(params = {}) {
       const tag = String(params.tag)
       list = list.filter((c) => (c.tags || []).includes(tag))
     }
+    if (params.tagsStatus) {
+      const ts = String(params.tagsStatus)
+      if (ts === 'untagged' || ts === 'empty') {
+        list = list.filter((c) => !c.tagsStatus)
+      } else {
+        list = list.filter((c) => c.tagsStatus === ts)
+      }
+    }
     return Promise.resolve(list)
   }
   return request({ url: '/api/clothes', data: params })
@@ -204,6 +212,33 @@ function retagClothing(id) {
     return Promise.resolve({ id, tagsStatus: 'pending' })
   }
   return request({ url: `/api/clothes/${id}/retag`, method: 'POST' })
+}
+
+function fetchTaggingStatus() {
+  if (USE_MOCK) {
+    return Promise.resolve({ total: 0, ready: 0, pending: 0, failed: 0, untagged: 0, items: [] })
+  }
+  return request({ url: '/api/clothes/tagging' })
+}
+
+function retagBatch(scope) {
+  if (USE_MOCK) {
+    return Promise.resolve({ queued: 0, scope: scope || 'failed' })
+  }
+  return request({ url: '/api/clothes/retag-batch', method: 'POST', data: { scope: scope || 'failed' } })
+}
+
+function exportBackup() {
+  if (USE_MOCK) {
+    return Promise.resolve({
+      exportedAt: new Date().toISOString(),
+      version: 1,
+      categories: mock.getCategories(),
+      clothes: mock.getClothes(),
+      outfits: mock.getOutfits()
+    })
+  }
+  return request({ url: '/api/export/backup' })
 }
 
 function deleteClothing(id) {
@@ -465,6 +500,7 @@ function fetchBodyProfile() {
   if (USE_MOCK) {
     return Promise.resolve({
       gender: 'female',
+      birthDate: '1998-03-12',
       age: 28,
       heightCm: 165,
       weightKg: 52,
@@ -489,6 +525,20 @@ function fetchDietLogs(params = {}) {
   if (params.date) q.push('date=' + encodeURIComponent(params.date))
   const qs = q.length ? '?' + q.join('&') : ''
   return request({ url: '/api/diet' + qs })
+}
+
+function fetchDietWeekSummary() {
+  if (USE_MOCK) {
+    return Promise.resolve({
+      from: '',
+      to: '',
+      days: 7,
+      daysWithLog: 0,
+      totalCalories: 0,
+      avgDaily: 0
+    })
+  }
+  return request({ url: '/api/diet/week' })
 }
 
 function fetchDietDetail(id) {
@@ -518,6 +568,7 @@ module.exports = {
   fetchBodyProfile,
   saveBodyProfile,
   fetchDietLogs,
+  fetchDietWeekSummary,
   fetchDietDetail,
   createDietLog,
   updateDietLog,
@@ -527,6 +578,9 @@ module.exports = {
   createClothing,
   updateClothing,
   retagClothing,
+  fetchTaggingStatus,
+  retagBatch,
+  exportBackup,
   deleteClothing,
   fetchCategories,
   createCategory,

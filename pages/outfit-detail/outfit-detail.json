@@ -1,4 +1,5 @@
 {
   "navigationBarTitleText": "穿搭详情",
+  "enableShareAppMessage": true,
   "usingComponents": {}
 }

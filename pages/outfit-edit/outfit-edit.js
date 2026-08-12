@@ -12,14 +12,49 @@ Page({
     imageUrl: ''
   },
 
-  async onLoad() {
+  async onLoad(query) {
     const date = util.formatDate()
     this.setData({
       date,
       dateLabel: util.formatDisplayDate(date)
     })
+    this._fromSuggest = String((query && query.fromSuggest) || '') === '1'
     await this.loadClothes()
     await this.loadToday()
+    this.applySuggestPrefill()
+  },
+
+  applySuggestPrefill() {
+    if (!this._fromSuggest) return
+    let ids = []
+    let note = ''
+    try {
+      ids = wx.getStorageSync('suggest_outfit_ids') || []
+      note = wx.getStorageSync('suggest_outfit_note') || ''
+      wx.removeStorageSync('suggest_outfit_ids')
+      wx.removeStorageSync('suggest_outfit_note')
+    } catch (e) {}
+    if (!ids.length) return
+
+    // 今日已有记录时合并建议（去重），备注为空则用建议文案
+    const merged = []
+    const seen = new Set()
+    ;[...ids, ...(this.data.selectedIds || [])].forEach((id) => {
+      const key = String(id)
+      if (seen.has(key)) return
+      seen.add(key)
+      merged.push(id)
+    })
+    const selectedSet = new Set(merged.map(String))
+    this.setData({
+      selectedIds: merged,
+      note: (this.data.note || '').trim() ? this.data.note : note,
+      clothes: (this.data.clothes || []).map((c) => ({
+        ...c,
+        selected: selectedSet.has(String(c.id))
+      }))
+    })
+    wx.showToast({ title: '已带入今日建议', icon: 'none' })
   },
 
   async loadClothes() {

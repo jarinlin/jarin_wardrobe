@@ -1,7 +1,7 @@
 <view class="page detail" wx:if="{{item}}">
   <view class="head">
     <view class="date">{{dateLabel}}</view>
-    <view class="count">这套穿搭使用 {{item.wearCount || 1}} 次</view>
+    <view class="count">这套穿搭使用 {{item.wearCount || 1}} 次 · {{clothesCount}} 件单品</view>
     <view class="note" wx:if="{{item.note}}">{{item.note}}</view>
   </view>
 
@@ -10,17 +10,22 @@
   <view class="section">
     <view class="section-title">包含衣物</view>
     <view class="list">
-      <view class="cloth" wx:for="{{item.clothes}}" wx:key="id">
+      <view class="cloth" wx:for="{{item.clothes}}" wx:for-item="c" wx:key="id">
         <view class="cover">
-          <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" />
-          <view wx:else class="ph">{{item.categoryName}}</view>
+          <image wx:if="{{c.imageUrl}}" src="{{c.imageUrl}}" mode="aspectFill" />
+          <view wx:else class="ph">{{c.categoryName}}</view>
         </view>
         <view class="info">
-          <text class="name">{{item.name}}</text>
-          <text class="meta">{{item.color || '—'}} · {{item.brand || '—'}}</text>
+          <text class="name">{{c.name}}</text>
+          <text class="meta">{{c.color || '—'}} · {{c.brand || '—'}}</text>
         </view>
       </view>
     </view>
+  </view>
+
+  <view class="share-row">
+    <button class="share-btn primary" open-type="share">分享给好友</button>
+    <view class="share-btn ghost" bindtap="onCopyShare">复制文案</view>
   </view>
 
   <view class="btn-danger" bindtap="onDelete">删除这条穿搭</view>

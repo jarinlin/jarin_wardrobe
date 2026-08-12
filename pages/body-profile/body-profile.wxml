@@ -11,8 +11,11 @@
       </view>
     </view>
     <view class="form-item">
-      <text class="form-label">年龄</text>
-      <input class="form-input" type="number" placeholder="如：28" placeholder-class="form-placeholder" value="{{form.age}}" data-key="age" bindinput="onInput" />
+      <text class="form-label">出生日期</text>
+      <picker mode="date" value="{{form.birthDate || endDate}}" start="{{startDate}}" end="{{endDate}}" bindchange="onBirthChange">
+        <view class="form-input picker">{{form.birthDate ? birthLabel : '请选择出生日期'}}</view>
+      </picker>
+      <text class="age-hint" wx:if="{{form.age}}">当前 {{form.age}} 岁（按生日自动计算）</text>
     </view>
     <view class="form-item">
       <text class="form-label">身高 (cm)</text>

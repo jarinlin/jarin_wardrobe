@@ -5,10 +5,15 @@
       { "value": "backend", "type": "folder" },
       { "value": "_deprecated_server_node", "type": "folder" },
       { "value": "_tmp_misans", "type": "folder" },
+      { "value": "docs", "type": "folder" },
+      { "value": ".superpowers", "type": "folder" },
+      { "value": ".cursor", "type": "folder" },
       { "value": "Projectprogress.md", "type": "file" },
       { "value": "DESIGN.md", "type": "file" },
       { "value": ".git", "type": "folder" },
-      { "value": ".gitignore", "type": "file" }
+      { "value": ".gitignore", "type": "file" },
+      { "value": "**/*.md", "type": "glob" },
+      { "value": "src/assets/fonts/MiSans-Medium.woff", "type": "file" }
     ],
     "include": []
   },

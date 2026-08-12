@@ -1,12 +1,13 @@
 <view class="page edit">
-  <view class="cover surface" bindtap="onChooseImage">
-    <image wx:if="{{form.imageUrl}}" src="{{form.imageUrl}}" mode="aspectFill" />
+  <view class="cover surface" hover-class="cover-hover" bindtap="onChooseImage">
+    <image wx:if="{{form.imageUrl}}" class="cover-img" src="{{form.imageUrl}}" mode="aspectFill" />
     <view wx:else class="cover-empty">
       <text class="plus">＋</text>
       <text>拍照 / 上传餐食</text>
-      <text class="cover-hint">上传后自动 AI 识别</text>
+      <text class="cover-hint">上传后自动 AI 拆成多道菜</text>
     </view>
-    <view class="analyzing-mask" wx:if="{{analyzing}}">AI 识别中…</view>
+    <!-- 识别中全覆盖并拦截点击，避免误触；未识别时不渲染 -->
+    <view class="analyzing-mask" wx:if="{{analyzing}}" catchtap="noop">AI 识别中…</view>
   </view>
 
   <view class="meal-row">
@@ -20,21 +21,37 @@
   </view>
 
   <view class="form surface">
-    <view class="form-item">
-      <text class="form-label">食物</text>
-      <input class="form-input" placeholder="如：鸡胸肉沙拉" placeholder-class="form-placeholder" value="{{form.foodName}}" data-key="foodName" bindinput="onInput" />
+    <view class="items-head">
+      <text class="form-label">本餐菜品</text>
+      <text class="total-kcal">合计 {{totalCalories}} kcal</text>
     </view>
-    <view class="form-item">
-      <text class="form-label">分量</text>
-      <input class="form-input" placeholder="如：约350g" placeholder-class="form-placeholder" value="{{form.portion}}" data-key="portion" bindinput="onInput" />
+
+    <view class="item-row" wx:for="{{form.items}}" wx:key="index" wx:for-index="index">
+      <view class="item-top">
+        <text class="item-idx">第 {{index + 1}} 道</text>
+        <text class="item-del" data-index="{{index}}" catchtap="onRemoveItem">删除</text>
+      </view>
+      <view class="form-item compact">
+        <text class="form-label">名称</text>
+        <input class="form-input" placeholder="如：番茄炒蛋" placeholder-class="form-placeholder" value="{{item.foodName}}" data-index="{{index}}" data-key="foodName" bindinput="onItemInput" />
+      </view>
+      <view class="item-grid">
+        <view class="form-item compact">
+          <text class="form-label">分量</text>
+          <input class="form-input" placeholder="约150g" placeholder-class="form-placeholder" value="{{item.portion}}" data-index="{{index}}" data-key="portion" bindinput="onItemInput" />
+        </view>
+        <view class="form-item compact">
+          <text class="form-label">热量</text>
+          <input class="form-input" type="digit" placeholder="0" placeholder-class="form-placeholder" value="{{item.calories}}" data-index="{{index}}" data-key="calories" bindinput="onItemInput" />
+        </view>
+      </view>
     </view>
-    <view class="form-item">
-      <text class="form-label">热量 (kcal)</text>
-      <input class="form-input" type="digit" placeholder="0" placeholder-class="form-placeholder" value="{{form.calories}}" data-key="calories" bindinput="onInput" />
-    </view>
-    <view class="form-item">
+
+    <view class="add-item" bindtap="onAddItem">＋ 添加一道</view>
+
+    <view class="form-item advice-block" wx:if="{{showAdvice}}">
       <text class="form-label">饮食建议</text>
-      <textarea class="form-textarea" placeholder="AI 建议可改" placeholder-class="form-textarea-placeholder" value="{{form.advice}}" data-key="advice" bindinput="onInput" />
+      <textarea class="form-textarea" placeholder="AI 建议可改" placeholder-class="form-textarea-placeholder" value="{{form.advice}}" bindinput="onAdviceInput" />
     </view>
   </view>
 

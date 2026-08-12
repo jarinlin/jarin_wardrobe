@@ -55,11 +55,14 @@ function uploadImage(filePath) {
   })
 }
 
-/** 选图并压缩后上传，返回 COS URL */
+/** 选图并压缩后上传，返回 COS URL；选图/上传失败会 toast 并 reject */
 function chooseAndUploadImage(count = 1) {
   const util = require('./util')
   return util.chooseImage(count).then(async (paths) => {
-    if (!paths.length) return []
+    if (!paths.length) {
+      wx.showToast({ title: '未选择图片', icon: 'none' })
+      return Promise.reject(new Error('未选择图片'))
+    }
     const urls = []
     for (const p of paths) {
       let local = p

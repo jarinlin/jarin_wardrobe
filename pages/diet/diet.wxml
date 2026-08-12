@@ -22,7 +22,32 @@
         <text class="m-label">今日摄入</text>
       </view>
     </view>
-    <text class="metrics-tip">{{bodyReady ? '建议日摄入约 ' + (metrics.suggestKcal || '—') + ' kcal · 点此改档案' : '先完善身高体重，识别建议更准 →'}}</text>
+    <text class="metrics-tip">{{metricsTip}}</text>
+  </view>
+
+  <view class="week-summary surface anim-rise-delay">
+    <view class="week-head">
+      <text class="week-title">近 7 日汇总</text>
+      <text class="week-sub">有记录 {{week.daysWithLog}} / 7 天</text>
+    </view>
+    <view class="week-nums">
+      <view class="m">
+        <text class="m-num">{{week.totalCalories}}</text>
+        <text class="m-label">总热量 kcal</text>
+      </view>
+      <view class="m">
+        <text class="m-num">{{week.avgDaily}}</text>
+        <text class="m-label">日均</text>
+      </view>
+      <view class="m">
+        <text class="m-num">{{week.suggestWeek || '—'}}</text>
+        <text class="m-label">建议周摄入</text>
+      </view>
+    </view>
+    <view class="week-bar" wx:if="{{week.suggestWeek}}">
+      <view class="week-bar-fill" style="width: {{week.ratioPct}}%;"></view>
+    </view>
+    <text class="week-tip" wx:if="{{week.tip}}">{{week.tip}}</text>
   </view>
 
   <view class="date-row">
@@ -32,6 +57,8 @@
     </picker>
   </view>
 
+  <view class="meal-hint" wx:if="{{mealHint}}" bindtap="goCreate">{{mealHint}}</view>
+
   <view class="list" wx:if="{{list.length}}">
     <view class="item" wx:for="{{list}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
       <image wx:if="{{item.imageUrl}}" class="thumb" src="{{item.imageUrl}}" mode="aspectFill" />
@@ -39,10 +66,10 @@
       <view class="meta">
         <view class="meta-top">
           <text class="meal">{{item.mealTypeLabel}}</text>
-          <text class="kcal">{{item.calories}} kcal</text>
+          <text class="kcal">{{item.displayKcal}} kcal</text>
         </view>
-        <text class="food">{{item.foodName || '未命名'}}</text>
-        <text class="portion">{{item.portion}}</text>
+        <text class="food">{{item.displayTitle}}</text>
+        <text class="portion">{{item.displaySub}}</text>
       </view>
     </view>
   </view>

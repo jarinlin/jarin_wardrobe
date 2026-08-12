@@ -68,6 +68,23 @@
   opacity: 0.92;
 }
 
+.alerts {
+  margin: 0 0 18rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.alert-item {
+  padding: 18rpx 22rpx;
+  border-radius: 18rpx;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--ink-soft);
+  font-size: 24rpx;
+  line-height: 1.45;
+  box-shadow: var(--shadow);
+}
+
 .suggest {
   margin: 8rpx 0 24rpx;
   padding: 28rpx;
@@ -96,6 +113,17 @@
   font-size: 24rpx;
   font-weight: 600;
   color: var(--coral-deep);
+}
+
+.suggest-empty {
+  padding: 8rpx 0 12rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.suggest-empty .loc-action {
+  margin: 0;
 }
 
 .w-city {

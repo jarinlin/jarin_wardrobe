@@ -1,11 +1,13 @@
 /**
  * 模糊定位（城市级），用于天气与穿搭建议。
- * 直接调 wx.getFuzzyLocation，由微信弹出隐私协议 + 授权窗；
- * 勿先 requirePrivacyAuthorize 失败后直接放弃（会导致「完全不弹窗」）。
+ * 隐私：requirePrivacyAuthorize 失败仍继续 getFuzzyLocation，
+ * 以便触发微信官方隐私弹窗（勿因预检失败直接放弃）。
  *
  * @param {{ forceOpenSetting?: boolean }} [opts]
  * @returns {Promise<{ lat: number, lng: number } | { error: string, message: string }>}
  */
+
+const util = require('./util')
 
 function getFuzzyLocation(opts) {
   const forceOpenSetting = !!(opts && opts.forceOpenSetting)
@@ -36,13 +38,17 @@ function getFuzzyLocation(opts) {
           ok(res.latitude, res.longitude)
         },
         fail(err) {
-          const text = ((err && err.errMsg) || '').toLowerCase()
-          if (text.indexOf('auth deny') >= 0 || text.indexOf('authorize') >= 0 || text.indexOf('permission') >= 0) {
-            fail(err, 'denied', '需要授权模糊位置才能获取当地天气')
+          const kind = util.classifyMediaErr(err)
+          if (kind === 'privacy_undeclared') {
+            fail(err, 'privacy', '隐私指引未声明位置，请后台勾选「位置信息」并发布')
             return
           }
-          if (text.indexOf('privacy') >= 0) {
+          if (kind === 'privacy') {
             fail(err, 'privacy', '请先同意隐私指引中的位置说明')
+            return
+          }
+          if (kind === 'denied') {
+            fail(err, 'denied', '需要授权模糊位置才能获取当地天气')
             return
           }
           fail(err, 'fail', '获取模糊位置失败')
@@ -102,17 +108,11 @@ function getFuzzyLocation(opts) {
       })
     }
 
-    // 隐私：优先走官方流程；失败仍继续定位，避免卡死不弹窗
-    if (typeof wx.requirePrivacyAuthorize === 'function') {
-      wx.requirePrivacyAuthorize({
-        success: ensureAuthThenLocate,
-        fail() {
-          ensureAuthThenLocate()
-        }
-      })
-    } else {
-      ensureAuthThenLocate()
-    }
+    // 隐私预检失败仍继续，避免「完全不弹窗」
+    util
+      .requirePrivacyAuthorize({ continueOnFail: true })
+      .then(ensureAuthThenLocate)
+      .catch(ensureAuthThenLocate)
   })
 }
 

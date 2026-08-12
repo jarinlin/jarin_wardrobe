@@ -7,10 +7,12 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"jarin-wardrobe/internal/config"
 	"jarin-wardrobe/internal/db"
+	"jarin-wardrobe/internal/media"
 	"jarin-wardrobe/internal/middleware"
 	"jarin-wardrobe/internal/response"
 
@@ -45,7 +47,11 @@ func (h AuthHandler) Login(c *gin.Context) {
 		openid = sid
 	}
 
-	user, err := upsertUser(c.Request.Context(), openid, body.NickName, body.AvatarURL)
+	avatarStore := media.NormalizeForStore(h.Cfg, body.AvatarURL)
+	if avatarStore == "" {
+		avatarStore = body.AvatarURL // 微信临时头像等外链
+	}
+	user, err := upsertUser(c.Request.Context(), openid, body.NickName, avatarStore)
 	if err != nil {
 		response.Fail(c, err.Error(), 1, http.StatusOK)
 		return
@@ -64,15 +70,25 @@ func (h AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
+	needProfile := profileIncomplete(user.Nickname, user.AvatarURL)
 	response.OK(c, gin.H{
-		"token": signed,
+		"token":       signed,
+		"needProfile": needProfile,
 		"user": gin.H{
 			"id":        user.ID,
 			"nickname":  user.Nickname,
-			"avatarUrl": user.AvatarURL,
+			"avatarUrl": media.ProxyURL(h.Cfg, user.ID, user.AvatarURL),
 			"openid":    user.OpenID,
 		},
 	})
+}
+
+func profileIncomplete(nickname, avatarURL string) bool {
+	n := strings.TrimSpace(nickname)
+	if n == "" || n == "微信用户" {
+		return true
+	}
+	return strings.TrimSpace(avatarURL) == ""
 }
 
 type profileBody struct {
@@ -86,11 +102,20 @@ func (h AuthHandler) UpdateProfile(c *gin.Context) {
 	var body profileBody
 	_ = c.ShouldBindJSON(&body)
 
+	nickName := body.NickName
+	if nickName == "微信用户" {
+		nickName = ""
+	}
+	avatarStore := media.NormalizeForStore(h.Cfg, body.AvatarURL)
+	if avatarStore == "" {
+		avatarStore = body.AvatarURL
+	}
+
 	_, err := db.Pool.Exec(c.Request.Context(),
 		`UPDATE users SET
 			nickname = COALESCE(NULLIF($1,''), nickname),
 			avatar_url = COALESCE(NULLIF($2,''), avatar_url)
-		 WHERE id=$3`, body.NickName, body.AvatarURL, uid)
+		 WHERE id=$3`, nickName, avatarStore, uid)
 	if err != nil {
 		response.Fail(c, err.Error(), 1, http.StatusOK)
 		return
@@ -107,7 +132,7 @@ func (h AuthHandler) UpdateProfile(c *gin.Context) {
 	response.OK(c, gin.H{
 		"id":        u.ID,
 		"nickname":  u.Nickname,
-		"avatarUrl": u.AvatarURL,
+		"avatarUrl": media.ProxyURL(h.Cfg, u.ID, u.AvatarURL),
 		"openid":    u.OpenID,
 	})
 }
@@ -152,7 +177,7 @@ func (h AuthHandler) code2Session(code string) (string, error) {
 		if h.Cfg.AllowMockLogin {
 			return "mock_" + code, nil
 		}
-		return "", fmt.Errorf(data.ErrMsg)
+		return "", fmt.Errorf("%s", data.ErrMsg)
 	}
 	return data.OpenID, nil
 }
@@ -165,26 +190,31 @@ type userRow struct {
 }
 
 func upsertUser(ctx context.Context, openid, nickName, avatarURL string) (*userRow, error) {
+	// 占位昵称视为未提供，避免覆盖库里已有真实昵称
+	if nickName == "微信用户" {
+		nickName = ""
+	}
+
 	var u userRow
 	err := db.Pool.QueryRow(ctx,
 		`SELECT id, openid, nickname, avatar_url FROM users WHERE openid=$1 LIMIT 1`, openid,
 	).Scan(&u.ID, &u.OpenID, &u.Nickname, &u.AvatarURL)
 	if err == nil {
-		if nickName != "" || avatarURL != "" {
-			_, _ = db.Pool.Exec(ctx,
-				`UPDATE users SET
-					nickname = COALESCE(NULLIF($1,''), nickname),
-					avatar_url = COALESCE(NULLIF($2,''), avatar_url)
-				 WHERE id=$3`, nickName, avatarURL, u.ID)
-			_ = db.Pool.QueryRow(ctx,
-				`SELECT id, openid, nickname, avatar_url FROM users WHERE id=$1`, u.ID,
-			).Scan(&u.ID, &u.OpenID, &u.Nickname, &u.AvatarURL)
-		}
+		// 每次登录都刷新 updated_at；昵称/头像仅在有新值时覆盖
+		_, _ = db.Pool.Exec(ctx,
+			`UPDATE users SET
+				nickname = COALESCE(NULLIF($1,''), nickname),
+				avatar_url = COALESCE(NULLIF($2,''), avatar_url),
+				updated_at = NOW()
+			 WHERE id=$3`, nickName, avatarURL, u.ID)
+		_ = db.Pool.QueryRow(ctx,
+			`SELECT id, openid, nickname, avatar_url FROM users WHERE id=$1`, u.ID,
+		).Scan(&u.ID, &u.OpenID, &u.Nickname, &u.AvatarURL)
 		return &u, nil
 	}
 
 	if nickName == "" {
-		nickName = "Jarin"
+		nickName = "微信用户"
 	}
 	err = db.Pool.QueryRow(ctx,
 		`INSERT INTO users (openid, nickname, avatar_url) VALUES ($1,$2,$3) RETURNING id, openid, nickname, avatar_url`,

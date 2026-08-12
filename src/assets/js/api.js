@@ -83,16 +83,19 @@ function request(options) {
 /** ---------- 登录 ---------- */
 function loginWithCode(code, profile = {}) {
   if (USE_MOCK) {
+    const nick = (profile.nickName || '').trim()
+    const avatar = (profile.avatarUrl || '').trim()
+    const needProfile = !nick || nick === '微信用户' || !avatar
     const user = {
       id: 1,
-      nickname: profile.nickName || 'Jarin',
-      avatarUrl: profile.avatarUrl || '',
+      nickname: nick || '微信用户',
+      avatarUrl: avatar,
       openid: 'mock_openid'
     }
     const token = 'mock_token_' + Date.now()
     auth.setToken(token)
     auth.setUserInfo(user)
-    return Promise.resolve({ token, user })
+    return Promise.resolve({ token, user, needProfile })
   }
   return request({
     url: '/api/auth/login',
@@ -190,6 +193,13 @@ function updateClothing(id, payload) {
     return Promise.resolve(list[idx])
   }
   return request({ url: `/api/clothes/${id}`, method: 'PUT', data: payload })
+}
+
+function retagClothing(id) {
+  if (USE_MOCK) {
+    return Promise.resolve({ id, tagsStatus: 'pending' })
+  }
+  return request({ url: `/api/clothes/${id}/retag`, method: 'POST' })
 }
 
 function deleteClothing(id) {
@@ -353,15 +363,90 @@ function analyzeClothing(imageUrl) {
   })
 }
 
+function analyzeFood(imageUrl, mealType) {
+  if (USE_MOCK) {
+    return Promise.resolve({
+      foodName: '示例米饭套餐',
+      portion: '约400g',
+      calories: 620,
+      advice: '分量适中，可搭配蔬菜。',
+      items: ['米饭', '青菜'],
+      confidence: 0.8
+    })
+  }
+  return request({
+    url: '/api/ai/food/analyze',
+    method: 'POST',
+    data: { imageUrl, mealType }
+  })
+}
+
+function fetchBodyProfile() {
+  if (USE_MOCK) {
+    return Promise.resolve({
+      gender: 'female',
+      age: 28,
+      heightCm: 165,
+      weightKg: 52,
+      metrics: { bmi: 19.1, bmiLevel: '正常', bodyFatPct: 24, idealWeightKg: 60, bmr: 1300, suggestKcal: 1800 }
+    })
+  }
+  return request({ url: '/api/profile/body' })
+}
+
+function saveBodyProfile(payload) {
+  if (USE_MOCK) {
+    return fetchBodyProfile()
+  }
+  return request({ url: '/api/profile/body', method: 'PUT', data: payload })
+}
+
+function fetchDietLogs(params = {}) {
+  if (USE_MOCK) {
+    return Promise.resolve({ list: [], totalCalories: 0 })
+  }
+  const q = []
+  if (params.date) q.push('date=' + encodeURIComponent(params.date))
+  const qs = q.length ? '?' + q.join('&') : ''
+  return request({ url: '/api/diet' + qs })
+}
+
+function fetchDietDetail(id) {
+  return request({ url: `/api/diet/${id}` })
+}
+
+function createDietLog(payload) {
+  if (USE_MOCK) return Promise.resolve({ id: Date.now(), ...payload })
+  return request({ url: '/api/diet', method: 'POST', data: payload })
+}
+
+function updateDietLog(id, payload) {
+  return request({ url: `/api/diet/${id}`, method: 'PUT', data: payload })
+}
+
+function deleteDietLog(id) {
+  if (USE_MOCK) return Promise.resolve(true)
+  return request({ url: `/api/diet/${id}`, method: 'DELETE' })
+}
+
 module.exports = {
   request,
   loginWithCode,
   updateProfile,
   analyzeClothing,
+  analyzeFood,
+  fetchBodyProfile,
+  saveBodyProfile,
+  fetchDietLogs,
+  fetchDietDetail,
+  createDietLog,
+  updateDietLog,
+  deleteDietLog,
   fetchClothes,
   fetchClothingDetail,
   createClothing,
   updateClothing,
+  retagClothing,
   deleteClothing,
   fetchCategories,
   createCategory,

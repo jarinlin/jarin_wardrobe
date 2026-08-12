@@ -1,0 +1,44 @@
+<view class="page edit">
+  <view class="cover surface" bindtap="onChooseImage">
+    <image wx:if="{{form.imageUrl}}" src="{{form.imageUrl}}" mode="aspectFill" />
+    <view wx:else class="cover-empty">
+      <text class="plus">＋</text>
+      <text>拍照 / 上传餐食</text>
+      <text class="cover-hint">上传后自动 AI 识别</text>
+    </view>
+    <view class="analyzing-mask" wx:if="{{analyzing}}">AI 识别中…</view>
+  </view>
+
+  <view class="meal-row">
+    <view
+      class="meal-chip {{form.mealType === item.value ? 'on' : ''}}"
+      wx:for="{{mealTypes}}"
+      wx:key="value"
+      data-value="{{item.value}}"
+      bindtap="onMealType"
+    >{{item.label}}</view>
+  </view>
+
+  <view class="form surface">
+    <view class="form-item">
+      <text class="form-label">食物</text>
+      <input class="form-input" placeholder="如：鸡胸肉沙拉" value="{{form.foodName}}" data-key="foodName" bindinput="onInput" />
+    </view>
+    <view class="form-item">
+      <text class="form-label">分量</text>
+      <input class="form-input" placeholder="如：约350g" value="{{form.portion}}" data-key="portion" bindinput="onInput" />
+    </view>
+    <view class="form-item">
+      <text class="form-label">热量 (kcal)</text>
+      <input class="form-input" type="digit" placeholder="0" value="{{form.calories}}" data-key="calories" bindinput="onInput" />
+    </view>
+    <view class="form-item">
+      <text class="form-label">饮食建议</text>
+      <textarea class="form-textarea" placeholder="AI 建议可改" value="{{form.advice}}" data-key="advice" bindinput="onInput" />
+    </view>
+  </view>
+
+  <view class="btn-primary" bindtap="onSubmit">{{id ? '保存修改' : '保存记录'}}</view>
+  <view class="btn-danger del" wx:if="{{id}}" bindtap="onDelete">删除记录</view>
+  <view class="safe-bottom"></view>
+</view>

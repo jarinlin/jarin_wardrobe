@@ -18,6 +18,19 @@
         <text class="v">{{item.remark}}</text>
       </view>
     </view>
+
+    <view class="tags-block">
+      <view class="tags-head">
+        <text class="k">AI 标签</text>
+        <text class="tag-status" wx:if="{{item.tagsStatus === 'pending'}}">打标中…</text>
+        <text class="tag-status fail" wx:elif="{{item.tagsStatus === 'failed'}}">打标失败</text>
+        <text class="retag" wx:if="{{item.imageUrl}}" bindtap="onRetag">重新打标</text>
+      </view>
+      <view class="chip-row" wx:if="{{item.tags && item.tags.length}}">
+        <text class="chip" wx:for="{{item.tags}}" wx:key="*this">{{item}}</text>
+      </view>
+      <text class="tag-empty" wx:elif="{{item.tagsStatus !== 'pending'}}">暂无标签，保存图片后会自动异步打标</text>
+    </view>
   </view>
 
   <view class="actions">

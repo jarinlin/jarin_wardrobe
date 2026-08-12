@@ -143,14 +143,20 @@ AI_TIMEOUT_SEC=60
 - 将估算价格强制写入不可编辑状态
 - 饮食模块完整功能（见 Phase 2）
 
-## 9. Phase 2 预留（饮食记录，未开工）
+## 9. Phase 2 饮食记录（已实现 MVP）
 
-后续独立规格，原则：
+- `GET/PUT /api/profile/body`：身高/体重/年龄/性别 → BMI、体脂估算、BMR、建议摄入  
+- `POST /api/ai/food/analyze`：图片 + 餐次 + 档案 + 当前时间 → 食物/分量/热量/建议  
+- `GET/POST/PUT/DELETE /api/diet`：饮食日志 CRUD，删记录同步删 COS  
+- 小程序：`pages/diet`、`pages/diet-edit`、`pages/body-profile`（入口在「我的」）  
 
-- 用户身体档案：身高、体重、年龄、性别等 → 后端计算 BMI 等指标  
-- 饮食记录：拍照/上传 → 标注早餐/午餐/晚餐/其他 → AI 识别食物、分量、卡路里 + 个性化建议  
-- 请求携带：图片、身体信息、系统当前时间、餐次  
-- 复用同一 `AI_*` 与 `internal/ai` 客户端，新增 `POST /api/ai/food/analyze` 与饮食 CRUD  
+
+## 9.1 异步打标（穿搭建议预备）
+
+- 衣物创建（有图）或换图后：后台 `go` 协程调用打标模型，写入 `clothes.tags`，状态 `tags_status`：`pending|ready|failed`
+- 与表单同步识别分离：表单识别填字段；打标面向风格/季节/场合等检索标签
+- `POST /api/clothes/:id/retag` 可手动重打
+- 更新衣物时前端空 tags 不会覆盖已有 AI 标签
 
 ## 10. 验收标准
 

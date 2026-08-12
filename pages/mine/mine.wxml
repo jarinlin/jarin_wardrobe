@@ -23,6 +23,14 @@
   </view>
 
   <view class="menu">
+    <view class="menu-item" bindtap="goDiet">
+      <text class="menu-label">饮食记录</text>
+      <text class="arrow">→</text>
+    </view>
+    <view class="menu-item" bindtap="goBody">
+      <text class="menu-label">身体档案</text>
+      <text class="arrow">→</text>
+    </view>
     <view class="menu-item" bindtap="goCategory">
       <text class="menu-label">分类管理</text>
       <text class="arrow">→</text>

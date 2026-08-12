@@ -53,15 +53,13 @@ func (c *Client) Upload(ctx context.Context, userID int64, filename string, r io
 		ext = guessExt(contentType)
 	}
 	now := time.Now()
-	key := fmt.Sprintf(
-		"%s/%d/%04d/%02d/%s%s",
-		strings.Trim(c.cfg.COSPrefix, "/"),
-		userID,
-		now.Year(),
-		int(now.Month()),
-		uuid.NewString(),
-		ext,
-	)
+	prefix := strings.Trim(c.cfg.COSPrefix, "/")
+	var key string
+	if prefix == "" {
+		key = fmt.Sprintf("%d/%04d/%02d/%s%s", userID, now.Year(), int(now.Month()), uuid.NewString(), ext)
+	} else {
+		key = fmt.Sprintf("%s/%d/%04d/%02d/%s%s", prefix, userID, now.Year(), int(now.Month()), uuid.NewString(), ext)
+	}
 	opt := &tencentcos.ObjectPutOptions{
 		ObjectPutHeaderOptions: &tencentcos.ObjectPutHeaderOptions{
 			ContentType: contentType,
@@ -83,6 +81,71 @@ func (c *Client) publicURL(key string) string {
 		return d + "/" + key
 	}
 	return fmt.Sprintf("https://%s.cos.%s.myqcloud.com/%s", c.cfg.COSBucket, c.cfg.COSRegion, key)
+}
+
+// InternalURL 服务端访问 COS 的地址（未签名；私有桶会 403，AI 请用 PresignedGetURL）
+func (c *Client) InternalURL(key string) string {
+	if key == "" {
+		return ""
+	}
+	return c.publicURL(strings.TrimPrefix(key, "/"))
+}
+
+// PresignedGetURL 生成短时预签名下载链，供 AI 等多模态服务拉图（私有桶可用）
+func (c *Client) PresignedGetURL(ctx context.Context, key string, ttl time.Duration) (string, error) {
+	if !c.Enabled() {
+		return "", fmt.Errorf("未配置腾讯云 COS")
+	}
+	key = strings.TrimPrefix(strings.TrimSpace(key), "/")
+	if key == "" {
+		return "", fmt.Errorf("空对象键")
+	}
+	if ttl <= 0 {
+		ttl = 30 * time.Minute
+	}
+	u, err := c.client.Object.GetPresignedURL(
+		ctx,
+		http.MethodGet,
+		key,
+		c.cfg.COSSecretID,
+		c.cfg.COSSecretKey,
+		ttl,
+		nil,
+	)
+	if err != nil {
+		return "", err
+	}
+	return u.String(), nil
+}
+
+// Delete 硬删除 COS 对象
+func (c *Client) Delete(ctx context.Context, key string) error {
+	if !c.Enabled() {
+		return fmt.Errorf("未配置腾讯云 COS")
+	}
+	key = strings.TrimPrefix(strings.TrimSpace(key), "/")
+	if key == "" {
+		return nil
+	}
+	_, err := c.client.Object.Delete(ctx, key)
+	return err
+}
+
+// GetObject 读取对象流（媒体代理）
+func (c *Client) GetObject(ctx context.Context, key string) (io.ReadCloser, string, error) {
+	if !c.Enabled() {
+		return nil, "", fmt.Errorf("未配置腾讯云 COS")
+	}
+	key = strings.TrimPrefix(strings.TrimSpace(key), "/")
+	resp, err := c.client.Object.Get(ctx, key, nil)
+	if err != nil {
+		return nil, "", err
+	}
+	ct := resp.Header.Get("Content-Type")
+	if ct == "" {
+		ct = "application/octet-stream"
+	}
+	return resp.Body, ct, nil
 }
 
 func guessExt(contentType string) string {

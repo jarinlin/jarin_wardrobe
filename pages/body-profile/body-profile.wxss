@@ -1,0 +1,60 @@
+.tip {
+  margin-bottom: 28rpx;
+}
+
+.form {
+  padding: 28rpx;
+  margin-bottom: 24rpx;
+  border-radius: 32rpx;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--shadow);
+}
+
+.gender-row {
+  display: flex;
+  gap: 12rpx;
+}
+
+.g {
+  flex: 1;
+  text-align: center;
+  padding: 20rpx 0;
+  border-radius: 16rpx;
+  background: #f7f5f3;
+  color: var(--ink-soft);
+  font-size: 26rpx;
+}
+
+.g.on {
+  background: var(--accent-soft);
+  color: var(--coral-deep);
+  font-weight: 600;
+}
+
+.metrics {
+  padding: 28rpx;
+  margin-bottom: 32rpx;
+  border-radius: 28rpx;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  padding: 14rpx 0;
+  border-bottom: 1rpx solid rgba(31, 29, 36, 0.06);
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.k {
+  font-size: 26rpx;
+  color: var(--muted);
+}
+
+.v {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--ink);
+}

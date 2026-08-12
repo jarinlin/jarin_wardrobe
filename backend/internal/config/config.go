@@ -11,6 +11,7 @@ import (
 
 type Config struct {
 	Port            string
+	PublicBaseURL   string // 对外访问根地址，用于拼媒体代理链接
 	JWTSecret       string
 	DBHost          string
 	DBPort          string
@@ -41,6 +42,7 @@ func Load() Config {
 	_ = godotenv.Load()
 	return Config{
 		Port:            getEnv("PORT", "3000"),
+		PublicBaseURL:   strings.TrimRight(getEnv("PUBLIC_BASE_URL", ""), "/"),
 		JWTSecret:       getEnv("JWT_SECRET", "jarin_wardrobe_dev_secret"),
 		DBHost:          getEnv("DB_HOST", "127.0.0.1"),
 		DBPort:          getEnv("DB_PORT", "5432"),
@@ -88,6 +90,8 @@ func (c Config) DatabaseURL(dbName string) string {
 	}
 	q := u.Query()
 	q.Set("sslmode", c.SSLMode())
+	// 会话时区：读写 TIMESTAMPTZ / NOW() 按上海时间解释与展示
+	q.Set("TimeZone", "Asia/Shanghai")
 	u.RawQuery = q.Encode()
 	return u.String()
 }

@@ -18,8 +18,8 @@ function setUserInfo(user) {
 }
 
 function clear() {
+  // 只清登录态，保留本地 user 资料，便于再次登录页预填昵称/头像
   wx.removeStorageSync(TOKEN_KEY)
-  wx.removeStorageSync(USER_KEY)
 }
 
 function isLoggedIn() {
@@ -34,7 +34,8 @@ function purgeStaleMockSession(useMock) {
   const staleToken = typeof token === 'string' && token.indexOf('mock_token_') === 0
   const staleUser = user && String(user.openid || '').indexOf('mock_') === 0
   if (staleToken || staleUser) {
-    clear()
+    wx.removeStorageSync(TOKEN_KEY)
+    wx.removeStorageSync(USER_KEY)
     return true
   }
   return false

@@ -1,20 +1,21 @@
 <view class="page login">
   <view class="panel">
+    <image class="logo" src="/src/assets/icons/logo.png" mode="aspectFit" />
     <text class="brand">Jarin衣柜</text>
-    <text class="slogan">登录后同步衣柜与穿搭记录</text>
+    <text class="slogan">{{needProfile ? '完善头像与昵称后即可使用' : '登录后同步衣柜与穿搭记录'}}</text>
 
-    <view class="profile">
+    <!-- 仅新用户（库中无完整资料）才展示设置区 -->
+    <view class="profile" wx:if="{{needProfile}}">
       <view class="avatar-wrap">
         <button class="avatar-btn" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
           <image class="avatar" src="{{avatarUrl || defaultAvatar}}" mode="aspectFill" />
         </button>
       </view>
-      <text class="avatar-hint">点击头像，选择微信头像</text>
       <view class="nickname-wrap">
         <input
           class="nickname"
           type="nickname"
-          placeholder="点击填写微信昵称"
+          placeholder="昵称"
           value="{{nickname}}"
           bindblur="onNickname"
           bindinput="onNickname"
@@ -23,9 +24,8 @@
       </view>
     </view>
 
-    <view class="btn-primary {{loading ? 'disabled' : ''}}" bindtap="onLogin">
-      {{loading ? '登录中…' : '微信一键登录'}}
+    <view class="btn-primary {{loading ? 'disabled' : ''}}" bindtap="onPrimaryTap">
+      {{loading ? '请稍候…' : (needProfile ? '完成' : '微信一键登录')}}
     </view>
-    <view class="tip">微信不再自动返回头像昵称，需你点选一次；账号仍用微信身份登录</view>
   </view>
 </view>

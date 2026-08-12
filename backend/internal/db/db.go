@@ -7,8 +7,10 @@ import (
 	"regexp"
 	"time"
 
+	"jarin-wardrobe/internal/apptime"
 	"jarin-wardrobe/internal/config"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -22,7 +24,15 @@ func Connect(cfg config.Config) error {
 		log.Printf("[db] 自动建库跳过: %v", err)
 	}
 
-	pool, err := pgxpool.New(ctx, cfg.DatabaseURL(cfg.DBName))
+	pcfg, err := pgxpool.ParseConfig(cfg.DatabaseURL(cfg.DBName))
+	if err != nil {
+		return err
+	}
+	pcfg.AfterConnect = func(ctx context.Context, conn *pgx.Conn) error {
+		_, err := conn.Exec(ctx, "SET TIME ZONE '"+apptime.ZoneName+"'")
+		return err
+	}
+	pool, err := pgxpool.NewWithConfig(ctx, pcfg)
 	if err != nil {
 		return err
 	}
@@ -31,6 +41,7 @@ func Connect(cfg config.Config) error {
 		return err
 	}
 	Pool = pool
+	log.Printf("[db] 会话时区: %s", apptime.ZoneName)
 	return ensureTables(ctx)
 }
 

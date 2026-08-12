@@ -51,7 +51,10 @@ App({
   },
 
   clearSession() {
-    this.globalData.userInfo = null
+    // 只清 token，保留本地昵称/头像，供再次登录一键进入
     auth.clear()
+    // globalData 仍保留资料展示；是否登录以 token 为准
+    const kept = auth.getUserInfo()
+    if (kept) this.globalData.userInfo = kept
   }
 })

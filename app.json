@@ -9,7 +9,10 @@
     "pages/clothing-detail/clothing-detail",
     "pages/category/category",
     "pages/outfit-edit/outfit-edit",
-    "pages/outfit-detail/outfit-detail"
+    "pages/outfit-detail/outfit-detail",
+    "pages/diet/diet",
+    "pages/diet-edit/diet-edit",
+    "pages/body-profile/body-profile"
   ],
   "window": {
     "navigationBarBackgroundColor": "#FAF7F5",

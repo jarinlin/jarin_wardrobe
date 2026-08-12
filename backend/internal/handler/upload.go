@@ -5,7 +5,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"jarin-wardrobe/internal/config"
 	"jarin-wardrobe/internal/cos"
+	"jarin-wardrobe/internal/media"
 	"jarin-wardrobe/internal/middleware"
 	"jarin-wardrobe/internal/response"
 
@@ -13,6 +15,7 @@ import (
 )
 
 type UploadHandler struct {
+	Cfg config.Config
 	COS *cos.Client
 }
 
@@ -58,14 +61,15 @@ func (h UploadHandler) Upload(c *gin.Context) {
 	}
 
 	uid := middleware.UserID(c)
-	urlStr, key, err := h.COS.Upload(c.Request.Context(), uid, file.Filename, f, contentType)
+	_, key, err := h.COS.Upload(c.Request.Context(), uid, file.Filename, f, contentType)
 	if err != nil {
 		response.Fail(c, "上传失败: "+err.Error(), 1, http.StatusOK)
 		return
 	}
 
+	// 对外只返回后端代理地址，不暴露 COS 直链
 	response.OK(c, gin.H{
-		"url": urlStr,
+		"url": media.ProxyURL(h.Cfg, uid, key),
 		"key": key,
 	})
 }

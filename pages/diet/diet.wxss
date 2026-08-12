@@ -1,0 +1,147 @@
+.head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 28rpx;
+  gap: 24rpx;
+}
+
+.head-btn {
+  flex-shrink: 0;
+  padding: 16rpx 24rpx;
+  border-radius: 16rpx;
+  background: var(--coral);
+  color: #fff;
+  font-size: 24rpx;
+  font-weight: 500;
+  box-shadow: 0 10rpx 24rpx rgba(232, 93, 117, 0.2);
+}
+
+.metrics {
+  padding: 28rpx;
+  margin-bottom: 24rpx;
+  border-radius: 28rpx;
+}
+
+.metrics-row {
+  display: flex;
+  gap: 12rpx;
+}
+
+.m {
+  flex: 1;
+  text-align: center;
+}
+
+.m-num {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 34rpx;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.m-label {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 20rpx;
+  color: var(--muted);
+}
+
+.metrics-tip {
+  display: block;
+  margin-top: 20rpx;
+  font-size: 22rpx;
+  color: var(--coral-deep);
+}
+
+.date-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.date-label {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.date-pick {
+  font-size: 24rpx;
+  color: var(--coral-deep);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.item {
+  display: flex;
+  gap: 20rpx;
+  padding: 20rpx;
+  border-radius: 24rpx;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: var(--shadow);
+}
+
+.thumb {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 18rpx;
+  flex-shrink: 0;
+  background: #f3f0ee;
+}
+
+.thumb.ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 28rpx;
+}
+
+.meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.meta-top {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8rpx;
+}
+
+.meal {
+  font-size: 22rpx;
+  color: var(--coral-deep);
+  font-weight: 600;
+}
+
+.kcal {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.food {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.portion {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: var(--muted);
+}
+
+.muted {
+  font-size: 24rpx;
+  color: var(--muted);
+}

@@ -1,0 +1,54 @@
+<view class="page diet">
+  <view class="head anim-rise">
+    <view>
+      <view class="page-title">饮食记录</view>
+      <view class="page-subtitle">拍照识别热量，结合身体档案给建议</view>
+    </view>
+    <view class="head-btn" bindtap="goCreate">记一餐</view>
+  </view>
+
+  <view class="metrics surface anim-rise-delay" bindtap="goBody">
+    <view class="metrics-row">
+      <view class="m">
+        <text class="m-num">{{metrics.bmi || '—'}}</text>
+        <text class="m-label">BMI {{metrics.bmiLevel || ''}}</text>
+      </view>
+      <view class="m">
+        <text class="m-num">{{metrics.bodyFatPct || '—'}}%</text>
+        <text class="m-label">体脂估算</text>
+      </view>
+      <view class="m">
+        <text class="m-num">{{todayKcal}}</text>
+        <text class="m-label">今日摄入</text>
+      </view>
+    </view>
+    <text class="metrics-tip">{{bodyReady ? '建议日摄入约 ' + (metrics.suggestKcal || '—') + ' kcal · 点此改档案' : '先完善身高体重，识别建议更准 →'}}</text>
+  </view>
+
+  <view class="date-row">
+    <text class="date-label">{{dateLabel}}</text>
+    <picker mode="date" value="{{date}}" bindchange="onDateChange">
+      <text class="date-pick">换日期</text>
+    </picker>
+  </view>
+
+  <view class="list" wx:if="{{list.length}}">
+    <view class="item" wx:for="{{list}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
+      <image wx:if="{{item.imageUrl}}" class="thumb" src="{{item.imageUrl}}" mode="aspectFill" />
+      <view wx:else class="thumb ph">餐</view>
+      <view class="meta">
+        <view class="meta-top">
+          <text class="meal">{{item.mealTypeLabel}}</text>
+          <text class="kcal">{{item.calories}} kcal</text>
+        </view>
+        <text class="food">{{item.foodName || '未命名'}}</text>
+        <text class="portion">{{item.portion}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty" wx:else>
+    <view class="empty-title">这天还没有记录</view>
+    <view class="muted">拍一张餐食，AI 帮你估热量与建议</view>
+  </view>
+</view>

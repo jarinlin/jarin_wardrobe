@@ -38,6 +38,16 @@ Page({
     }
   },
 
+  goDiet() {
+    if (!util.ensureLogin()) return
+    wx.navigateTo({ url: '/pages/diet/diet' })
+  },
+
+  goBody() {
+    if (!util.ensureLogin()) return
+    wx.navigateTo({ url: '/pages/body-profile/body-profile' })
+  },
+
   goCategory() {
     if (!util.ensureLogin()) return
     wx.navigateTo({ url: '/pages/category/category' })

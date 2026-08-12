@@ -32,10 +32,13 @@ type Config struct {
 	COSCDNDomain string
 
 	// AI（OpenAI 兼容中转，如 https://open.lastoken.cn/v1）
-	AIBaseURL     string
-	AIAPIKey      string
-	AIModel       string
-	AITimeoutSec  int
+	AIBaseURL    string
+	AIAPIKey     string
+	AIModel      string
+	AITimeoutSec int
+
+	// 高德 Web 服务 Key（天气 / 逆地理）
+	AmapKey string
 }
 
 func Load() Config {
@@ -63,7 +66,13 @@ func Load() Config {
 		AIAPIKey:        getEnv("AI_API_KEY", ""),
 		AIModel:         getEnv("AI_MODEL", "qwen3.5-plus"),
 		AITimeoutSec:    getEnvInt("AI_TIMEOUT_SEC", 60),
+		// 兼容 AMAP_KEY / AMAP_WEB_KEY（高德 Web 服务 Key）
+		AmapKey: firstNonEmpty(getEnv("AMAP_KEY", ""), getEnv("AMAP_WEB_KEY", "")),
 	}
+}
+
+func (c Config) AmapEnabled() bool {
+	return strings.TrimSpace(c.AmapKey) != ""
 }
 
 func (c Config) COSEnabled() bool {
@@ -101,6 +110,15 @@ func getEnv(key, fallback string) string {
 		return v
 	}
 	return fallback
+}
+
+func firstNonEmpty(vals ...string) string {
+	for _, v := range vals {
+		if strings.TrimSpace(v) != "" {
+			return strings.TrimSpace(v)
+		}
+	}
+	return ""
 }
 
 func getEnvBool(key string, fallback bool) bool {

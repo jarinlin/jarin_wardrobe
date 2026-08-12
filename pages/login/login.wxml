@@ -16,6 +16,7 @@
           class="nickname"
           type="nickname"
           placeholder="昵称"
+          placeholder-class="nickname-placeholder"
           value="{{nickname}}"
           bindblur="onNickname"
           bindinput="onNickname"

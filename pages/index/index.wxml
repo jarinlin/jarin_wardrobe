@@ -15,6 +15,45 @@
     </view>
   </view>
 
+  <view class="suggest anim-rise-delay" wx:if="{{loggedIn}}">
+    <view class="section-head">
+      <text class="section-title">今日建议</text>
+      <text class="section-action" bindtap="onRefreshSuggest">{{suggestLoading ? '获取中…' : '刷新'}}</text>
+    </view>
+
+    <view class="weather-line" wx:if="{{weather}}">
+      <text class="w-city">{{weather.city || '本地'}}</text>
+      <text class="w-main">{{weather.weather}} {{weather.temperature}}℃</text>
+      <text class="w-sub">{{suggest.seasonHint}}</text>
+    </view>
+    <view class="weather-line muted" wx:elif="{{suggest.weatherNote}}">{{suggest.weatherNote}}</view>
+    <view class="loc-action" wx:if="{{locationHint && !weather}}" bindtap="onRefreshSuggest">开启定位获取天气</view>
+
+    <view class="suggest-reason" wx:if="{{suggest.reason}}">{{suggest.reason}}</view>
+    <view class="suggest-tips" wx:if="{{suggest.tips}}">{{suggest.tips}}</view>
+
+    <scroll-view class="suggest-scroll" scroll-x show-scrollbar="{{false}}" wx:if="{{suggest.items.length}}">
+      <view class="suggest-row">
+        <view
+          class="suggest-card"
+          wx:for="{{suggest.items}}"
+          wx:key="id"
+          data-id="{{item.id}}"
+          bindtap="goClothing"
+        >
+          <image wx:if="{{item.imageUrl}}" class="suggest-cover" src="{{item.imageUrl}}" mode="aspectFill" />
+          <view wx:else class="suggest-cover ph">{{item.categoryName}}</view>
+          <text class="suggest-name">{{item.name}}</text>
+          <text class="suggest-cat">{{item.categoryName}}</text>
+        </view>
+      </view>
+    </scroll-view>
+
+    <view class="suggest-actions">
+      <view class="btn-ghost suggest-btn" bindtap="goOutfitEdit">记为今日穿搭</view>
+    </view>
+  </view>
+
   <view class="panel anim-rise-delay">
     <view class="section-head">
       <text class="section-title">今日穿搭</text>

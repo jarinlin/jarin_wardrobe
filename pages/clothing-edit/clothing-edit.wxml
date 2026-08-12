@@ -12,7 +12,7 @@
   <view class="form surface">
     <view class="form-item">
       <text class="form-label">名称</text>
-      <input class="form-input" placeholder="如：白色T恤" value="{{form.name}}" data-key="name" bindinput="onInput" />
+      <input class="form-input" placeholder="如：白色T恤" placeholder-class="form-placeholder" value="{{form.name}}" data-key="name" bindinput="onInput" />
     </view>
 
     <view class="form-item">
@@ -24,17 +24,17 @@
 
     <view class="form-item">
       <text class="form-label">品牌</text>
-      <input class="form-input" placeholder="可选" value="{{form.brand}}" data-key="brand" bindinput="onInput" />
+      <input class="form-input" placeholder="可选" placeholder-class="form-placeholder" value="{{form.brand}}" data-key="brand" bindinput="onInput" />
     </view>
 
     <view class="form-item">
       <text class="form-label">颜色</text>
-      <input class="form-input" placeholder="如：黑色" value="{{form.color}}" data-key="color" bindinput="onInput" />
+      <input class="form-input" placeholder="如：黑色" placeholder-class="form-placeholder" value="{{form.color}}" data-key="color" bindinput="onInput" />
     </view>
 
     <view class="form-item">
       <text class="form-label">尺码</text>
-      <input class="form-input" placeholder="如：M / 42" value="{{form.size}}" data-key="size" bindinput="onInput" />
+      <input class="form-input" placeholder="如：M / 42" placeholder-class="form-placeholder" value="{{form.size}}" data-key="size" bindinput="onInput" />
     </view>
 
     <view class="form-item">
@@ -46,13 +46,13 @@
 
     <view class="form-item">
       <text class="form-label">购买价格</text>
-      <input class="form-input" type="digit" placeholder="0" value="{{form.price}}" data-key="price" bindinput="onInput" />
+      <input class="form-input" type="digit" placeholder="0" placeholder-class="form-placeholder" value="{{form.price}}" data-key="price" bindinput="onInput" />
       <text class="price-hint" wx:if="{{priceEstimated}}">{{priceNote || '估算参考，可修改'}}</text>
     </view>
 
     <view class="form-item">
       <text class="form-label">备注</text>
-      <textarea class="form-textarea" placeholder="可选备注" value="{{form.remark}}" data-key="remark" bindinput="onInput" />
+      <textarea class="form-textarea" placeholder="可选备注" placeholder-class="form-textarea-placeholder" value="{{form.remark}}" data-key="remark" bindinput="onInput" />
     </view>
   </view>
 

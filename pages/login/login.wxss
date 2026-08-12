@@ -116,6 +116,13 @@
   box-sizing: border-box;
 }
 
+.nickname-placeholder {
+  color: var(--muted);
+  font-size: 30rpx;
+  line-height: 96rpx;
+  text-align: center;
+}
+
 .saved-name {
   display: block;
   margin: -8rpx 0 16rpx;

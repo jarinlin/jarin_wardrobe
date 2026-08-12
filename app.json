@@ -12,7 +12,9 @@
     "pages/outfit-detail/outfit-detail",
     "pages/diet/diet",
     "pages/diet-edit/diet-edit",
-    "pages/body-profile/body-profile"
+    "pages/body-profile/body-profile",
+    "pages/tags/tags",
+    "pages/settings/settings"
   ],
   "window": {
     "navigationBarBackgroundColor": "#FAF7F5",
@@ -53,6 +55,15 @@
       }
     ]
   },
+  "permission": {
+    "scope.userFuzzyLocation": {
+      "desc": "用于获取所在城市的模糊位置，展示本地天气并给出今日穿搭建议"
+    }
+  },
+  "requiredPrivateInfos": [
+    "getFuzzyLocation"
+  ],
+  "__usePrivacyCheck__": true,
   "style": "v2",
   "sitemapLocation": "sitemap.json",
   "lazyCodeLoading": "requiredComponents"

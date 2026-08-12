@@ -22,19 +22,19 @@
   <view class="form surface">
     <view class="form-item">
       <text class="form-label">食物</text>
-      <input class="form-input" placeholder="如：鸡胸肉沙拉" value="{{form.foodName}}" data-key="foodName" bindinput="onInput" />
+      <input class="form-input" placeholder="如：鸡胸肉沙拉" placeholder-class="form-placeholder" value="{{form.foodName}}" data-key="foodName" bindinput="onInput" />
     </view>
     <view class="form-item">
       <text class="form-label">分量</text>
-      <input class="form-input" placeholder="如：约350g" value="{{form.portion}}" data-key="portion" bindinput="onInput" />
+      <input class="form-input" placeholder="如：约350g" placeholder-class="form-placeholder" value="{{form.portion}}" data-key="portion" bindinput="onInput" />
     </view>
     <view class="form-item">
       <text class="form-label">热量 (kcal)</text>
-      <input class="form-input" type="digit" placeholder="0" value="{{form.calories}}" data-key="calories" bindinput="onInput" />
+      <input class="form-input" type="digit" placeholder="0" placeholder-class="form-placeholder" value="{{form.calories}}" data-key="calories" bindinput="onInput" />
     </view>
     <view class="form-item">
       <text class="form-label">饮食建议</text>
-      <textarea class="form-textarea" placeholder="AI 建议可改" value="{{form.advice}}" data-key="advice" bindinput="onInput" />
+      <textarea class="form-textarea" placeholder="AI 建议可改" placeholder-class="form-textarea-placeholder" value="{{form.advice}}" data-key="advice" bindinput="onInput" />
     </view>
   </view>
 

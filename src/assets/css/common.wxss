@@ -141,20 +141,53 @@
   font-weight: 500;
 }
 
-.form-input,
-.form-textarea {
+/* 微信 input 勿用上下 padding + 继承行高，否则 placeholder 被裁切 */
+.form-input {
   width: 100%;
-  padding: 24rpx 26rpx;
+  height: 88rpx;
+  min-height: 88rpx;
+  padding: 0 26rpx;
+  line-height: 88rpx;
   background: #fff;
   border-radius: var(--radius);
   border: 2rpx solid rgba(31, 29, 36, 0.08);
   color: var(--ink);
   font-size: 30rpx;
   font-family: var(--font);
+  box-sizing: border-box;
+}
+
+/* clothing-edit 等用 view 模拟选择框 */
+.form-input.picker {
+  display: flex;
+  align-items: center;
+  line-height: 1.4;
+}
+
+.form-placeholder {
+  color: var(--muted);
+  font-size: 30rpx;
+  line-height: 88rpx;
 }
 
 .form-textarea {
+  width: 100%;
   min-height: 160rpx;
+  padding: 22rpx 26rpx;
+  line-height: 1.5;
+  background: #fff;
+  border-radius: var(--radius);
+  border: 2rpx solid rgba(31, 29, 36, 0.08);
+  color: var(--ink);
+  font-size: 30rpx;
+  font-family: var(--font);
+  box-sizing: border-box;
+}
+
+.form-textarea-placeholder {
+  color: var(--muted);
+  font-size: 30rpx;
+  line-height: 1.5;
 }
 
 .safe-bottom {

@@ -54,11 +54,12 @@ Page({
   },
 
   goTags() {
-    wx.showToast({ title: '标签管理二期开放', icon: 'none' })
+    if (!util.ensureLogin()) return
+    wx.navigateTo({ url: '/pages/tags/tags' })
   },
 
   onSettings() {
-    wx.showToast({ title: '设置页即将上线', icon: 'none' })
+    wx.navigateTo({ url: '/pages/settings/settings' })
   },
 
   onLogout() {

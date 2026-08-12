@@ -12,15 +12,15 @@
     </view>
     <view class="form-item">
       <text class="form-label">年龄</text>
-      <input class="form-input" type="number" placeholder="如：28" value="{{form.age}}" data-key="age" bindinput="onInput" />
+      <input class="form-input" type="number" placeholder="如：28" placeholder-class="form-placeholder" value="{{form.age}}" data-key="age" bindinput="onInput" />
     </view>
     <view class="form-item">
       <text class="form-label">身高 (cm)</text>
-      <input class="form-input" type="digit" placeholder="如：165" value="{{form.heightCm}}" data-key="heightCm" bindinput="onInput" />
+      <input class="form-input" type="digit" placeholder="如：165" placeholder-class="form-placeholder" value="{{form.heightCm}}" data-key="heightCm" bindinput="onInput" />
     </view>
     <view class="form-item">
       <text class="form-label">体重 (kg)</text>
-      <input class="form-input" type="digit" placeholder="如：52" value="{{form.weightKg}}" data-key="weightKg" bindinput="onInput" />
+      <input class="form-input" type="digit" placeholder="如：52" placeholder-class="form-placeholder" value="{{form.weightKg}}" data-key="weightKg" bindinput="onInput" />
     </view>
   </view>
 

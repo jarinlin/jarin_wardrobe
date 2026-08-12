@@ -93,6 +93,12 @@ func (h ClothesHandler) List(c *gin.Context) {
 		args = append(args, "%"+kw+"%")
 		n++
 	}
+	if tag := strings.TrimSpace(c.Query("tag")); tag != "" {
+		// tags 为 JSON 字符串数组，精确匹配某一标签
+		sql += " AND EXISTS (SELECT 1 FROM jsonb_array_elements_text(COALESCE(c.tags,'[]'::jsonb)) t WHERE t = $" + itoa(n) + ")"
+		args = append(args, tag)
+		n++
+	}
 	sql += " ORDER BY c.id DESC"
 
 	rows, err := db.Pool.Query(c, sql, args...)

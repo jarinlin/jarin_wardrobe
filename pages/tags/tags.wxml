@@ -1,0 +1,32 @@
+<view class="page tags">
+  <view class="hint">汇总衣物上已出现的 AI / 手动标签，点选可筛选衣柜</view>
+
+  <view class="search-box">
+    <input
+      class="form-input"
+      placeholder="筛选标签名"
+      placeholder-class="form-placeholder"
+      value="{{keyword}}"
+      bindinput="onFilterInput"
+      confirm-type="search"
+    />
+  </view>
+
+  <view class="chip-wrap" wx:if="{{displayList.length}}">
+    <view
+      class="tag-chip"
+      wx:for="{{displayList}}"
+      wx:key="name"
+      data-tag="{{item.name}}"
+      bindtap="goWardrobe"
+    >
+      <text class="tag-name">{{item.name}}</text>
+      <text class="tag-count">{{item.count}}</text>
+    </view>
+  </view>
+
+  <view class="empty" wx:else>
+    <text class="empty-title">暂无标签</text>
+    <text class="muted">为衣物拍照保存后，AI 会异步打标；也可在衣物详情查看状态</text>
+  </view>
+</view>

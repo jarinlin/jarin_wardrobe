@@ -23,6 +23,15 @@ scroll-view {
   box-sizing: border-box;
 }
 
+/* 避免 page 的 line-height 压扁 input/textarea 文字 */
+input {
+  line-height: normal;
+}
+
+textarea {
+  line-height: 1.5;
+}
+
 button {
   margin: 0;
   padding: 0;

@@ -84,6 +84,7 @@
   flex: 1;
   min-width: 0;
   height: 80rpx;
+  min-height: 80rpx;
   padding: 0 24rpx;
   box-sizing: border-box;
   background: #f7f5f3;

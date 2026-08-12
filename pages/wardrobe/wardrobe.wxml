@@ -1,14 +1,10 @@
 <view class="page wardrobe">
-  <view class="head anim-rise">
-    <text class="head-title">我的衣柜</text>
-    <text class="head-sub">按分类浏览与管理衣物</text>
-  </view>
-
-  <view class="toolbar">
+  <view class="toolbar anim-rise">
     <view class="search-box">
       <input
         class="search-input"
         placeholder="搜索名称 / 品牌 / 颜色"
+        placeholder-class="search-placeholder"
         value="{{keyword}}"
         confirm-type="search"
         bindinput="onKeyword"
@@ -18,21 +14,28 @@
     <view class="add-btn" bindtap="goAdd">＋</view>
   </view>
 
-  <scroll-view class="cat-scroll" scroll-x enable-flex>
-    <view
-      class="chip {{activeCategoryId === 0 ? 'active' : ''}}"
-      data-id="0"
-      bindtap="onCategoryTap"
-    >全部</view>
-    <view
-      wx:for="{{categories}}"
-      wx:key="id"
-      class="chip {{activeCategoryId === item.id ? 'active' : ''}}"
-      data-id="{{item.id}}"
-      bindtap="onCategoryTap"
-    >{{item.name}}</view>
-    <view class="chip manage" bindtap="goCategory">管理</view>
+  <scroll-view class="cat-scroll" scroll-x show-scrollbar="{{false}}">
+    <view class="cat-row">
+      <view
+        class="cat-chip {{activeCategoryId === 0 ? 'on' : ''}}"
+        data-id="0"
+        bindtap="onCategoryTap"
+      >全部</view>
+      <view
+        wx:for="{{categories}}"
+        wx:key="id"
+        class="cat-chip {{activeCategoryId === item.id ? 'on' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="onCategoryTap"
+      >{{item.name}}</view>
+      <view class="cat-manage" bindtap="goCategory">管理</view>
+    </view>
   </scroll-view>
+
+  <view class="tag-filter" wx:if="{{activeTag}}">
+    <text class="tag-filter-label">标签 · {{activeTag}}</text>
+    <text class="tag-filter-clear" bindtap="clearTag">清除</text>
+  </view>
 
   <view class="grid" wx:if="{{list.length}}">
     <view

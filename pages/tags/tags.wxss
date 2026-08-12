@@ -1,0 +1,62 @@
+.tags {
+  padding-bottom: 48rpx;
+}
+
+.hint {
+  margin-bottom: 20rpx;
+  font-size: 24rpx;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.search-box {
+  margin-bottom: 24rpx;
+}
+
+.chip-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10rpx;
+  padding: 14rpx 20rpx;
+  border-radius: 16rpx;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--shadow);
+}
+
+.tag-name {
+  font-size: 26rpx;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.tag-count {
+  font-size: 22rpx;
+  color: var(--coral-deep);
+  font-weight: 600;
+}
+
+.empty {
+  padding: 80rpx 16rpx;
+  text-align: center;
+}
+
+.empty-title {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 32rpx;
+  color: var(--ink);
+  margin-bottom: 12rpx;
+}
+
+.muted {
+  display: block;
+  font-size: 24rpx;
+  color: var(--muted);
+  line-height: 1.6;
+}

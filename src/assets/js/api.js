@@ -144,6 +144,10 @@ function fetchClothes(params = {}) {
           (c.color || '').toLowerCase().includes(kw)
       )
     }
+    if (params.tag) {
+      const tag = String(params.tag)
+      list = list.filter((c) => (c.tags || []).includes(tag))
+    }
     return Promise.resolve(list)
   }
   return request({ url: '/api/clothes', data: params })
@@ -322,8 +326,84 @@ function deleteOutfit(id) {
 
 /** ---------- 标签 / 统计 ---------- */
 function fetchTags() {
-  if (USE_MOCK) return Promise.resolve(mock.getTags())
+  if (USE_MOCK) {
+    const counts = {}
+    mock.getClothes().forEach((c) => {
+      ;(c.tags || []).forEach((t) => {
+        if (!t) return
+        counts[t] = (counts[t] || 0) + 1
+      })
+    })
+    const fromClothes = Object.keys(counts)
+      .map((name) => ({ name, count: counts[name] }))
+      .sort((a, b) => b.count - a.count)
+    const list = (mock.getTags() || []).map((name, i) => ({ id: i + 1, name }))
+    return Promise.resolve({ fromClothes, list })
+  }
   return request({ url: '/api/tags' })
+}
+
+function createTag(name) {
+  if (USE_MOCK) {
+    const list = mock.getTags()
+    if (!list.includes(name)) {
+      list.push(name)
+      mock.saveTags(list)
+    }
+    return Promise.resolve({ id: Date.now(), name })
+  }
+  return request({ url: '/api/tags', method: 'POST', data: { name } })
+}
+
+function deleteTag(id) {
+  if (USE_MOCK) return Promise.resolve(true)
+  return request({ url: `/api/tags/${id}`, method: 'DELETE' })
+}
+
+function fetchWeather(lat, lng) {
+  if (USE_MOCK) {
+    return Promise.resolve({
+      city: '示例市',
+      weather: '晴',
+      temperature: '24',
+      tempC: 24
+    })
+  }
+  const data = {}
+  if (lat != null && lng != null) {
+    data.lat = lat
+    data.lng = lng
+  }
+  return request({ url: '/api/weather', data })
+}
+
+function suggestOutfit(lat, lng) {
+  if (USE_MOCK) {
+    const clothes = mock.getClothes().slice(0, 4).map((c) => ({
+      id: c.id,
+      name: c.name,
+      categoryId: c.categoryId,
+      categoryName: c.categoryName || '',
+      color: c.color,
+      imageUrl: c.imageUrl,
+      tags: c.tags || [],
+      score: 10
+    }))
+    return Promise.resolve({
+      items: clothes,
+      reason: 'Mock 模式示例推荐',
+      tips: '配置 local 后端与 AMAP_KEY 可拉取真实天气',
+      seasonHint: '适中',
+      weatherNote: '',
+      weather: { city: '示例市', weather: '晴', temperature: '24', tempC: 24 }
+    })
+  }
+  const data = {}
+  if (lat != null && lng != null) {
+    data.lat = lat
+    data.lng = lng
+  }
+  return request({ url: '/api/suggest/outfit', data })
 }
 
 function fetchStats() {
@@ -458,5 +538,9 @@ module.exports = {
   createOutfit,
   deleteOutfit,
   fetchTags,
+  createTag,
+  deleteTag,
+  fetchWeather,
+  suggestOutfit,
   fetchStats
 }

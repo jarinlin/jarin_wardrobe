@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"jarin-wardrobe/internal/ai"
+	"jarin-wardrobe/internal/amap"
 	"jarin-wardrobe/internal/apptime"
 	"jarin-wardrobe/internal/config"
 	cosclient "jarin-wardrobe/internal/cos"
@@ -64,10 +65,26 @@ func main() {
 	aiH := handler.AIHandler{Cfg: cfg, Client: aiClient, COS: cosCli}
 	profileH := handler.ProfileHandler{}
 	dietH := handler.DietHandler{Cfg: cfg, COS: cosCli}
+	amapCli := amap.New(cfg.AmapKey)
+	weatherH := handler.WeatherHandler{Amap: amapCli}
+	suggestH := handler.SuggestHandler{Cfg: cfg, Amap: amapCli}
+	tagsH := handler.TagsHandler{}
 	if cfg.AIEnabled() {
 		log.Printf("[ai] 已启用 model=%s base=%s", cfg.AIModel, cfg.AIBaseURL)
 	} else {
 		log.Println("[ai] 未配置 AI_API_KEY，识别接口将不可用")
+	}
+	if cfg.AmapEnabled() {
+		log.Println("[amap] 高德天气已启用")
+	} else {
+		log.Println("[amap] 未配置 AMAP_KEY，天气将降级，穿搭建议仍可用")
+	}
+	if cfg.WXAppID != "" && cfg.WXSecret != "" {
+		log.Println("[wx] 已配置 AppID/Secret，将走正式 code2session")
+	} else if cfg.AllowMockLogin {
+		log.Println("[wx] 未配置微信凭证，ALLOW_MOCK_LOGIN=true，使用 mock openid")
+	} else {
+		log.Println("[wx] 警告：未配置微信凭证且禁止 mock 登录")
 	}
 	authMw := middleware.AuthRequired(cfg)
 	mediaLimit := middleware.RateLimit(120, time.Minute)
@@ -110,7 +127,12 @@ func main() {
 		api.DELETE("/outfits/:id", authMw, outfits.Delete)
 
 		api.GET("/stats", authMw, stats.Get)
-		api.GET("/tags", authMw, stats.Tags)
+		api.GET("/tags", authMw, tagsH.Aggregate)
+		api.POST("/tags", authMw, tagsH.Create)
+		api.DELETE("/tags/:id", authMw, tagsH.Delete)
+
+		api.GET("/weather", authMw, weatherH.Get)
+		api.GET("/suggest/outfit", authMw, suggestH.Outfit)
 
 		api.POST("/upload", authMw, upload.Upload)
 	}

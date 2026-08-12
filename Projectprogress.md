@@ -90,6 +90,7 @@ wardrobe/                         ← 微信开发者工具打开这里
 | 2026-08-12 | Dockerfile 构建镜像改为 golang:1.25-alpine，对齐 go.mod |
 | 2026-08-12 | 云托管启动：DB 重试连接；远端库跳过自动建库；部署文档补充排障 |
 | 2026-08-12 | 云托管连 Supabase：`network is unreachable` 根因 IPv6；后端强制 tcp4；文档补充改用 Pooler |
+| 2026-08-12 | 主仓推送 GitHub `851422a`；后端 Gitee 已是 `1a20dc9`（tcp4） |
 | 2026-08-12 | 身体档案改为选择出生日期并自动计算年龄；库表增加 birth_date |
 | 2026-08-12 | 新建饮食记录按时段预选餐次：7–9 早餐 / 11–13 午餐 / 18–21 晚餐 / 其余其他 |
 | 2026-08-12 | 产品能力加强：AI 穿搭精炼、打标中心、导出备份、智能提醒；设计见 docs/superpowers/specs/2026-08-12-product-capability-boost-design.md |

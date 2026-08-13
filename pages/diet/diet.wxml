@@ -21,7 +21,7 @@
           <text class="m-label">BMI {{metrics.bmiLevel || ''}}</text>
         </view>
         <view class="m">
-          <text class="m-num">{{metrics.bodyFatPct || '—'}}%</text>
+          <text class="m-num">{{bodyFatText}}</text>
           <text class="m-label">体脂估算</text>
         </view>
         <view class="m">
@@ -69,7 +69,7 @@
     <view class="list" wx:if="{{list.length}}">
       <view class="item" wx:for="{{list}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
         <image wx:if="{{item.imageUrl}}" class="thumb" src="{{item.imageUrl}}" mode="aspectFill" />
-        <view wx:else class="thumb ph">餐</view>
+        <image wx:else class="thumb" src="{{item.placeholderUrl}}" mode="aspectFill" />
         <view class="meta">
           <view class="meta-top">
             <text class="meal">{{item.mealTypeLabel}}</text>

@@ -159,6 +159,33 @@
   font-weight: 600;
 }
 
+.chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.chip-grid .g {
+  flex: none;
+  width: calc((100% - 12rpx) / 2);
+  text-align: center;
+  padding: 20rpx 8rpx;
+  border-radius: 16rpx;
+  background: #f7f5f3;
+  color: var(--ink-soft);
+  font-size: 26rpx;
+}
+
+.chip-grid .g.on {
+  background: var(--accent-soft);
+  color: var(--coral-deep);
+  font-weight: 600;
+}
+
+.chip-grid.three .g {
+  width: calc((100% - 24rpx) / 3);
+}
+
 .form-label {
   display: block;
   margin-bottom: 12rpx;
@@ -256,4 +283,13 @@
 
 .anim-pop {
   animation: pop-in 0.4s var(--ease) both;
+}
+
+.metrics-note {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 20rpx;
+  font-weight: 400;
+  color: var(--muted);
+  line-height: 1.4;
 }

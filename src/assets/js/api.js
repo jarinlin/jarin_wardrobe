@@ -290,7 +290,16 @@ function deleteCategory(id) {
 function fetchOutfits() {
   if (USE_MOCK) {
     return Promise.resolve(
-      mock.getOutfits().sort((a, b) => (a.date < b.date ? 1 : -1))
+      mock.getOutfits().sort((a, b) => (a.date < b.date ? 1 : -1)).map((o) => {
+        const post = mockOotdPosts().find(
+          (p) => p.status === 'published' && String(p.outfitId) === String(o.id)
+        )
+        return {
+          ...o,
+          ootdPublished: !!post,
+          ootdPostId: post ? post.id : 0
+        }
+      })
     )
   }
   return request({ url: '/api/outfits' })
@@ -299,7 +308,15 @@ function fetchOutfits() {
 function fetchOutfitDetail(id) {
   if (USE_MOCK) {
     const item = mock.getOutfits().find((o) => String(o.id) === String(id))
-    return item ? Promise.resolve(item) : Promise.reject(new Error('not found'))
+    if (!item) return Promise.reject(new Error('not found'))
+    const post = mockOotdPosts().find(
+      (p) => p.status === 'published' && String(p.outfitId) === String(id)
+    )
+    return Promise.resolve({
+      ...item,
+      ootdPublished: !!post,
+      ootdPostId: post ? post.id : 0
+    })
   }
   return request({ url: `/api/outfits/${id}` })
 }
@@ -354,9 +371,182 @@ function deleteOutfit(id) {
   if (USE_MOCK) {
     const list = wx.getStorageSync('mock_outfits') || []
     mock.saveOutfits(list.filter((o) => String(o.id) !== String(id)))
+    const posts = wx.getStorageSync('mock_ootd_posts') || []
+    wx.setStorageSync(
+      'mock_ootd_posts',
+      posts.map((p) =>
+        String(p.outfitId) === String(id) ? { ...p, status: 'withdrawn', outfitId: null } : p
+      )
+    )
     return Promise.resolve(true)
   }
   return request({ url: `/api/outfits/${id}`, method: 'DELETE' })
+}
+
+function mockOotdPosts() {
+  return wx.getStorageSync('mock_ootd_posts') || []
+}
+
+function saveMockOotdPosts(list) {
+  wx.setStorageSync('mock_ootd_posts', list)
+}
+
+function mockAuthor() {
+  const user = auth.getUserInfo() || {}
+  return {
+    nickname: user.nickname || '我',
+    avatarUrl: user.avatarUrl || ''
+  }
+}
+
+function mapMockOotd(p, uid) {
+  const mine = String(p.userId) === String(uid)
+  const out = {
+    id: p.id,
+    caption: p.showCaption ? p.caption || '' : '',
+    imageUrl: p.showPhoto ? p.imageUrl || '' : '',
+    itemNames: p.showItems ? p.itemNames || [] : [],
+    likeCount: p.likeCount || 0,
+    liked: (p.likedBy || []).some((id) => String(id) === String(uid)),
+    status: p.status,
+    createdAt: p.createdAt,
+    mine,
+    author: p.author || mockAuthor()
+  }
+  if (mine) {
+    out.showPhoto = !!p.showPhoto
+    out.showCaption = !!p.showCaption
+    out.showItems = !!p.showItems
+    out.captionDraft = p.caption || ''
+    out.outfitId = p.outfitId
+  }
+  return out
+}
+
+function fetchOotdFeed(params = {}) {
+  if (USE_MOCK) {
+    const user = auth.getUserInfo() || {}
+    const uid = user.id || 1
+    const sort = params.sort === 'new' ? 'new' : 'hot'
+    const range = params.range === 'all' ? 'all' : 'week'
+    let list = mockOotdPosts().filter((p) => p.status === 'published')
+    if (sort === 'hot' && range === 'week') {
+      const start = Date.now() - 7 * 24 * 3600 * 1000
+      list = list.filter((p) => new Date(p.createdAt).getTime() >= start)
+    }
+    list.sort((a, b) => {
+      if (sort === 'new') return (b.createdAt || '').localeCompare(a.createdAt || '')
+      const d = (b.likeCount || 0) - (a.likeCount || 0)
+      if (d) return d
+      return (b.createdAt || '').localeCompare(a.createdAt || '')
+    })
+    return Promise.resolve(list.map((p, i) => ({ ...mapMockOotd(p, uid), rank: i + 1 })))
+  }
+  return request({ url: '/api/ootd/feed', data: params })
+}
+
+function fetchOotdPost(id) {
+  if (USE_MOCK) {
+    const user = auth.getUserInfo() || {}
+    const uid = user.id || 1
+    const p = mockOotdPosts().find((x) => String(x.id) === String(id))
+    if (!p || (p.status !== 'published' && String(p.userId) !== String(uid))) {
+      return Promise.reject(new Error('not found'))
+    }
+    return Promise.resolve(mapMockOotd(p, uid))
+  }
+  return request({ url: `/api/ootd/posts/${id}` })
+}
+
+function fetchOotdMine(outfitId) {
+  if (USE_MOCK) {
+    const user = auth.getUserInfo() || {}
+    const uid = user.id || 1
+    const p = mockOotdPosts().find(
+      (x) => String(x.userId) === String(uid) && String(x.outfitId) === String(outfitId)
+    )
+    if (!p) {
+      return Promise.resolve({ published: false, postId: 0, status: '', post: null })
+    }
+    return Promise.resolve({
+      published: p.status === 'published',
+      postId: p.id,
+      status: p.status,
+      post: mapMockOotd(p, uid)
+    })
+  }
+  return request({ url: '/api/ootd/mine', data: { outfitId } })
+}
+
+function createOotdPost(payload) {
+  if (USE_MOCK) {
+    const user = auth.getUserInfo() || {}
+    const uid = user.id || 1
+    const outfit = (mock.getOutfits() || []).find((o) => String(o.id) === String(payload.outfitId))
+    if (!outfit) return Promise.reject(new Error('not found'))
+    const list = mockOotdPosts()
+    const existing = list.find(
+      (p) => String(p.userId) === String(uid) && String(p.outfitId) === String(payload.outfitId)
+    )
+    const itemNames = (outfit.clothes || []).map((c) => c.name).filter(Boolean)
+    const row = {
+      id: existing ? existing.id : Date.now(),
+      userId: uid,
+      outfitId: payload.outfitId,
+      showPhoto: !!payload.showPhoto,
+      showCaption: !!payload.showCaption,
+      showItems: !!payload.showItems,
+      caption: payload.caption || '',
+      imageUrl: payload.showPhoto ? outfit.imageUrl || '' : '',
+      itemNames: payload.showItems ? itemNames : [],
+      likeCount: existing ? existing.likeCount || 0 : 0,
+      likedBy: existing ? existing.likedBy || [] : [],
+      status: 'published',
+      createdAt: existing ? existing.createdAt : new Date().toISOString(),
+      author: mockAuthor()
+    }
+    const next = existing
+      ? list.map((p) => (p.id === existing.id ? row : p))
+      : [row, ...list]
+    saveMockOotdPosts(next)
+    return Promise.resolve(mapMockOotd(row, uid))
+  }
+  return request({ url: '/api/ootd/posts', method: 'POST', data: payload })
+}
+
+function updateOotdPost(id, payload) {
+  if (USE_MOCK) {
+    const user = auth.getUserInfo() || {}
+    const uid = user.id || 1
+    const list = mockOotdPosts()
+    const idx = list.findIndex((p) => String(p.id) === String(id) && String(p.userId) === String(uid))
+    if (idx < 0) return Promise.reject(new Error('not found'))
+    const cur = { ...list[idx], ...payload }
+    if (payload.status === 'withdrawn') cur.status = 'withdrawn'
+    list[idx] = cur
+    saveMockOotdPosts(list)
+    return Promise.resolve(mapMockOotd(cur, uid))
+  }
+  return request({ url: `/api/ootd/posts/${id}`, method: 'PUT', data: payload })
+}
+
+function likeOotdPost(id) {
+  if (USE_MOCK) {
+    const user = auth.getUserInfo() || {}
+    const uid = user.id || 1
+    const list = mockOotdPosts()
+    const idx = list.findIndex((p) => String(p.id) === String(id))
+    if (idx < 0) return Promise.reject(new Error('not found'))
+    const p = list[idx]
+    const likedBy = p.likedBy || []
+    const has = likedBy.some((x) => String(x) === String(uid))
+    p.likedBy = has ? likedBy.filter((x) => String(x) !== String(uid)) : likedBy.concat(uid)
+    p.likeCount = p.likedBy.length
+    list[idx] = p
+    saveMockOotdPosts(list)
+    return Promise.resolve({ liked: !has, likeCount: p.likeCount })
+  }
+  return request({ url: `/api/ootd/posts/${id}/like`, method: 'POST' })
 }
 
 /** ---------- 标签 / 统计 ---------- */
@@ -524,6 +714,8 @@ function fetchBodyProfile() {
       age: 28,
       heightCm: 165,
       weightKg: 52,
+      activityLevel: 'light',
+      goal: 'maintain',
       metrics: { bmi: 19.1, bmiLevel: '正常', bodyFatPct: 24, idealWeightKg: 60, bmr: 1300, suggestKcal: 1800 }
     })
   }
@@ -612,6 +804,12 @@ module.exports = {
   fetchTodayOutfit,
   createOutfit,
   deleteOutfit,
+  fetchOotdFeed,
+  fetchOotdPost,
+  fetchOotdMine,
+  createOotdPost,
+  updateOotdPost,
+  likeOotdPost,
   fetchTags,
   createTag,
   deleteTag,

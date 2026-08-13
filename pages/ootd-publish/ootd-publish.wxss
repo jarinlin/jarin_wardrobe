@@ -1,0 +1,9 @@
+@import '../../src/assets/css/ootd.wxss';
+
+.publish .page-subtitle {
+  margin-bottom: 4rpx;
+}
+
+.choice switch {
+  flex-shrink: 0;
+}

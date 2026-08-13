@@ -1,7 +1,7 @@
 const api = require('../../src/assets/js/api')
 const util = require('../../src/assets/js/util')
 const auth = require('../../src/assets/js/auth')
-const { buildDayCard, isBodyReady, promptBodyProfile } = require('../../src/assets/js/diet-metrics')
+const { buildDayCard, isBodyReady, promptBodyProfile, mealPlaceholderUrl } = require('../../src/assets/js/diet-metrics')
 
 function todayStr() {
   const d = new Date()
@@ -17,6 +17,7 @@ Page({
     list: [],
     todayKcal: 0,
     metrics: {},
+    bodyFatText: '—',
     bodyReady: false,
     bodyChecked: false,
     metricsTip: '先完善身高体重才能记饮食 →',
@@ -48,13 +49,15 @@ Page({
       const body = await api.fetchBodyProfile()
       metrics = body.metrics || {}
       bodyReady = isBodyReady(body)
+      const bodyFatText = metrics.bodyFatPct ? `${metrics.bodyFatPct}%` : '—'
       const metricsTip = bodyReady
         ? `建议日摄入约 ${metrics.suggestKcal || '—'} kcal · 点此改档案`
         : '先完善身高体重才能记饮食 →'
-      this.setData({ metrics, bodyReady, bodyChecked: true, metricsTip })
+      this.setData({ metrics, bodyFatText, bodyReady, bodyChecked: true, metricsTip })
     } catch (e) {
       this.setData({
         metrics: {},
+        bodyFatText: '—',
         bodyReady: false,
         bodyChecked: true,
         metricsTip: '先完善身高体重才能记饮食 →'
@@ -89,7 +92,8 @@ Page({
           ...item,
           displayTitle: item.foodName || (items[0] && items[0].foodName) || '未命名',
           displaySub: subtitle,
-          displayKcal: Math.round(Number(item.calories) || 0)
+          displayKcal: Math.round(Number(item.calories) || 0),
+          placeholderUrl: mealPlaceholderUrl(item.mealType)
         }
       })
       const selectedKcal = Math.round(data.totalCalories || 0)

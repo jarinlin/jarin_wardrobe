@@ -16,7 +16,7 @@
 
 .count {
   font-size: 22rpx;
-  color: var(--mint-deep);
+  color: var(--ink-soft);
   font-weight: 500;
 }
 
@@ -123,6 +123,10 @@
 .share-btn.ghost {
   background: #efe8e3;
   color: var(--ink-soft);
+}
+
+.plaza-btn {
+  margin-top: 20rpx;
 }
 
 .btn-danger {

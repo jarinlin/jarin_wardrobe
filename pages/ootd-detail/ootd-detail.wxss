@@ -1,0 +1,63 @@
+@import '../../src/assets/css/ootd.wxss';
+
+.detail-hero {
+  overflow: hidden;
+  height: 560rpx;
+  margin: 0 -4rpx 28rpx;
+  border-radius: 32rpx;
+  background: #f6f3f1;
+  box-shadow: var(--shadow);
+}
+
+.detail-photo {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.detail-author {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  margin-bottom: 24rpx;
+}
+
+.detail-author .mag-avatar {
+  width: 64rpx;
+  height: 64rpx;
+}
+
+.detail-caption {
+  display: block;
+  margin-bottom: 22rpx;
+  font-size: 30rpx;
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+.detail-caption.lead {
+  font-family: var(--font-display);
+  font-size: 40rpx;
+  font-weight: 500;
+  line-height: 1.4;
+  margin-bottom: 28rpx;
+}
+
+.ootd-detail .mag-items {
+  margin-bottom: 12rpx;
+}
+
+.ootd-detail .like-cta {
+  margin-top: 32rpx;
+}
+
+.detail-actions {
+  margin-top: 20rpx;
+}
+
+.muted-line {
+  margin-top: 20rpx;
+  font-size: 22rpx;
+  color: var(--muted);
+  text-align: center;
+}

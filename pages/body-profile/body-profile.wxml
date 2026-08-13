@@ -1,13 +1,12 @@
 <view class="page body" wx:if="{{booted}}">
-  <view class="page-subtitle tip">用于计算 BMI / 体脂估算，并在饮食识别时给个性化建议</view>
+  <view class="page-subtitle tip">BMI / 体脂 / 基础代谢为本地估算；建议摄入由 AI 根据档案生成</view>
 
   <view class="form surface">
     <view class="form-item">
       <text class="form-label">性别</text>
       <view class="gender-row">
-        <view class="g {{form.gender==='female'?'on':''}}" data-v="female" bindtap="onGender">女</view>
         <view class="g {{form.gender==='male'?'on':''}}" data-v="male" bindtap="onGender">男</view>
-        <view class="g {{form.gender==='other'?'on':''}}" data-v="other" bindtap="onGender">其他</view>
+        <view class="g {{form.gender==='female'?'on':''}}" data-v="female" bindtap="onGender">女</view>
       </view>
     </view>
     <view class="form-item">
@@ -25,14 +24,37 @@
       <text class="form-label">体重 (kg)</text>
       <input class="form-input" type="digit" placeholder="如：52" placeholder-class="form-placeholder" value="{{form.weightKg}}" data-key="weightKg" bindinput="onInput" />
     </view>
+    <view class="form-item">
+      <text class="form-label">平均每日活动量</text>
+      <view class="chip-grid">
+        <view class="g {{form.activityLevel==='sedentary'?'on':''}}" data-v="sedentary" bindtap="onActivity">久坐办公</view>
+        <view class="g {{form.activityLevel==='light'?'on':''}}" data-v="light" bindtap="onActivity">轻度活动</view>
+        <view class="g {{form.activityLevel==='moderate'?'on':''}}" data-v="moderate" bindtap="onActivity">中度活动</view>
+        <view class="g {{form.activityLevel==='heavy'?'on':''}}" data-v="heavy" bindtap="onActivity">重度活动</view>
+      </view>
+      <text class="age-hint" wx:if="{{activityHint}}">{{activityHint}}</text>
+    </view>
+    <view class="form-item">
+      <text class="form-label">目标</text>
+      <view class="chip-grid three">
+        <view class="g {{form.goal==='cut'?'on':''}}" data-v="cut" bindtap="onGoal">减脂</view>
+        <view class="g {{form.goal==='maintain'?'on':''}}" data-v="maintain" bindtap="onGoal">维持</view>
+        <view class="g {{form.goal==='bulk'?'on':''}}" data-v="bulk" bindtap="onGoal">增肌</view>
+      </view>
+      <text class="age-hint" wx:if="{{goalHint}}">{{goalHint}}</text>
+    </view>
   </view>
 
   <view class="metrics surface" wx:if="{{metrics.bmi}}">
     <view class="row"><text class="k">BMI</text><text class="v">{{metrics.bmi}}（{{metrics.bmiLevel}}）</text></view>
-    <view class="row"><text class="k">体脂估算</text><text class="v">{{metrics.bodyFatPct}}%</text></view>
+    <view class="row" wx:if="{{metrics.bodyFatPct}}">
+      <text class="k">体脂估算</text>
+      <text class="v">{{metrics.bodyFatPct}}%</text>
+    </view>
     <view class="row"><text class="k">理想体重</text><text class="v">{{metrics.idealWeightKg}} kg</text></view>
     <view class="row"><text class="k">基础代谢</text><text class="v">{{metrics.bmr}} kcal</text></view>
     <view class="row"><text class="k">建议摄入</text><text class="v">{{metrics.suggestKcal}} kcal/日</text></view>
+    <text class="metrics-note">体脂为估算非 AI；建议摄入在档案变更后重新生成</text>
   </view>
 
   <view class="btn-primary" bindtap="onSave">保存档案</view>

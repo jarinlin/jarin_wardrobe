@@ -1,0 +1,99 @@
+<view class="page publish" wx:if="{{ready}}">
+  <view class="page-title">{{published ? '管理广场帖' : '发布到广场'}}</view>
+  <view class="page-subtitle">私人记录还在。开关只控制卡片上展示什么。</view>
+
+  <view class="preview-kicker">广场上会是这样</view>
+  <view class="mag-card mag-hero">
+    <view class="mag-cover" wx:if="{{showCover}}">
+      <image class="mag-photo" src="{{photoUrl}}" mode="aspectFill" />
+      <view class="mag-cover-bar">
+        <image class="mag-avatar" src="{{author.avatarUrl || defaultAvatar}}" mode="aspectFill" />
+        <text class="mag-nick mag-nick-light">{{author.nickname}}</text>
+        <view class="like-btn">
+          <view class="like-heart-wrap"><view class="like-heart"></view></view>
+          <text>0</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="mag-text" wx:else>
+      <view class="mag-author">
+        <image class="mag-avatar" src="{{author.avatarUrl || defaultAvatar}}" mode="aspectFill" />
+        <text class="mag-nick">{{author.nickname}}</text>
+        <view class="like-btn">
+          <view class="like-heart-wrap"><view class="like-heart"></view></view>
+          <text>0</text>
+        </view>
+      </view>
+      <textarea
+        wx:if="{{showCaption}}"
+        class="preview-caption quote"
+        maxlength="500"
+        placeholder="想说的话"
+        placeholder-class="form-textarea-placeholder"
+        value="{{caption}}"
+        bindinput="onCaptionInput"
+      />
+      <view class="mag-items" wx:if="{{showItems && itemTags.length}}">
+        <text class="mag-item" wx:for="{{itemTags}}" wx:key="i">{{item.name}}</text>
+      </view>
+      <view class="hint-empty" wx:if="{{!canSubmit}}">至少打开一项有内容的，才不会变成空卡</view>
+    </view>
+
+    <view class="mag-below" wx:if="{{showBelow}}">
+      <textarea
+        wx:if="{{showCaption}}"
+        class="preview-caption"
+        maxlength="500"
+        placeholder="想说的话"
+        placeholder-class="form-textarea-placeholder"
+        value="{{caption}}"
+        bindinput="onCaptionInput"
+      />
+      <view class="mag-items" wx:if="{{showItems && itemTags.length}}">
+        <text class="mag-item" wx:for="{{itemTags}}" wx:key="i">{{item.name}}</text>
+      </view>
+      <view class="hint-empty" wx:if="{{!canSubmit}}">至少打开一项有内容的，才不会变成空卡</view>
+    </view>
+  </view>
+
+  <view class="choice-list">
+    <view class="choice {{hasImage ? '' : 'off'}}">
+      <image wx:if="{{hasImage}}" class="choice-thumb" src="{{photoUrl}}" mode="aspectFill" />
+      <view wx:else class="choice-thumb empty"></view>
+      <view class="choice-copy">
+        <text class="opt-title">附带穿搭照片</text>
+        <text class="opt-sub">{{hasImage ? '卡片上会展示这张穿搭照' : '没有照片也能发，或先回穿搭补一张'}}</text>
+      </view>
+      <switch checked="{{showPhoto}}" disabled="{{!hasImage}}" color="#E85D75" bindchange="onPhoto" />
+    </view>
+    <view class="choice">
+      <view class="choice-thumb empty lines">
+        <view class="mark-line"></view>
+        <view class="mark-line short"></view>
+      </view>
+      <view class="choice-copy">
+        <text class="opt-title">附带文案</text>
+        <text class="opt-sub">写给大家看的一句话，可改</text>
+      </view>
+      <switch checked="{{showCaption}}" color="#E85D75" bindchange="onCaptionSwitch" />
+    </view>
+    <view class="choice">
+      <view class="choice-thumb empty chips">
+        <view class="mark-chip"></view>
+        <view class="mark-chip short"></view>
+      </view>
+      <view class="choice-copy">
+        <text class="opt-title">展示单品名称</text>
+        <text class="opt-sub">只显示单品名，不公开衣柜</text>
+      </view>
+      <switch checked="{{showItems}}" color="#E85D75" bindchange="onItems" />
+    </view>
+  </view>
+
+  <view class="btn-primary {{canSubmit ? '' : 'disabled'}}" bindtap="onSubmit">
+    {{published ? '保存修改' : '发布到广场'}}
+  </view>
+  <view class="btn-ghost withdraw-btn" wx:if="{{published}}" bindtap="onWithdraw">从广场撤回</view>
+  <view class="safe-bottom"></view>
+</view>

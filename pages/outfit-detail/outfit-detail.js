@@ -13,7 +13,10 @@ Page({
 
   onLoad(query) {
     this.setData({ id: query.id })
-    this.loadDetail()
+  },
+
+  onShow() {
+    if (this.data.id) this.loadDetail()
   },
 
   async loadDetail() {
@@ -66,10 +69,18 @@ Page({
     })
   },
 
+  goPublish() {
+    const item = this.data.item || {}
+    const postId = item.ootdPostId || ''
+    wx.navigateTo({
+      url: `/pages/ootd-publish/ootd-publish?outfitId=${this.data.id}&postId=${postId}`
+    })
+  },
+
   onDelete() {
     wx.showModal({
       title: '删除穿搭',
-      content: '确定删除这条穿搭记录？',
+      content: '确定删除这条穿搭记录？已发布到广场的会一并撤回。',
       confirmColor: '#B54A3A',
       success: async (res) => {
         if (!res.confirm) return

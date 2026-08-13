@@ -191,14 +191,7 @@
   border-radius: 18rpx;
   flex-shrink: 0;
   background: #f3f0ee;
-}
-
-.thumb.ph {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--muted);
-  font-size: 28rpx;
+  overflow: hidden;
 }
 
 .meta {

@@ -1,32 +1,115 @@
 <view class="page outfit">
   <view class="head anim-rise">
     <view>
-      <view class="page-title">穿搭记录</view>
-      <view class="page-subtitle">按日期查看与记录穿搭</view>
+      <view class="page-title">穿搭</view>
+      <view class="page-subtitle">{{tab === 'plaza' ? '看看大家在穿什么' : '记下今天的样子'}}</view>
     </view>
-    <view class="head-btn" bindtap="goCreate">今日穿搭</view>
+    <view class="head-btn" wx:if="{{tab === 'mine'}}" bindtap="goCreate">今日穿搭</view>
   </view>
 
-  <view class="list" wx:if="{{list.length}}">
-    <view
-      class="item"
-      wx:for="{{list}}"
-      wx:key="id"
-      data-id="{{item.id}}"
-      bindtap="goDetail"
-    >
-      <view class="item-top">
-        <text class="item-date">{{item.dateLabel}}</text>
-        <text class="item-count">×{{item.wearCount || 1}}</text>
-      </view>
-      <view class="item-clothes">
-        <text wx:for="{{item.clothes}}" wx:for-item="c" wx:key="id" class="cloth-line">{{c.name}}</text>
-      </view>
-    </view>
+  <view class="seg">
+    <view class="seg-item {{tab === 'mine' ? 'on' : ''}}" data-tab="mine" bindtap="onTab">我的</view>
+    <view class="seg-item {{tab === 'plaza' ? 'on' : ''}}" data-tab="plaza" bindtap="onTab">广场</view>
   </view>
 
-  <view class="empty" wx:else>
-    <view class="empty-title">还没有穿搭记录</view>
-    <view class="muted">记录今天的穿搭，开始你的衣橱日志</view>
-  </view>
+  <block wx:if="{{tab === 'mine'}}">
+    <view class="look-list" wx:if="{{list.length}}">
+      <view
+        class="look-card anim-pop"
+        wx:for="{{list}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        hover-class="look-hover"
+        bindtap="goDetail"
+        style="animation-delay: {{index * 40}}ms"
+      >
+        <view class="look-cover" wx:if="{{item.hasCover}}">
+          <image class="look-photo" src="{{item.imageUrl}}" mode="aspectFill" />
+        </view>
+        <view class="look-cover look-mosaic n{{item.thumbN}}" wx:else>
+          <view class="look-cell" wx:for="{{item.thumbs}}" wx:for-item="t" wx:key="id">
+            <image wx:if="{{t.imageUrl}}" class="look-thumb" src="{{t.imageUrl}}" mode="aspectFill" />
+            <view wx:else class="look-ph">{{t.name}}</view>
+            <view class="look-more" wx:if="{{t.more}}">+{{t.more}}</view>
+          </view>
+          <view class="look-ph look-ph-empty" wx:if="{{!item.thumbN}}">穿搭</view>
+        </view>
+        <view class="look-bar">
+          <text class="look-date">{{item.dateLabel}}</text>
+          <text class="look-pub" wx:if="{{item.ootdPublished}}">已发布</text>
+        </view>
+      </view>
+    </view>
+    <view class="empty" wx:else>
+      <view class="empty-title">还没有穿搭记录</view>
+      <view class="muted">记录今天的穿搭，开始你的衣橱日志</view>
+    </view>
+  </block>
+
+  <block wx:else>
+    <view class="plaza-chips">
+      <view class="plaza-chip {{feedKey === 'week' ? 'on' : ''}}" data-key="week" bindtap="onFeedKey">本周热门</view>
+      <view class="plaza-chip {{feedKey === 'all' ? 'on' : ''}}" data-key="all" bindtap="onFeedKey">总榜</view>
+      <view class="plaza-chip {{feedKey === 'new' ? 'on' : ''}}" data-key="new" bindtap="onFeedKey">最新</view>
+    </view>
+    <view wx:if="{{feed.length}}">
+      <view
+        class="mag-card"
+        wx:for="{{feed}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        hover-class="look-hover"
+        bindtap="goOotd"
+        style="animation-delay: {{index * 40}}ms"
+      >
+        <view class="mag-cover" wx:if="{{item.hasPhoto}}">
+          <image class="mag-photo" src="{{item.imageUrl}}" mode="aspectFill" />
+          <text class="rank-badge r{{item.rank}}" wx:if="{{item.showRank}}">{{item.rank}}</text>
+          <view class="mag-cover-bar">
+            <image class="mag-avatar" src="{{item.author.avatarUrl || defaultAvatar}}" mode="aspectFill" />
+            <text class="mag-nick mag-nick-light">{{item.author.nickname}}</text>
+            <button
+              class="like-btn {{item.liked ? 'on' : ''}}"
+              hover-class="like-press"
+              data-id="{{item.id}}"
+              catchtap="onLike"
+            >
+              <view class="like-heart-wrap"><view class="like-heart"></view></view>
+              <text>{{item.likeCount}}</text>
+            </button>
+          </view>
+        </view>
+        <view class="mag-text" wx:else>
+          <view class="mag-author">
+            <text class="rank-badge inline r{{item.rank}}" wx:if="{{item.showRank}}">{{item.rank}}</text>
+            <image class="mag-avatar" src="{{item.author.avatarUrl || defaultAvatar}}" mode="aspectFill" />
+            <text class="mag-nick">{{item.author.nickname}}</text>
+            <button
+              class="like-btn {{item.liked ? 'on' : ''}}"
+              hover-class="like-press"
+              data-id="{{item.id}}"
+              catchtap="onLike"
+            >
+              <view class="like-heart-wrap"><view class="like-heart"></view></view>
+              <text>{{item.likeCount}}</text>
+            </button>
+          </view>
+          <text class="mag-quote" wx:if="{{item.hasCaption}}">{{item.caption}}</text>
+          <view class="mag-items" wx:if="{{item.hasItems}}">
+            <text class="mag-item" wx:for="{{item.itemTags}}" wx:for-item="n" wx:key="i">{{n.name}}</text>
+          </view>
+        </view>
+        <view class="mag-below" wx:if="{{item.hasPhoto && (item.hasCaption || item.hasItems)}}">
+          <text class="mag-caption" wx:if="{{item.hasCaption}}">{{item.caption}}</text>
+          <view class="mag-items" wx:if="{{item.hasItems}}">
+            <text class="mag-item" wx:for="{{item.itemTags}}" wx:for-item="n" wx:key="i">{{n.name}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+    <view class="empty" wx:else>
+      <view class="empty-title">广场还是空的</view>
+      <view class="muted">把你的穿搭发布上来，就会出现在这里</view>
+    </view>
+  </block>
 </view>

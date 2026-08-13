@@ -10,6 +10,8 @@
     "pages/category/category",
     "pages/outfit-edit/outfit-edit",
     "pages/outfit-detail/outfit-detail",
+    "pages/ootd-publish/ootd-publish",
+    "pages/ootd-detail/ootd-detail",
     "pages/diet-edit/diet-edit",
     "pages/body-profile/body-profile",
     "pages/tags/tags",

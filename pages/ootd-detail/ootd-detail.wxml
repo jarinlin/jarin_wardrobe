@@ -1,0 +1,24 @@
+<view class="page ootd-detail" wx:if="{{post}}">
+  <view class="detail-hero" wx:if="{{post.hasPhoto}}">
+    <image class="detail-photo" src="{{post.imageUrl}}" mode="aspectFill" />
+  </view>
+
+  <view class="detail-author">
+    <image class="mag-avatar" src="{{post.author.avatarUrl || defaultAvatar}}" mode="aspectFill" />
+    <text class="mag-nick">{{post.author.nickname}}</text>
+  </view>
+
+  <text class="detail-caption {{post.hasPhoto ? '' : 'lead'}}" wx:if="{{post.hasCaption}}">{{post.caption}}</text>
+
+  <view class="mag-items" wx:if="{{post.hasItems}}">
+    <text class="mag-item" wx:for="{{post.itemTags}}" wx:key="i">{{item.name}}</text>
+  </view>
+
+  <button class="like-cta {{post.liked ? 'on' : ''}}" hover-class="like-press" bindtap="onLike">
+    <view class="like-heart-wrap"><view class="like-heart"></view></view>
+    <text>{{post.liked ? '已喜欢' : '喜欢'}} {{post.likeCount}}</text>
+  </button>
+
+  <view class="btn-ghost detail-actions" wx:if="{{post.mine && post.outfitId}}" bindtap="goManage">管理广场帖</view>
+  <view class="muted-line">只展示作者选择公开的内容</view>
+</view>

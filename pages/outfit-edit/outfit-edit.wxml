@@ -6,6 +6,18 @@
     </picker>
   </view>
 
+  <view class="form-item">
+    <text class="form-label">穿搭照片（可选）</text>
+    <view class="photo {{imageUrl ? 'has-photo' : ''}}" hover-class="photo-hover" bindtap="onChooseImage">
+      <image wx:if="{{imageUrl}}" class="photo-img" src="{{imageUrl}}" mode="aspectFill" />
+      <view wx:else class="photo-empty">
+        <text class="plus">＋</text>
+        <text>点击添加穿搭照片</text>
+        <text class="photo-hint">可不传，下面先选单品也行</text>
+      </view>
+    </view>
+  </view>
+
   <view class="section">
     <view class="section-head">
       <text class="section-title">选用衣物</text>
@@ -17,28 +29,24 @@
         wx:for="{{clothes}}"
         wx:key="id"
         data-id="{{item.id}}"
+        hover-class="cloth-hover"
         bindtap="toggleCloth"
       >
         <view class="cloth-cover">
           <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" />
           <view wx:else class="ph">{{item.categoryName}}</view>
+          <view class="cloth-mark" wx:if="{{item.selected}}">
+            <view class="check"></view>
+          </view>
         </view>
         <text class="cloth-name">{{item.name}}</text>
       </view>
     </view>
   </view>
 
-  <view class="form-item">
-    <text class="form-label">穿搭照片（可选）</text>
-    <view class="photo" bindtap="onChooseImage">
-      <image wx:if="{{imageUrl}}" src="{{imageUrl}}" mode="aspectFill" />
-      <text wx:else class="muted">点击添加</text>
-    </view>
-  </view>
-
-  <view class="form-item">
-    <text class="form-label">备注</text>
-    <textarea class="form-textarea" placeholder="如：轻松上班" placeholder-class="form-textarea-placeholder" value="{{note}}" bindinput="onNote" />
+  <view class="form-item note-item">
+    <text class="form-label">备注（可选）</text>
+    <textarea class="form-textarea note-area" placeholder="如：轻松上班" placeholder-class="form-textarea-placeholder" value="{{note}}" bindinput="onNote" />
   </view>
 
   <view class="btn-primary" bindtap="onSubmit">保存穿搭</view>

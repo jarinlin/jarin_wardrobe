@@ -1,3 +1,14 @@
+const MEAL_PLACEHOLDERS = {
+  breakfast: '/src/assets/images/diet/diet-breakfast.png',
+  lunch: '/src/assets/images/diet/diet-lunch.png',
+  dinner: '/src/assets/images/diet/diet-dinner.png',
+  other: '/src/assets/images/diet/diet-other.png'
+}
+
+function mealPlaceholderUrl(mealType) {
+  return MEAL_PLACEHOLDERS[mealType] || MEAL_PLACEHOLDERS.other
+}
+
 function isBodyReady(body) {
   const h = Number(body && body.heightCm)
   const w = Number(body && body.weightKg)
@@ -71,5 +82,6 @@ function buildDayCard(metrics, todayKcal) {
 module.exports = {
   buildDayCard,
   isBodyReady,
-  promptBodyProfile
+  promptBodyProfile,
+  mealPlaceholderUrl
 }

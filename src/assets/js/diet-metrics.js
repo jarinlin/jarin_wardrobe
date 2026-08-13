@@ -35,7 +35,7 @@ function promptBodyProfile(opts) {
 function buildDayCard(metrics, todayKcal, aiAdvice) {
   const suggestDay = Math.round(Number(metrics && metrics.suggestKcal) || 0)
   const today = Math.round(Number(todayKcal) || 0)
-  const advice = String(aiAdvice || '').trim()
+  const advice = String(aiAdvice || '').trim().replace(/^建议[：:]\s*/, '')
   if (!suggestDay) {
     return {
       suggestDay: 0,

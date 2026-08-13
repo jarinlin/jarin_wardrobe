@@ -18,15 +18,6 @@
         <text class="v">{{item.remark}}</text>
       </view>
     </view>
-
-    <view class="tags-block" wx:if="{{item.tags && item.tags.length}}">
-      <view class="tags-head">
-        <text class="k">标签</text>
-      </view>
-      <view class="chip-row">
-        <text class="chip" wx:for="{{item.tags}}" wx:key="*this">{{item}}</text>
-      </view>
-    </view>
   </view>
 
   <view class="actions">

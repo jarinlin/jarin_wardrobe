@@ -55,10 +55,7 @@
         <view class="{{day.barClass}}" style="width: {{day.ratioPct}}%;"></view>
       </view>
       <text class="week-tip" wx:if="{{day.tip}}">{{day.tip}}</text>
-      <view class="diet-ai" wx:if="{{day.aiAdvice}}">
-        <text class="diet-ai-tag">AI 生成</text>
-        <text class="diet-ai-text">{{day.aiAdvice}}</text>
-      </view>
+      <text class="diet-ai" wx:if="{{day.aiAdvice}}">建议：{{day.aiAdvice}}<text class="diet-ai-tag">AI</text></text>
     </view>
 
     <view class="date-row">

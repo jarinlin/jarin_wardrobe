@@ -8,35 +8,12 @@ Page({
     priceText: '—'
   },
 
-  _pollTimer: null,
-
   onLoad(query) {
     this.setData({ id: query.id })
   },
 
   onShow() {
     if (this.data.id) this.loadDetail()
-  },
-
-  onHide() {
-    this.clearPoll()
-  },
-
-  onUnload() {
-    this.clearPoll()
-  },
-
-  clearPoll() {
-    if (this._pollTimer) {
-      clearTimeout(this._pollTimer)
-      this._pollTimer = null
-    }
-  },
-
-  schedulePoll(status) {
-    this.clearPoll()
-    if (status !== 'pending') return
-    this._pollTimer = setTimeout(() => this.loadDetail(), 2800)
   },
 
   async loadDetail() {
@@ -46,7 +23,6 @@ Page({
         item,
         priceText: util.formatPrice(item.price)
       })
-      this.schedulePoll(item.tagsStatus)
     } catch (e) {
       wx.showToast({ title: '衣物不存在', icon: 'none' })
     }

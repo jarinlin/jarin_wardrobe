@@ -45,11 +45,7 @@ function formatPrice(n) {
 
 function ensureLogin() {
   const auth = require('./auth')
-  if (!auth.isLoggedIn()) {
-    wx.navigateTo({ url: '/pages/login/login' })
-    return false
-  }
-  return true
+  return auth.requireLogin()
 }
 
 /**

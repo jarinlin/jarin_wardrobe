@@ -3,18 +3,18 @@
     "pages/index/index",
     "pages/wardrobe/wardrobe",
     "pages/outfit/outfit",
-    "pages/mine/mine",
+    "pages/diet/diet",
     "pages/login/login",
     "pages/clothing-edit/clothing-edit",
     "pages/clothing-detail/clothing-detail",
     "pages/category/category",
     "pages/outfit-edit/outfit-edit",
     "pages/outfit-detail/outfit-detail",
-    "pages/diet/diet",
     "pages/diet-edit/diet-edit",
     "pages/body-profile/body-profile",
     "pages/tags/tags",
-    "pages/settings/settings"
+    "pages/settings/settings",
+    "pages/mine/mine"
   ],
   "window": {
     "navigationBarBackgroundColor": "#FAF7F5",
@@ -37,21 +37,21 @@
       },
       {
         "pagePath": "pages/wardrobe/wardrobe",
-        "text": "我的衣柜",
+        "text": "衣柜",
         "iconPath": "src/assets/icons/wardrobe.png",
         "selectedIconPath": "src/assets/icons/wardrobe-active.png"
       },
       {
         "pagePath": "pages/outfit/outfit",
-        "text": "穿搭记录",
+        "text": "穿搭",
         "iconPath": "src/assets/icons/outfit.png",
         "selectedIconPath": "src/assets/icons/outfit-active.png"
       },
       {
-        "pagePath": "pages/mine/mine",
-        "text": "我的",
-        "iconPath": "src/assets/icons/mine.png",
-        "selectedIconPath": "src/assets/icons/mine-active.png"
+        "pagePath": "pages/diet/diet",
+        "text": "饮食",
+        "iconPath": "src/assets/icons/diet.png",
+        "selectedIconPath": "src/assets/icons/diet-active.png"
       }
     ]
   },
@@ -67,6 +67,7 @@
     "getFuzzyLocation"
   ],
   "__usePrivacyCheck__": true,
+  "cloud": true,
   "style": "v2",
   "sitemapLocation": "sitemap.json",
   "lazyCodeLoading": "requiredComponents"

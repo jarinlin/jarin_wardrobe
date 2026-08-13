@@ -19,14 +19,6 @@ const OCCASION_SEASON_KEYS = [
   '冬季'
 ]
 
-const STATUS_CHIPS = [
-  { id: '', label: '全部状态' },
-  { id: 'ready', label: '已打标' },
-  { id: 'pending', label: '打标中' },
-  { id: 'failed', label: '失败' },
-  { id: 'untagged', label: '未打标' }
-]
-
 function pickOccasionSeasonChips(fromClothes = []) {
   const wanted = new Set(OCCASION_SEASON_KEYS)
   return (fromClothes || [])
@@ -37,6 +29,5 @@ function pickOccasionSeasonChips(fromClothes = []) {
 
 module.exports = {
   OCCASION_SEASON_KEYS,
-  STATUS_CHIPS,
   pickOccasionSeasonChips
 }

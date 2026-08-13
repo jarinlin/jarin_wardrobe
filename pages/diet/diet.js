@@ -1,5 +1,7 @@
 const api = require('../../src/assets/js/api')
 const util = require('../../src/assets/js/util')
+const auth = require('../../src/assets/js/auth')
+const { buildDayCard } = require('../../src/assets/js/diet-metrics')
 
 function todayStr() {
   const d = new Date()
@@ -18,17 +20,22 @@ Page({
     bodyReady: false,
     metricsTip: '先完善身高体重，识别建议更准 →',
     mealHint: '',
-    week: {
-      totalCalories: 0,
-      daysWithLog: 0,
-      avgDaily: 0,
-      suggestWeek: 0,
+    day: {
+      suggestDay: 0,
+      todayKcal: 0,
+      remainText: '—',
+      remainLabel: '还可摄入',
+      remainOver: false,
       ratioPct: 0,
+      remainClass: '',
+      barClass: 'week-bar-fill',
+      sub: '对照建议看还能吃多少',
       tip: ''
     }
   },
 
   onShow() {
+    if (!auth.requireLogin()) return
     this.refresh()
   },
 
@@ -52,45 +59,7 @@ Page({
       })
     }
 
-    try {
-      const weekRaw = await api.fetchDietWeekSummary()
-      const suggestKcal = Number(metrics.suggestKcal) || 0
-      const total = Math.round(Number(weekRaw.totalCalories) || 0)
-      const suggestWeek = suggestKcal > 0 ? Math.round(suggestKcal * 7) : 0
-      let ratioPct = 0
-      if (suggestWeek > 0) {
-        ratioPct = Math.min(100, Math.round((total / suggestWeek) * 100))
-      }
-      let tip = '近 7 日饮食汇总'
-      if (suggestWeek > 0) {
-        if (total === 0) tip = '近 7 日暂无记录，建议日摄入约 ' + suggestKcal + ' kcal'
-        else if (ratioPct < 70) tip = '低于建议周摄入约 ' + (100 - ratioPct) + '%'
-        else if (ratioPct <= 110) tip = '接近建议周摄入（' + suggestWeek + ' kcal）'
-        else tip = '高于建议周摄入约 ' + (ratioPct - 100) + '%'
-      }
-      this.setData({
-        week: {
-          totalCalories: total,
-          daysWithLog: weekRaw.daysWithLog || 0,
-          avgDaily: Math.round(Number(weekRaw.avgDaily) || 0),
-          suggestWeek,
-          ratioPct,
-          tip
-        }
-      })
-    } catch (e) {
-      this.setData({
-        week: {
-          totalCalories: 0,
-          daysWithLog: 0,
-          avgDaily: 0,
-          suggestWeek: 0,
-          ratioPct: 0,
-          tip: ''
-        }
-      })
-    }
-
+    let todayKcal = 0
     try {
       const data = await api.fetchDietLogs({ date: this.data.date })
       const rawList = data.list || []
@@ -111,8 +80,19 @@ Page({
           displayKcal: Math.round(Number(item.calories) || 0)
         }
       })
+      const selectedKcal = Math.round(data.totalCalories || 0)
+      todayKcal = selectedKcal
+      const today = todayStr()
+      if (this.data.date !== today) {
+        try {
+          const todayData = await api.fetchDietLogs({ date: today })
+          todayKcal = Math.round(todayData.totalCalories || 0)
+        } catch (e) {
+          todayKcal = 0
+        }
+      }
       let mealHint = ''
-      if (this.data.date === todayStr()) {
+      if (this.data.date === today) {
         const meal = util.guessMealType()
         const labels = { breakfast: '早餐', lunch: '午餐', dinner: '晚餐' }
         if (labels[meal] && !list.some((x) => x.mealType === meal)) {
@@ -121,11 +101,17 @@ Page({
       }
       this.setData({
         list,
-        todayKcal: Math.round(data.totalCalories || 0),
-        mealHint
+        todayKcal,
+        mealHint,
+        day: buildDayCard(metrics, todayKcal)
       })
     } catch (e) {
-      this.setData({ list: [], todayKcal: 0, mealHint: '' })
+      this.setData({
+        list: [],
+        todayKcal: 0,
+        mealHint: '',
+        day: buildDayCard(metrics, 0)
+      })
     }
   },
 

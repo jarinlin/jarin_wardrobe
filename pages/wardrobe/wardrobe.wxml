@@ -28,20 +28,8 @@
         data-id="{{item.id}}"
         bindtap="onCategoryTap"
       >{{item.name}}</view>
-      <view class="cat-manage" bindtap="goCategory">管理</view>
-    </view>
-  </scroll-view>
-
-  <scroll-view class="cat-scroll status-scroll" scroll-x show-scrollbar="{{false}}">
-    <view class="cat-row">
-      <view
-        wx:for="{{statusChips}}"
-        wx:key="id"
-        class="cat-chip status-chip {{activeStatus === item.id ? 'on' : ''}}"
-        data-id="{{item.id}}"
-        bindtap="onStatusTap"
-      >{{item.label}}</view>
-      <view class="cat-manage" bindtap="goTags">打标中心</view>
+      <view class="cat-manage" bindtap="goCategory">分类</view>
+      <view class="cat-manage" bindtap="goTags">标签</view>
     </view>
   </scroll-view>
 
@@ -66,10 +54,6 @@
     <text class="tag-filter-clear" bindtap="clearTag">清除</text>
   </view>
 
-  <view class="retag-hint" wx:if="{{showRetagHint}}" bindtap="goTags">
-    当前筛选含待处理衣物，去打标中心批量重打 →
-  </view>
-
   <view class="grid" wx:if="{{list.length}}">
     <view
       class="card"
@@ -85,9 +69,6 @@
           <text class="ph-cat">{{item.categoryName || '衣物'}}</text>
           <text class="ph-name">{{item.name}}</text>
         </view>
-        <view class="status-badge" wx:if="{{item.showStatusBadge}}">
-          {{item.statusLabel}}
-        </view>
       </view>
       <view class="meta">
         <text class="name">{{item.name}}</text>
@@ -98,7 +79,7 @@
 
   <view class="empty" wx:else>
     <view class="empty-title">没有匹配的衣物</view>
-    <view class="muted">试试换分类、打标状态或场合标签</view>
+    <view class="muted">试试换分类或场合标签</view>
     <view class="btn-primary empty-btn" bindtap="goAdd">添加衣物</view>
   </view>
 </view>

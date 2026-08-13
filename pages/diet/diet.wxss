@@ -1,3 +1,7 @@
+.page.diet {
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+}
+
 .head {
   display: flex;
   align-items: flex-end;
@@ -65,6 +69,14 @@
   height: 100%;
   border-radius: 999rpx;
   background: linear-gradient(90deg, var(--coral), #f0a3b0);
+}
+
+.week-bar-fill.over {
+  background: linear-gradient(90deg, #c43d3d, var(--coral));
+}
+
+.m-num.over {
+  color: var(--coral-deep);
 }
 
 .week-tip {

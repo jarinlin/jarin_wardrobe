@@ -1,6 +1,7 @@
 const api = require('../../src/assets/js/api')
 const util = require('../../src/assets/js/util')
-const { STATUS_CHIPS, pickOccasionSeasonChips } = require('../../src/assets/js/wardrobe-filters')
+const auth = require('../../src/assets/js/auth')
+const { pickOccasionSeasonChips } = require('../../src/assets/js/wardrobe-filters')
 
 Page({
   data: {
@@ -8,24 +9,18 @@ Page({
     activeCategoryId: 0,
     keyword: '',
     activeTag: '',
-    activeStatus: '',
-    statusChips: STATUS_CHIPS,
     occasionChips: [],
-    list: [],
-    showRetagHint: false
+    list: []
   },
 
   onShow() {
+    if (!auth.requireLogin()) return
     const tag = wx.getStorageSync('wardrobe_filter_tag') || ''
-    const status = wx.getStorageSync('wardrobe_filter_status') || ''
     if (tag) {
       wx.removeStorageSync('wardrobe_filter_tag')
       this.setData({ activeTag: tag })
     }
-    if (status) {
-      wx.removeStorageSync('wardrobe_filter_status')
-      this.setData({ activeStatus: status })
-    }
+    wx.removeStorageSync('wardrobe_filter_status')
     this.bootstrap()
   },
 
@@ -48,27 +43,14 @@ Page({
   },
 
   async loadList() {
-    const { activeCategoryId, keyword, activeTag, activeStatus } = this.data
+    const { activeCategoryId, keyword, activeTag } = this.data
     const params = {}
     if (activeCategoryId) params.categoryId = activeCategoryId
     if (keyword) params.keyword = keyword
     if (activeTag) params.tag = activeTag
-    if (activeStatus) params.tagsStatus = activeStatus
     try {
-      const raw = await api.fetchClothes(params)
-      const list = (raw || []).map((item) => {
-        const status = item.tagsStatus || ''
-        let statusLabel = status
-        if (status === 'pending') statusLabel = '打标中'
-        else if (status === 'failed') statusLabel = '失败'
-        return {
-          ...item,
-          showStatusBadge: !!(status && status !== 'ready'),
-          statusLabel
-        }
-      })
-      const showRetagHint = activeStatus === 'failed' || activeStatus === 'untagged' || activeStatus === 'pending'
-      this.setData({ list, showRetagHint })
+      const list = await api.fetchClothes(params)
+      this.setData({ list: list || [] })
     } catch (e) {}
   },
 
@@ -81,11 +63,6 @@ Page({
     this.setData({ activeCategoryId: id }, () => this.loadList())
   },
 
-  onStatusTap(e) {
-    const id = e.currentTarget.dataset.id || ''
-    this.setData({ activeStatus: id }, () => this.loadList())
-  },
-
   onOccasionTap(e) {
     const tag = e.currentTarget.dataset.tag || ''
     const next = this.data.activeTag === tag ? '' : tag
@@ -94,11 +71,6 @@ Page({
 
   clearTag() {
     this.setData({ activeTag: '' }, () => this.loadList())
-  },
-
-  goTags() {
-    if (!util.ensureLogin()) return
-    wx.navigateTo({ url: '/pages/tags/tags' })
   },
 
   goAdd() {
@@ -114,5 +86,10 @@ Page({
   goCategory() {
     if (!util.ensureLogin()) return
     wx.navigateTo({ url: '/pages/category/category' })
+  },
+
+  goTags() {
+    if (!util.ensureLogin()) return
+    wx.navigateTo({ url: '/pages/tags/tags' })
   }
 })

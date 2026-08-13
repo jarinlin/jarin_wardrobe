@@ -27,8 +27,38 @@ git push -u origin main
    - `WX_APPID` / `WX_SECRET`（云托管也可依赖网关注入的 `x-wx-openid`）
    - `ALLOW_MOCK_LOGIN=false`（正式环境）
    - `COS_*` / `AI_*` / `AMAP_KEY`
+   - `REDIS_HOST` / `REDIS_PORT` / `REDIS_USER` / `REDIS_PASSWORD` / `REDIS_TLS`（Upstash 填 `"true"`）/ 可选 `REDIS_DB`
 5. 数据库：使用云托管 PostgreSQL 或自建；首次启动会 auto-migrate
-6. 小程序：`RUN_MODE='cloud'`，基础库 ≥ 2.23.0；云托管免备案域名
+6. 小程序：`src/assets/js/config.js` 设 `RUN_MODE='cloud'`，填写 `CLOUD_ENV` / `CLOUD_SERVICE`（本项目：`prod-d5grcb82q8a137e9c` / `warerobe-backend`）
+7. 基础库 ≥ 2.23.0；API 走 `wx.cloud.callContainer`，**无需**配置 request 合法域名（业务 API）
+8. 图片上传：cloud 模式先 `POST /api/upload/sign` 再直传 COS；需在公众平台配置：
+   - **request 合法域名**：`https://jarin-1318356458.cos.ap-guangzhou.myqcloud.com`
+   - **downloadFile / 图片**：同上 COS 域名（及 CDN 若使用）
+9. 开发者工具：重新编译 → 清缓存 → 真机预览/上传体验版；正式发布走「上传 → 提交审核」
+10. 图片：接口一律返回 **COS 预签名 GET**（库内只存 key）。不要配 `PUBLIC_BASE_URL`、不要用 `/api/media` 给小程序当图床。小程序需配置 COS downloadFile/图片域名。
+
+## Redis（今日穿搭建议缓存）
+- 用途：缓存 `GET /api/suggest/outfit` 的完整业务 data，按用户 + 上海日历日隔离
+- Key：`suggest:outfit:{userId}:{YYYY-MM-DD}`（Asia/Shanghai）
+- TTL：从现在到**次日 00:00 Asia/Shanghai** 的剩余秒数（不是固定 24h）
+- 未配置或连不上 Redis 时**降级为不缓存**，服务仍可出建议，不会 CrashLoop
+- Upstash 必须 `REDIS_TLS=true`（控制台 JSON 里值用字符串 `"true"`）
+- 云托管环境变量示例（值全部为字符串）：
+
+```json
+{
+  "REDIS_HOST": "nearby-possum-82824.upstash.io",
+  "REDIS_PORT": "6379",
+  "REDIS_USER": "default",
+  "REDIS_PASSWORD": "<写在控制台，勿提交仓库>",
+  "REDIS_TLS": "true",
+  "REDIS_DB": "0"
+}
+```
+
+- 首页默认读缓存，不重复调高德/AI；无缓存且无坐标时后端返回 `needLocation`，前端再定位后重试
+- 点「刷新」走 `refresh=1` 强制重算并覆盖缓存；无天气的旧缓存在带坐标时会重算
+- 排障请在云托管日志搜 `[suggest]` / `[amap]` / `[redis]`：可区分没传坐标、缓存无天气、Key 未配置、HTTP 失败、业务 infocode、解析失败、天气成功
 
 ## 健康检查
 - 路径：`GET /health`

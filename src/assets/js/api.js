@@ -412,7 +412,7 @@ function fetchWeather(lat, lng) {
   return request({ url: '/api/weather', data })
 }
 
-function suggestOutfit(lat, lng) {
+function suggestOutfit(lat, lng, opts) {
   if (USE_MOCK) {
     const clothes = mock.getClothes().slice(0, 4).map((c) => ({
       id: c.id,
@@ -433,12 +433,18 @@ function suggestOutfit(lat, lng) {
       weather: { city: '示例市', weather: '晴', temperature: '24', tempC: 24 }
     })
   }
-  const data = {}
-  if (lat != null && lng != null) {
-    data.lat = lat
-    data.lng = lng
+  const q = []
+  const latN = Number(lat)
+  const lngN = Number(lng)
+  if (Number.isFinite(latN) && Number.isFinite(lngN)) {
+    q.push('lat=' + encodeURIComponent(String(latN)))
+    q.push('lng=' + encodeURIComponent(String(lngN)))
   }
-  return request({ url: '/api/suggest/outfit', data })
+  if (opts && opts.refresh) q.push('refresh=1')
+  if (opts && opts.fallback) q.push('fallback=1')
+  const qs = q.length ? '?' + q.join('&') : ''
+  // callContainer 的 GET data 不一定进 query，坐标必须写在 path 上
+  return request({ url: '/api/suggest/outfit' + qs, method: 'GET' })
 }
 
 function fetchStats() {

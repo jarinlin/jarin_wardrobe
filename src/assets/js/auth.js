@@ -10,11 +10,25 @@ function setToken(token) {
 }
 
 function getUserInfo() {
-  return wx.getStorageSync(USER_KEY) || null
+  return sanitizeUser(wx.getStorageSync(USER_KEY) || null)
 }
 
 function setUserInfo(user) {
-  wx.setStorageSync(USER_KEY, user || null)
+  wx.setStorageSync(USER_KEY, sanitizeUser(user) || null)
+}
+
+/** 本机/临时头像不能给 <image> 当 src */
+function sanitizeUser(user) {
+  if (!user || typeof user !== 'object') return user
+  const url = String(user.avatarUrl || '')
+  if (
+    /127\.0\.0\.1|localhost|\[::1\]/i.test(url) ||
+    /^https?:\/\/tmp/i.test(url) ||
+    url.indexOf('wxfile://') === 0
+  ) {
+    return Object.assign({}, user, { avatarUrl: '' })
+  }
+  return user
 }
 
 function clear() {
@@ -24,6 +38,35 @@ function clear() {
 
 function isLoggedIn() {
   return !!getToken()
+}
+
+let loginRedirecting = false
+
+function isLoginPage() {
+  try {
+    const pages = getCurrentPages()
+    const cur = pages[pages.length - 1]
+    return !!(cur && cur.route === 'pages/login/login')
+  } catch (e) {
+    return false
+  }
+}
+
+/** 未登录则整页进入登录，不能返回空首页。已在登录页时不重复跳。 */
+function requireLogin() {
+  if (isLoggedIn()) {
+    loginRedirecting = false
+    return true
+  }
+  if (isLoginPage() || loginRedirecting) return false
+  loginRedirecting = true
+  wx.reLaunch({
+    url: '/pages/login/login',
+    complete() {
+      loginRedirecting = false
+    }
+  })
+  return false
 }
 
 /** 切到真实后端时，清掉以前 Mock 留下的假 token / openid */
@@ -48,5 +91,6 @@ module.exports = {
   setUserInfo,
   clear,
   isLoggedIn,
+  requireLogin,
   purgeStaleMockSession
 }

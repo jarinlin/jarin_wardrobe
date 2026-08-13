@@ -9,21 +9,45 @@
 
 const util = require('./util')
 
+/** 开发者工具模拟器常用拿不到 getFuzzyLocation，用广州坐标方便联调天气 */
+const DEVTOOLS_FALLBACK = { lat: 23.129163, lng: 113.264435 }
+
+function isDevtools() {
+  try {
+    const info = wx.getSystemInfoSync()
+    return info && info.platform === 'devtools'
+  } catch (e) {
+    return false
+  }
+}
+
 function getFuzzyLocation(opts) {
   const forceOpenSetting = !!(opts && opts.forceOpenSetting)
 
   return new Promise((resolve) => {
     const ok = (lat, lng) => {
-      if (typeof lat !== 'number' || typeof lng !== 'number') {
+      const latN = Number(lat)
+      const lngN = Number(lng)
+      if (!Number.isFinite(latN) || !Number.isFinite(lngN)) {
+        console.warn('[location] fuzzy 结果无效', lat, lng)
         resolve({ error: 'invalid', message: '定位结果无效' })
         return
       }
-      resolve({ lat, lng })
+      console.log('[location] fuzzy ok', latN, lngN)
+      try {
+        wx.setStorageSync('last_fuzzy_location', { lat: latN, lng: lngN, at: Date.now() })
+      } catch (e) {}
+      resolve({ lat: latN, lng: lngN })
     }
 
     const fail = (err, code, message) => {
       const msg = (err && (err.errMsg || err.message)) || message || '定位失败'
       console.warn('[location] fuzzy fail', code || 'fail', err)
+      if (isDevtools()) {
+        console.warn('[location] 模拟器定位不可用，使用广州坐标联调天气', DEVTOOLS_FALLBACK)
+        ok(DEVTOOLS_FALLBACK.lat, DEVTOOLS_FALLBACK.lng)
+        return
+      }
       resolve({ error: code || 'fail', message: msg })
     }
 
@@ -65,6 +89,10 @@ function getFuzzyLocation(opts) {
             return
           }
           if (authed === false) {
+            if (isDevtools()) {
+              fail(null, 'devtools', '模拟器未授权模糊位置')
+              return
+            }
             if (forceOpenSetting) {
               wx.showModal({
                 title: '需要位置权限',
@@ -117,10 +145,21 @@ function getFuzzyLocation(opts) {
 }
 
 function isLocationOk(loc) {
-  return !!(loc && typeof loc.lat === 'number' && typeof loc.lng === 'number')
+  return !!(loc && Number.isFinite(Number(loc.lat)) && Number.isFinite(Number(loc.lng)))
+}
+
+function lastFuzzyLocation() {
+  try {
+    const saved = wx.getStorageSync('last_fuzzy_location')
+    if (saved && Number.isFinite(Number(saved.lat)) && Number.isFinite(Number(saved.lng))) {
+      return { lat: Number(saved.lat), lng: Number(saved.lng) }
+    }
+  } catch (e) {}
+  return null
 }
 
 module.exports = {
   getFuzzyLocation,
-  isLocationOk
+  isLocationOk,
+  lastFuzzyLocation
 }

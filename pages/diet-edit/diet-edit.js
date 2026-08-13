@@ -2,6 +2,13 @@ const api = require('../../src/assets/js/api')
 const upload = require('../../src/assets/js/upload')
 const util = require('../../src/assets/js/util')
 
+function todayStr() {
+  const d = new Date()
+  const m = `${d.getMonth() + 1}`.padStart(2, '0')
+  const day = `${d.getDate()}`.padStart(2, '0')
+  return `${d.getFullYear()}-${m}-${day}`
+}
+
 function isEmpty(v) {
   return v === null || v === undefined || String(v).trim() === ''
 }
@@ -45,6 +52,7 @@ function calcTotalCalories(items) {
 Page({
   data: {
     id: null,
+    mealDate: '',
     analyzing: false,
     // 新建默认隐藏；有图或已有 advice 时再显示
     showAdvice: false,
@@ -65,9 +73,10 @@ Page({
 
   async onLoad(query) {
     const id = query.id || null
+    const mealDate = query.date || todayStr()
     // 新建：按时段预选餐次；编辑：以详情为准
     const mealType = util.guessMealType()
-    this.setData({ id, 'form.mealType': mealType })
+    this.setData({ id, mealDate, 'form.mealType': mealType })
     if (id) {
       wx.setNavigationBarTitle({ title: '编辑饮食' })
       await this.loadDetail(id)
@@ -114,6 +123,10 @@ Page({
 
   onMealType(e) {
     this.setData({ 'form.mealType': e.currentTarget.dataset.value })
+  },
+
+  onSkipPhoto() {
+    wx.pageScrollTo({ selector: '.form', duration: 280 })
   },
 
   onAdviceInput(e) {
@@ -214,20 +227,25 @@ Page({
         calories: it.calories === '' || it.calories == null ? 0 : Number(it.calories)
       }))
       .filter((it) => it.foodName || it.portion || it.calories)
-    if (!form.imageUrl && !items.length) {
-      wx.showToast({ title: '请拍照或添加一道菜', icon: 'none' })
+    if (!items.length || !items.some((it) => it.foodName)) {
+      wx.showToast({ title: '请至少填写一道菜名', icon: 'none' })
       return
     }
     const total = items.reduce((s, it) => s + (Number.isFinite(it.calories) ? it.calories : 0), 0)
     const payload = {
       mealType: form.mealType,
-      imageUrl: form.imageUrl,
+      imageUrl: form.imageUrl || '',
       items,
       foodName: items.map((it) => it.foodName).filter(Boolean).join('+'),
       portion: items.length ? `共${items.length}道` : '',
       calories: total,
-      advice: (form.advice || '').trim(),
-      mealAt: new Date().toISOString()
+      advice: (form.advice || '').trim()
+    }
+    if (!id) {
+      const mealDate = this.data.mealDate || todayStr()
+      payload.mealAt = mealDate === todayStr()
+        ? new Date().toISOString()
+        : mealDate + 'T12:00:00+08:00'
     }
     wx.showLoading({ title: '保存中' })
     try {
@@ -245,7 +263,7 @@ Page({
     const id = this.data.id
     wx.showModal({
       title: '删除记录',
-      content: '将同步删除云端图片',
+      content: this.data.form.imageUrl ? '将同步删除云端图片' : '删除后无法恢复',
       confirmColor: '#B54A3A',
       success: async (res) => {
         if (!res.confirm) return

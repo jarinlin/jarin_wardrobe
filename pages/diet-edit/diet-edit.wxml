@@ -3,12 +3,14 @@
     <image wx:if="{{form.imageUrl}}" class="cover-img" src="{{form.imageUrl}}" mode="aspectFill" />
     <view wx:else class="cover-empty">
       <text class="plus">＋</text>
-      <text>拍照 / 上传餐食</text>
-      <text class="cover-hint">上传后自动 AI 拆成多道菜</text>
+      <text>拍照识别（可选）</text>
+      <text class="cover-hint">忘拍照也可直接手填菜名和热量</text>
     </view>
     <!-- 识别中全覆盖并拦截点击，避免误触；未识别时不渲染 -->
     <view class="analyzing-mask" wx:if="{{analyzing}}" catchtap="noop">AI 识别中…</view>
   </view>
+
+  <view class="skip-photo" wx:if="{{!form.imageUrl}}" bindtap="onSkipPhoto">不拍照，直接手填菜品</view>
 
   <view class="meal-row">
     <view

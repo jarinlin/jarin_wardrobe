@@ -1,5 +1,6 @@
 const api = require('../../src/assets/js/api')
 const upload = require('../../src/assets/js/upload')
+const auth = require('../../src/assets/js/auth')
 const { USE_MOCK } = require('../../src/assets/js/config')
 
 function isPlaceholderNick(name) {
@@ -14,6 +15,12 @@ Page({
     loading: false,
     needProfile: false,
     defaultAvatar: '/src/assets/icons/mine-active.png'
+  },
+
+  onLoad() {
+    if (auth.isLoggedIn()) {
+      wx.switchTab({ url: '/pages/index/index' })
+    }
   },
 
   onChooseAvatar(e) {
@@ -61,7 +68,7 @@ Page({
 
           wx.showToast({ title: '登录成功', icon: 'success' })
           setTimeout(() => {
-            wx.navigateBack({ fail: () => wx.switchTab({ url: '/pages/mine/mine' }) })
+            wx.switchTab({ url: '/pages/index/index' })
           }, 400)
         } catch (e) {
           wx.showToast({ title: '登录失败', icon: 'none' })
@@ -93,8 +100,14 @@ Page({
     this.setData({ loading: true })
     try {
       let avatarUrl = formAvatar
-      if (formAvatar.indexOf('http') !== 0 && !USE_MOCK) {
+      const needUpload =
+        formAvatar.indexOf('wxfile://') === 0 ||
+        /^https?:\/\/tmp/i.test(formAvatar) ||
+        (formAvatar.indexOf('http') !== 0)
+      if (needUpload && !USE_MOCK) {
         avatarUrl = await upload.uploadImage(formAvatar)
+      } else if (/127\.0\.0\.1|localhost/i.test(formAvatar)) {
+        avatarUrl = ''
       }
       const user = await api.updateProfile({
         nickName: nick,
@@ -103,7 +116,7 @@ Page({
       getApp().setUserInfo({ ...user, profileReady: true })
       wx.showToast({ title: '登录成功', icon: 'success' })
       setTimeout(() => {
-        wx.navigateBack({ fail: () => wx.switchTab({ url: '/pages/mine/mine' }) })
+        wx.switchTab({ url: '/pages/index/index' })
       }, 400)
     } catch (e) {
       wx.showToast({ title: '保存失败', icon: 'none' })

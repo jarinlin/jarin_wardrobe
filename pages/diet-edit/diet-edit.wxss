@@ -59,6 +59,14 @@
   background: rgba(31, 29, 36, 0.55);
 }
 
+.skip-photo {
+  margin: -8rpx 0 20rpx;
+  text-align: center;
+  font-size: 24rpx;
+  font-weight: 500;
+  color: var(--coral-deep);
+}
+
 .meal-row {
   display: flex;
   gap: 12rpx;

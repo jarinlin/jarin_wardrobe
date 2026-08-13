@@ -42,6 +42,8 @@ App({
     const userInfo = auth.getUserInfo()
     if (token && userInfo) {
       this.globalData.userInfo = userInfo
+    } else {
+      auth.requireLogin()
     }
   },
 

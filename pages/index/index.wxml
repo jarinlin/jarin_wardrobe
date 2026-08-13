@@ -1,10 +1,15 @@
 <view class="page home">
   <view class="hero anim-rise">
     <view class="brand-row">
-      <text class="brand">Jarin</text>
-      <text class="brand-cn">衣柜</text>
+      <view class="brand-names">
+        <text class="brand">Jarin</text>
+        <text class="brand-cn">衣柜</text>
+      </view>
+      <view class="home-avatar-wrap" bindtap="onAvatarTap">
+        <image class="home-avatar" src="{{userInfo.avatarUrl || defaultAvatar}}" mode="aspectFill" />
+      </view>
     </view>
-    <text class="tagline">你好，{{userInfo.nickname || '访客'}} · 整理与记录今天的穿搭</text>
+    <text class="tagline">你好，{{userInfo.nickname || '访客'}} · 整理衣物，记录今天的穿搭和饮食</text>
 
     <view class="cta" bindtap="goWardrobe">
       <view class="cta-text">
@@ -23,6 +28,27 @@
       data-action="{{item.action}}"
       bindtap="onAlertTap"
     >{{item.text}}</view>
+  </view>
+
+  <view class="diet-strip surface anim-rise-delay" wx:if="{{loggedIn}}" bindtap="goDiet">
+    <view class="diet-head">
+      <text class="diet-title">今日热量</text>
+      <text class="diet-go">{{diet.sub || '去记录'}} →</text>
+    </view>
+    <view class="diet-nums">
+      <view class="m">
+        <text class="m-num">{{diet.suggestDay || '—'}}</text>
+        <text class="m-label">建议日摄入</text>
+      </view>
+      <view class="m">
+        <text class="m-num">{{diet.todayKcal}}</text>
+        <text class="m-label">今日摄入</text>
+      </view>
+      <view class="m">
+        <text class="m-num {{diet.remainClass}}">{{diet.remainText}}</text>
+        <text class="m-label">{{diet.remainLabel}}</text>
+      </view>
+    </view>
   </view>
 
   <view class="suggest anim-rise-delay" wx:if="{{loggedIn}}">

@@ -1,26 +1,5 @@
 <view class="page tags">
-  <view class="status-card surface" wx:if="{{tagging}}">
-    <view class="status-row">
-      <text class="status-title">打标进度</text>
-      <text class="status-action" bindtap="onRefreshTagging">刷新</text>
-    </view>
-    <view class="status-nums">
-      <text>就绪 {{tagging.ready || 0}}</text>
-      <text>进行中 {{tagging.pending || 0}}</text>
-      <text>失败 {{tagging.failed || 0}}</text>
-      <text>未打 {{tagging.untagged || 0}}</text>
-    </view>
-    <view class="status-ops" wx:if="{{showTagOps}}">
-      <view class="op-btn" bindtap="onRetagFailed" wx:if="{{tagging.failed}}">重打失败</view>
-      <view class="op-btn ghost" bindtap="onRetagUntagged" wx:if="{{tagging.untagged}}">补打未标</view>
-      <view class="op-btn ghost" bindtap="goWardrobeFailed" wx:if="{{tagging.failed}}">查看失败件</view>
-    </view>
-    <view class="failed-list" wx:if="{{tagging.items && tagging.items.length}}">
-      <text class="failed-item" wx:for="{{tagging.items}}" wx:key="id">{{item.name}} · {{item.tagsStatus}}</text>
-    </view>
-  </view>
-
-  <view class="hint">汇总衣物上已出现的 AI / 手动标签，点选可筛选衣柜</view>
+  <view class="hint">点选标签可筛选衣柜</view>
 
   <view class="search-box">
     <input
@@ -48,6 +27,6 @@
 
   <view class="empty" wx:else>
     <text class="empty-title">暂无标签</text>
-    <text class="muted">为衣物拍照保存后，AI 会异步打标；也可在衣物详情查看状态</text>
+    <text class="muted">给衣物拍照保存后，标签会自动出现在这里</text>
   </view>
 </view>

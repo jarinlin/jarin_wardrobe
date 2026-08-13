@@ -13,10 +13,17 @@ Page({
     birthLabel: '',
     startDate: '1920-01-01',
     endDate: util.formatDate(),
-    metrics: {}
+    metrics: {},
+    booted: false
+  },
+
+  onLoad() {
+    this.setData({ endDate: util.formatDate() })
+    this.load()
   },
 
   onShow() {
+    if (!this.data.booted) return
     this.setData({ endDate: util.formatDate() })
     this.load()
   },
@@ -37,9 +44,12 @@ Page({
           weightKg: body.weightKg ? String(body.weightKg) : ''
         },
         birthLabel: birthDate ? util.formatDisplayDate(birthDate) : '',
-        metrics: body.metrics || {}
+        metrics: body.metrics || {},
+        booted: true
       })
-    } catch (e) {}
+    } catch (e) {
+      this.setData({ booted: true })
+    }
   },
 
   onGender(e) {

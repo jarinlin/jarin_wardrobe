@@ -2,7 +2,7 @@ const api = require('../../src/assets/js/api')
 const upload = require('../../src/assets/js/upload')
 const auth = require('../../src/assets/js/auth')
 const util = require('../../src/assets/js/util')
-const { RUN_MODE, BASE_URL, USE_MOCK, USE_CLOUD } = require('../../src/assets/js/config')
+const { USE_MOCK } = require('../../src/assets/js/config')
 
 function isPlaceholderNick(name) {
   const n = (name || '').trim()
@@ -11,9 +11,6 @@ function isPlaceholderNick(name) {
 
 Page({
   data: {
-    runMode: RUN_MODE,
-    baseUrl: BASE_URL,
-    modeLabel: '',
     about: 'Jarin衣柜 · 整理衣物、记录穿搭、饮食与身体档案',
     exporting: false,
     nickname: '',
@@ -24,15 +21,10 @@ Page({
   },
 
   onShow() {
-    let modeLabel = '本地后端'
-    if (USE_MOCK) modeLabel = 'Mock 假数据'
-    else if (USE_CLOUD) modeLabel = '微信云托管'
+    if (!auth.requireLogin()) return
     const user = auth.getUserInfo() || {}
     const loggedIn = !!auth.getToken()
     this.setData({
-      modeLabel,
-      runMode: RUN_MODE,
-      baseUrl: BASE_URL,
       loggedIn,
       nickname: user.nickname || '',
       avatarUrl: user.avatarUrl || ''
@@ -67,8 +59,14 @@ Page({
     wx.showLoading({ title: '保存中', mask: true })
     try {
       let avatarUrl = formAvatar
-      if (formAvatar.indexOf('http') !== 0 && !USE_MOCK) {
+      const needUpload =
+        formAvatar.indexOf('wxfile://') === 0 ||
+        /^https?:\/\/tmp/i.test(formAvatar) ||
+        (formAvatar.indexOf('http') !== 0)
+      if (needUpload && !USE_MOCK) {
         avatarUrl = await upload.uploadImage(formAvatar)
+      } else if (/127\.0\.0\.1|localhost/i.test(formAvatar)) {
+        avatarUrl = ''
       }
       const user = await api.updateProfile({
         nickName: nick,
@@ -137,9 +135,21 @@ Page({
 
   onAbout() {
     wx.showModal({
-      title: '关于',
-      content: this.data.about + '\n运行模式：' + this.data.modeLabel,
+      title: '关于 Jarin衣柜',
+      content: this.data.about,
       showCancel: false
+    })
+  },
+
+  onLogout() {
+    wx.showModal({
+      title: '退出登录',
+      content: '确定退出当前账号？',
+      success: (res) => {
+        if (!res.confirm) return
+        getApp().clearSession()
+        wx.reLaunch({ url: '/pages/login/login' })
+      }
     })
   }
 })

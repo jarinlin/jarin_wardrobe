@@ -2,6 +2,7 @@ const api = require('../../src/assets/js/api')
 const auth = require('../../src/assets/js/auth')
 const util = require('../../src/assets/js/util')
 const location = require('../../src/assets/js/location')
+const { buildDayCard } = require('../../src/assets/js/diet-metrics')
 
 Page({
   data: {
@@ -19,10 +20,19 @@ Page({
     locationHint: '',
     suggestEngine: '',
     suggestActionLabel: '刷新',
-    alerts: []
+    alerts: [],
+    diet: {
+      suggestDay: 0,
+      todayKcal: 0,
+      remainText: '—',
+      remainLabel: '还可摄入',
+      remainClass: '',
+      sub: '去记录'
+    }
   },
 
   onShow() {
+    if (!auth.requireLogin()) return
     this.refresh()
   },
 
@@ -53,42 +63,27 @@ Page({
 
     if (auth.isLoggedIn()) {
       this.loadSuggest()
-      this.loadAlerts()
+      this.loadDietAndAlerts()
     } else {
-      this.setData({ alerts: [] })
+      this.setData({ alerts: [], diet: { suggestDay: 0, todayKcal: 0, remainText: '—', remainLabel: '还可摄入', remainClass: '', sub: '去记录' } })
     }
   },
 
-  async loadAlerts() {
+  async loadDietAndAlerts() {
     const alerts = []
+    let metrics = {}
+    let todayKcal = 0
     try {
-      const tagging = await api.fetchTaggingStatus()
-      if (tagging && tagging.failed > 0) {
-        alerts.push({
-          id: 'tag-failed',
-          text: `${tagging.failed} 件衣物打标失败，可去标签管理重试`,
-          action: 'tags'
-        })
-      } else if (tagging && tagging.pending > 0) {
-        alerts.push({
-          id: 'tag-pending',
-          text: `${tagging.pending} 件衣物正在打标中`,
-          action: 'tags'
-        })
-      } else if (tagging && tagging.untagged > 0) {
-        alerts.push({
-          id: 'tag-empty',
-          text: `${tagging.untagged} 件有图衣物尚未打标`,
-          action: 'tags'
-        })
-      }
+      const body = await api.fetchBodyProfile()
+      metrics = (body && body.metrics) || {}
     } catch (e) {}
     try {
       const meal = util.guessMealType()
+      const today = util.formatDate()
+      const data = await api.fetchDietLogs({ date: today })
+      const list = (data && data.list) || []
+      todayKcal = Math.round(Number(data && data.totalCalories) || 0)
       if (meal !== 'other') {
-        const today = util.formatDate()
-        const data = await api.fetchDietLogs({ date: today })
-        const list = (data && data.list) || []
         const hasMeal = list.some((x) => x.mealType === meal)
         if (!hasMeal) {
           const label = { breakfast: '早餐', lunch: '午餐', dinner: '晚餐' }[meal] || '这一餐'
@@ -100,20 +95,27 @@ Page({
         }
       }
     } catch (e) {}
-    this.setData({ alerts })
+    this.setData({ alerts, diet: buildDayCard(metrics, todayKcal) })
   },
 
   onAlertTap(e) {
     const action = e.currentTarget.dataset.action
-    if (action === 'tags') {
-      if (!util.ensureLogin()) return
-      wx.navigateTo({ url: '/pages/tags/tags' })
+    if (action === 'diet') {
+      this.goDiet()
+    }
+  },
+
+  goDiet() {
+    if (!util.ensureLogin()) return
+    wx.switchTab({ url: '/pages/diet/diet' })
+  },
+
+  onAvatarTap() {
+    if (!auth.isLoggedIn()) {
+      wx.navigateTo({ url: '/pages/login/login' })
       return
     }
-    if (action === 'diet') {
-      if (!util.ensureLogin()) return
-      wx.navigateTo({ url: '/pages/diet/diet' })
-    }
+    wx.navigateTo({ url: '/pages/settings/settings' })
   },
 
   onRefreshSuggest() {
@@ -125,26 +127,80 @@ Page({
     if (!auth.isLoggedIn() || this.data.suggestLoading) return
     this.setData({ suggestLoading: true, locationHint: '', suggestActionLabel: '获取中…' })
     try {
-      const loc = await location.getFuzzyLocation({ forceOpenSetting: interactive })
+      let data
       let locationHint = ''
       let lat
       let lng
-      if (location.isLocationOk(loc)) {
-        lat = loc.lat
-        lng = loc.lng
+
+      if (interactive) {
+        console.log('[suggest] 强制刷新，先取定位再 refresh=1')
+        const loc = await location.getFuzzyLocation({ forceOpenSetting: true })
+        if (location.isLocationOk(loc)) {
+          lat = Number(loc.lat)
+          lng = Number(loc.lng)
+        } else {
+          const last = location.lastFuzzyLocation()
+          if (last) {
+            lat = last.lat
+            lng = last.lng
+            console.warn('[suggest] 本次定位失败，使用上次坐标', last)
+          } else {
+            locationHint = (loc && loc.message) || '未能获取定位'
+            console.warn('[suggest] 刷新未拿到坐标，中止 refresh=1', loc)
+            if (loc && loc.error === 'denied') {
+              wx.showToast({ title: '未获得位置授权', icon: 'none' })
+            } else {
+              wx.showToast({ title: locationHint, icon: 'none' })
+            }
+            this.setData({
+              locationHint,
+              suggestLoading: false,
+              suggestActionLabel: this.data.suggestEngine === 'ai' ? 'AI · 刷新' : '刷新',
+              'suggest.weatherNote': this.data.suggest.weatherNote || '未能获取本地天气，已按当季常识推荐'
+            })
+            return
+          }
+        }
+        console.log('[suggest] 刷新带坐标', lat, lng)
+        data = await api.suggestOutfit(lat, lng, { refresh: true })
       } else {
-        locationHint = (loc && loc.message) || '未能获取定位'
-        if (interactive && loc && loc.error === 'denied') {
-          // forceOpenSetting 已处理弹窗；这里再 toast 一次结果
-          wx.showToast({ title: '未获得位置授权', icon: 'none' })
-        } else if (interactive) {
-          wx.showToast({ title: locationHint, icon: 'none' })
+        console.log('[suggest] 缓存优先：先不传 lat/lng')
+        data = await api.suggestOutfit()
+        if (data && data.needLocation) {
+          console.log('[suggest] 后端 needLocation，开始 getFuzzyLocation')
+          const loc = await location.getFuzzyLocation({ forceOpenSetting: false })
+          if (location.isLocationOk(loc)) {
+            lat = Number(loc.lat)
+            lng = Number(loc.lng)
+            console.log('[suggest] 定位成功，带坐标重试', lat, lng)
+            data = await api.suggestOutfit(lat, lng)
+          } else {
+            const last = location.lastFuzzyLocation()
+            if (last) {
+              lat = last.lat
+              lng = last.lng
+              console.warn('[suggest] 定位失败，使用上次坐标重试', last)
+              data = await api.suggestOutfit(lat, lng)
+            } else {
+              locationHint = (loc && loc.message) || '未能获取定位'
+              console.warn('[suggest] 定位失败，fallback 无天气建议', loc)
+              data = await api.suggestOutfit(null, null, { fallback: true })
+            }
+          }
+        } else {
+          console.log('[suggest] 命中缓存或直接返回', {
+            cached: !!(data && data.cached),
+            hasWeather: !!(data && data.weather),
+            engine: data && data.engine
+          })
         }
       }
 
-      const data = await api.suggestOutfit(lat, lng)
       const weatherNote = (data && data.weatherNote) || ''
       const suggestEngine = (data && data.engine) || ''
+      if (!locationHint && !(data && data.weather)) {
+        locationHint = '点击刷新并开启定位以获取当地天气'
+      }
       this.setData({
         suggest: {
           items: (data && data.items) || [],
@@ -159,13 +215,13 @@ Page({
         suggestLoading: false,
         suggestActionLabel: suggestEngine === 'ai' ? 'AI · 刷新' : '刷新'
       })
-      // 天气 tips 也可作为提醒
       if (data && data.tips && data.weather) {
         const alerts = (this.data.alerts || []).filter((a) => a.id !== 'weather-tip')
         alerts.unshift({ id: 'weather-tip', text: data.tips, action: '' })
         this.setData({ alerts: alerts.slice(0, 4) })
       }
     } catch (e) {
+      console.warn('[suggest] 请求失败', e)
       if (interactive) {
         wx.showToast({ title: '刷新失败', icon: 'none' })
       }

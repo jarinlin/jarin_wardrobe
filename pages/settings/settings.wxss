@@ -157,3 +157,7 @@
   color: var(--muted);
   font-size: 28rpx;
 }
+
+.logout {
+  margin-top: 32rpx;
+}

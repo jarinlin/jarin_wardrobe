@@ -27,7 +27,7 @@ wardrobe/                         ← 微信开发者工具打开这里
 - [x] 腾讯云 COS 图片上传（`POST /api/upload` + 小程序 `upload.js`）
 - [x] COS 密钥已配置，上传可用
 - [x] 启动自动 migrate（身体档案/饮食/tags_status）
-- [x] 衣物异步 AI 打标接线（保存有图自动打标 + 详情展示）
+- [x] 衣物异步 AI 打标接线（保存有图自动打标，前台不展示进度）
 - [x] 模糊定位 + 高德天气代理（`GET /api/weather`，失败可降级）
 - [x] AI/规则穿搭建议（`GET /api/suggest/outfit`，首页「今日建议」）
 - [x] 标签管理页（聚合衣物 tags，筛选跳转衣柜）
@@ -35,12 +35,14 @@ wardrobe/                         ← 微信开发者工具打开这里
 - [x] 微信登录：支持 `WX_APPID`/`WX_SECRET`；本地可 `ALLOW_MOCK_LOGIN=true`
 - [x] 云托管部署骨架文档（`docs/deploy/weixin-cloud.md`，未真部署）
 - [x] AI 增强穿搭建议（规则初筛 + 模型重排润色，失败回退）
-- [x] 打标进度中心（标签页汇总 / 批量重打）
+- [x] 标签管理页（聚合衣物 tags，筛选跳转衣柜）
 - [x] 衣柜数据导出（设置页复制 JSON）
-- [x] 首页/饮食智能提醒（打标状态、当前餐次未记）
-- [x] 饮食近 7 日汇总（`GET /api/diet/week` + 对比建议摄入）
-- [x] 衣柜多维筛选（tags_status + 场合/季节 chip + 打标中心入口）
+- [x] 首页/饮食智能提醒（当前餐次未记）
+- [x] 饮食今日热量（建议日摄入 / 今日摄入 / 还可摄入）
+- [x] 衣柜多维筛选（场合/季节 chip）
 - [x] 穿搭详情分享（onShareAppMessage + 复制文案）
+- [x] Redis 缓存今日穿搭建议（Upstash TLS；失败降级）
+- [x] 底栏改为 首页/衣柜/穿搭/饮食；「我的」弱化为首页头像进设置
 - [ ] 微信云托管真实上线
 
 ## 本地运行
@@ -93,6 +95,13 @@ wardrobe/                         ← 微信开发者工具打开这里
 | 2026-08-12 | 主仓推送 GitHub `851422a`；后端 Gitee 已是 `1a20dc9`（tcp4） |
 | 2026-08-12 | 云托管仍失败：`tcp4` + 无 A 记录；须改 Supabase Session Pooler（非代码能修） |
 | 2026-08-12 | Pooler 实测：`aws-1-ap-northeast-2.pooler.supabase.com` + `DB_USER=postgres.<ref>` 可通；`aws-0` 会 ENOTFOUND |
+| 2026-08-12 | 小程序切 `RUN_MODE=cloud`；上传改 COS 预签名直传；后端新增 `POST /api/upload/sign` |
+| 2026-08-12 | 隐私指引用途文案：位置/选图/剪切板（复制分享与导出）；无客户端第三方 SDK |
+| 2026-08-12 | 云托管图片不显示：列表曾返回 `127.0.0.1/api/media`；无公网基址时改回退 COS/CDN 直链 |
+| 2026-08-13 | 私有桶未签名直链 403：无公网基址时改为 COS 预签名 GET（衣物/穿搭/饮食/头像/上传） |
+| 2026-08-13 | 头像仍返回 127.0.0.1：库内旧代理链不再当外链透传；本机/tmp 地址不入库；前端过滤缓存 |
+| 2026-08-13 | 文件地址策略统一：前端只拿 COS 预签名 GET；去掉 PUBLIC_BASE_URL / `/api/media` 分支 |
+| 2026-08-13 | 打标对用户不可见：去掉打标中/已打标筛选、进度卡片、首页提醒、详情状态与重打按钮；后台仍静默打标 |
 | 2026-08-12 | 身体档案改为选择出生日期并自动计算年龄；库表增加 birth_date |
 | 2026-08-12 | 新建饮食记录按时段预选餐次：7–9 早餐 / 11–13 午餐 / 18–21 晚餐 / 其余其他 |
 | 2026-08-12 | 产品能力加强：AI 穿搭精炼、打标中心、导出备份、智能提醒；设计见 docs/superpowers/specs/2026-08-12-product-capability-boost-design.md |
@@ -102,12 +111,21 @@ wardrobe/                         ← 微信开发者工具打开这里
 | 2026-08-12 | **修复 WXML 编译错误**：`tags` 去掉 `{{... > 0}}`；`diet` 复杂拼接改 `metricsTip`；`outfit-detail` 去掉 `|| []` 并 `wx:for-item`；`wardrobe`/`index` 嵌套三元改 JS 字段 |
 | 2026-08-12 | **修复饮食编辑选图无反应**：根因是 `onChooseImage` 空 `catch` + `util.chooseImage` 失败无提示；现失败明确 toast（隐私/权限/取消区分）、`scope.camera` 说明、识别遮罩全覆盖拦截误触；`requiredPrivateInfos` 无需 `chooseMedia`（仅地理位置类） |
 | 2026-08-12 | **隐私指引审核通过后仍失败排查**：代码侧选图前主动 `requirePrivacyAuthorize`；errno 112/103/104 与 cancel 区分（隐私拒绝不再静默）；饮食页 `onLoad` 预拉隐私；定位未声明位置时提示更明确。最大概率仍是公众平台「选中的照片或视频 / 位置信息」未勾选或指引未**发布生效**（审核通过 ≠ 已对用户生效） |
+| 2026-08-13 | **Redis 缓存今日建议** + 天气链路日志：key=`suggest:outfit:{uid}:{上海日期}`，TTL 到次日 0 点；首页先读缓存，无缓存再定位；`refresh=1` 强制重算。日志前缀 `[suggest]`/`[amap]`/`[redis]` 可区分没传坐标 / 缓存无天气 / Key 未配 / HTTP / infocode / 解析失败 / 成功。`.env` 与云托管需配 `REDIS_*`（example 仅占位）。手动 SQL：无 |
+| 2026-08-13 | 天气一直失败：云托管 GET 日志只有 `refresh=1` 无 lat/lng；坐标改写 URL query；无定位不再空刷；记住上次模糊坐标 |
+| 2026-08-13 | 模拟器 getFuzzyLocation 常失败：devtools 降级广州坐标联调；真机仍走真实定位 |
+| 2026-08-13 | 身体档案进入闪一下错样式：性别/表单布局提到全局 css；数据回来再渲染，避免默认态和指标卡跳动 |
+| 2026-08-13 | 设置页去掉运行信息（mock/local/云托管）；关于只保留产品介绍 |
+| 2026-08-13 | 饮食「近日」对比改为日均 vs 建议日摄入，不再用建议周摄入 |
+| 2026-08-13 | 饮食中间卡改为今日热量：建议日摄入 / 今日摄入 / 还可摄入；记一餐可不拍照，手填菜名热量即可保存 |
+| 2026-08-13 | 四 Tab 落地：底栏 首页/衣柜/穿搭/饮食（第一项仍叫首页）；饮食升为 Tab；设置从首页头像进入；衣柜加分类/标签入口 |
+| 2026-08-13 | 未登录进入任意 Tab / 启动小程序会直接进登录页，不必再点右上角头像；退出后同样回到登录 |
 
 ## 配置要点（天气 / 隐私）
 1. 高德控制台创建 **Web 服务** Key → 写入 `backend/.env` 的 `AMAP_KEY=` 或 `AMAP_WEB_KEY=`（勿提交仓库）
 2. 小程序 `wx.getFuzzyLocation` 接口权限**已审核通过**；`app.json` 已声明 `requiredPrivateInfos` + `scope.userFuzzyLocation`
 3. 调用封装：`src/assets/js/location.js`（`type: gcj02`，对齐高德；失败降级不阻断）
-4. 用户手动 `go run` 重启后端后生效（启动日志应见 `[amap] 高德天气已启用`）
+4. 用户手动 `go run` 重启后端后生效（启动日志应见 `[amap] 高德天气已启用`；Redis 见 `[redis] 已连接`）
 5. 文档：https://developers.weixin.qq.com/miniprogram/dev/api/location/wx.getFuzzyLocation.html
 6. 若报 `api scope is not declared in the privacy agreement`：需在公众平台「用户隐私保护指引」中声明对应类型并**发布生效**（接口开通 / 审核通过 ≠ 已对用户生效）
 7. 饮食选图需勾选并发布：**选中的照片或视频**（建议同时勾选摄像头相关说明）；天气需勾选：**位置信息**（模糊地理位置）

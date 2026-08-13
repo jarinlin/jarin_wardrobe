@@ -56,17 +56,6 @@ Page({
     wx.navigateTo({ url: `/pages/clothing-edit/clothing-edit?id=${this.data.id}` })
   },
 
-  async onRetag() {
-    try {
-      await api.retagClothing(this.data.id)
-      wx.showToast({ title: '已开始打标', icon: 'none' })
-      this.setData({ 'item.tagsStatus': 'pending' })
-      this.schedulePoll('pending')
-    } catch (e) {
-      wx.showToast({ title: e.message || '打标失败', icon: 'none' })
-    }
-  },
-
   onDelete() {
     wx.showModal({
       title: '删除衣物',

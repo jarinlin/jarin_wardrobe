@@ -8,9 +8,32 @@
 
 .brand-row {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-bottom: 14rpx;
+}
+
+.brand-names {
+  display: flex;
   align-items: baseline;
   gap: 12rpx;
-  margin-bottom: 14rpx;
+  min-width: 0;
+}
+
+.home-avatar-wrap {
+  flex-shrink: 0;
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--accent-soft);
+}
+
+.home-avatar {
+  width: 72rpx;
+  height: 72rpx;
+  display: block;
 }
 
 .brand {
@@ -336,4 +359,58 @@
   border-radius: 14rpx;
   font-size: 22rpx;
   font-weight: 500;
+}
+
+.diet-strip {
+  padding: 24rpx 28rpx;
+  margin-bottom: 18rpx;
+  border-radius: 28rpx;
+}
+
+.diet-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16rpx;
+  margin-bottom: 16rpx;
+}
+
+.diet-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.diet-go {
+  font-size: 22rpx;
+  color: var(--coral-deep);
+}
+
+.diet-nums {
+  display: flex;
+  gap: 12rpx;
+}
+
+.diet-nums .m {
+  flex: 1;
+  text-align: center;
+}
+
+.diet-nums .m-num {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 34rpx;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.diet-nums .m-num.over {
+  color: var(--coral-deep);
+}
+
+.diet-nums .m-label {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 20rpx;
+  color: var(--muted);
 }

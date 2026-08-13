@@ -1,8 +1,10 @@
-const { BASE_URL, USE_MOCK } = require('./config')
+const { BASE_URL, USE_MOCK, USE_CLOUD } = require('./config')
 const auth = require('./auth')
+const api = require('./api')
 
 /**
  * 上传本地临时图片到后端，再由服务端写入腾讯云 COS
+ * cloud 模式：callContainer 拿预签名 → 小程序直传 COS（避开 100KB 限制）
  * @returns {Promise<string>} 可访问的图片 URL
  */
 function uploadImage(filePath) {
@@ -12,6 +14,10 @@ function uploadImage(filePath) {
   const token = auth.getToken()
   if (!token) {
     return Promise.reject(new Error('请先登录'))
+  }
+
+  if (USE_CLOUD) {
+    return uploadImageViaCloud(filePath)
   }
 
   return new Promise((resolve, reject) => {
@@ -53,6 +59,67 @@ function uploadImage(filePath) {
       }
     })
   })
+}
+
+function guessContentType(filePath) {
+  const lower = String(filePath || '').toLowerCase()
+  if (lower.endsWith('.png')) return 'image/png'
+  if (lower.endsWith('.webp')) return 'image/webp'
+  if (lower.endsWith('.gif')) return 'image/gif'
+  return 'image/jpeg'
+}
+
+function uploadImageViaCloud(filePath) {
+  const contentType = guessContentType(filePath)
+  const filename = contentType === 'image/png' ? 'image.png' : 'image.jpg'
+  return api
+    .request({
+      url: '/api/upload/sign',
+      method: 'POST',
+      data: { filename, contentType }
+    })
+    .then((sign) => {
+      if (!sign || !sign.putUrl || !sign.url) {
+        return Promise.reject(new Error('上传签名无效'))
+      }
+      return new Promise((resolve, reject) => {
+        wx.getFileSystemManager().readFile({
+          filePath,
+          success(fileRes) {
+            wx.request({
+              url: sign.putUrl,
+              method: 'PUT',
+              data: fileRes.data,
+              header: {
+                'Content-Type': sign.contentType || contentType
+              },
+              success(putRes) {
+                if (putRes.statusCode >= 200 && putRes.statusCode < 300) {
+                  resolve(sign.url)
+                  return
+                }
+                console.error('[upload.cos]', putRes.statusCode, putRes.data)
+                wx.showToast({ title: '直传 COS 失败', icon: 'none' })
+                reject(putRes)
+              },
+              fail(err) {
+                console.error('[upload.cos]', err)
+                wx.showToast({
+                  title: '请配置 COS 合法域名',
+                  icon: 'none'
+                })
+                reject(err)
+              }
+            })
+          },
+          fail(err) {
+            console.error('[upload.read]', err)
+            wx.showToast({ title: '读取图片失败', icon: 'none' })
+            reject(err)
+          }
+        })
+      })
+    })
 }
 
 /** 选图并压缩后上传，返回 COS URL；选图/上传失败会 toast 并 reject */

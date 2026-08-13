@@ -11,7 +11,7 @@ function isPlaceholderNick(name) {
 
 Page({
   data: {
-    about: 'Jarin衣柜 · 整理衣物、记录穿搭、饮食与身体档案',
+    about: '今天穿什么、吃什么，打开就能记。衣柜不再是黑洞，天气会帮你搭配，拍张餐也能估热量，好看的还可以丢上广场。',
     exporting: false,
     nickname: '',
     avatarUrl: '',

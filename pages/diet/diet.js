@@ -1,7 +1,7 @@
 const api = require('../../src/assets/js/api')
 const util = require('../../src/assets/js/util')
 const auth = require('../../src/assets/js/auth')
-const { buildDayCard, isBodyReady, promptBodyProfile, mealPlaceholderUrl, scheduleAdviceRetry } = require('../../src/assets/js/diet-metrics')
+const { buildDayCard, isBodyReady, promptBodyProfile, mealPlaceholderUrl, scheduleAdviceRetry, buildWeekLine } = require('../../src/assets/js/diet-metrics')
 
 function todayStr() {
   const d = new Date()
@@ -34,7 +34,8 @@ Page({
       sub: '对照建议看还能吃多少',
       tip: '',
       aiAdvice: ''
-    }
+    },
+    weekLine: ''
   },
 
   onShow() {
@@ -71,10 +72,17 @@ Page({
         list: [],
         todayKcal: 0,
         mealHint: '',
-        day: buildDayCard(metrics, 0, '')
+        day: buildDayCard(metrics, 0, ''),
+        weekLine: ''
       })
       return
     }
+
+    let weekLine = ''
+    try {
+      const week = await api.fetchDietWeekSummary()
+      weekLine = buildWeekLine(week)
+    } catch (e) {}
 
     let todayKcal = 0
     try {
@@ -127,7 +135,8 @@ Page({
         list,
         todayKcal,
         mealHint,
-        day: buildDayCard(metrics, todayKcal, aiAdvice)
+        day: buildDayCard(metrics, todayKcal, aiAdvice),
+        weekLine
       })
       scheduleAdviceRetry(this, hasTodayLogs, aiAdvice)
     } catch (e) {
@@ -135,7 +144,8 @@ Page({
         list: [],
         todayKcal: 0,
         mealHint: '',
-        day: buildDayCard(metrics, 0, '')
+        day: buildDayCard(metrics, 0, ''),
+        weekLine
       })
     }
   },

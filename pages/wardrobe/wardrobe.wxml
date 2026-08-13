@@ -28,6 +28,10 @@
         data-id="{{item.id}}"
         bindtap="onCategoryTap"
       >{{item.name}}</view>
+      <view
+        class="cat-chip {{idleOn ? 'on' : ''}}"
+        bindtap="onIdleTap"
+      >很久没穿</view>
       <view class="cat-manage" bindtap="goCategory">分类</view>
       <view class="cat-manage" bindtap="goTags">标签</view>
     </view>
@@ -79,7 +83,7 @@
 
   <view class="empty" wx:else>
     <view class="empty-title">没有匹配的衣物</view>
-    <view class="muted">试试换分类或场合标签</view>
+    <view class="muted">试试换分类，或看看「很久没穿」</view>
     <view class="btn-primary empty-btn" bindtap="goAdd">添加衣物</view>
   </view>
 </view>

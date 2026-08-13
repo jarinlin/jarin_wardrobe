@@ -57,6 +57,7 @@
       <text class="week-tip" wx:if="{{day.tip}}">{{day.tip}}</text>
       <text class="diet-ai" wx:if="{{day.aiAdvice}}">建议：{{day.aiAdvice}}<text class="diet-ai-tag">AI</text></text>
     </view>
+    <text class="week-7" wx:if="{{weekLine}}">{{weekLine}}</text>
 
     <view class="date-row">
       <text class="date-label">{{dateLabel}}</text>

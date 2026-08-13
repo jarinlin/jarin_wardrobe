@@ -93,10 +93,21 @@ function scheduleAdviceRetry(page, hasTodayLogs, aiAdvice) {
   }, 1400)
 }
 
+function buildWeekLine(week) {
+  if (!week || !Number(week.daysWithLog)) return ''
+  const avg = Math.round(Number(week.avgDaily) || 0)
+  const days = Number(week.daysWithLog) || 0
+  const over = Number(week.overDays) || 0
+  let s = '近7天均 ' + avg + ' 大卡 · 记了 ' + days + ' 天'
+  if (Number(week.suggestKcal) > 0) s += ' · 超标 ' + over + ' 天'
+  return s
+}
+
 module.exports = {
   buildDayCard,
   isBodyReady,
   promptBodyProfile,
   mealPlaceholderUrl,
-  scheduleAdviceRetry
+  scheduleAdviceRetry,
+  buildWeekLine
 }

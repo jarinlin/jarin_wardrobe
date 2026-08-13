@@ -183,6 +183,9 @@ function fetchClothes(params = {}) {
         list = list.filter((c) => c.tagsStatus === ts)
       }
     }
+    if (params.idleDays) {
+      return Promise.resolve(list)
+    }
     return Promise.resolve(list)
   }
   return request({ url: '/api/clothes', data: params })
@@ -678,6 +681,9 @@ function suggestOutfit(lat, lng, opts) {
   }
   if (opts && opts.refresh) q.push('refresh=1')
   if (opts && opts.fallback) q.push('fallback=1')
+  if (opts && opts.exclude && opts.exclude.length) {
+    q.push('exclude=' + encodeURIComponent(opts.exclude.filter(Boolean).join(',')))
+  }
   const qs = q.length ? '?' + q.join('&') : ''
   // callContainer 的 GET data 不一定进 query，坐标必须写在 path 上
   return request({ url: '/api/suggest/outfit' + qs, method: 'GET' })
@@ -793,7 +799,9 @@ function fetchDietWeekSummary() {
       days: 7,
       daysWithLog: 0,
       totalCalories: 0,
-      avgDaily: 0
+      avgDaily: 0,
+      suggestKcal: 0,
+      overDays: 0
     })
   }
   return request({ url: '/api/diet/week' })

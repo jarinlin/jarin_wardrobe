@@ -10,6 +10,7 @@ Page({
     keyword: '',
     activeTag: '',
     occasionChips: [],
+    idleOn: false,
     list: []
   },
 
@@ -43,11 +44,12 @@ Page({
   },
 
   async loadList() {
-    const { activeCategoryId, keyword, activeTag } = this.data
+    const { activeCategoryId, keyword, activeTag, idleOn } = this.data
     const params = {}
     if (activeCategoryId) params.categoryId = activeCategoryId
     if (keyword) params.keyword = keyword
     if (activeTag) params.tag = activeTag
+    if (idleOn) params.idleDays = 14
     try {
       const list = await api.fetchClothes(params)
       this.setData({ list: list || [] })
@@ -61,6 +63,10 @@ Page({
   onCategoryTap(e) {
     const id = Number(e.currentTarget.dataset.id)
     this.setData({ activeCategoryId: id }, () => this.loadList())
+  },
+
+  onIdleTap() {
+    this.setData({ idleOn: !this.data.idleOn }, () => this.loadList())
   },
 
   onOccasionTap(e) {

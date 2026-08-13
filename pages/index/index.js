@@ -19,7 +19,8 @@ Page({
     weather: null,
     locationHint: '',
     suggestEngine: '',
-    suggestActionLabel: '刷新',
+    suggestActionLabel: '换一套',
+    wardrobeSparse: false,
     alerts: [],
     bodyReady: false,
     diet: {
@@ -139,18 +140,23 @@ Page({
   },
 
   onRefreshSuggest() {
-    this.loadSuggest({ interactive: true })
+    this.loadSuggest({ interactive: true, swap: true })
   },
 
   async loadSuggest(opts) {
     const interactive = !!(opts && opts.interactive)
+    const swap = !!(opts && opts.swap)
     if (!auth.isLoggedIn() || this.data.suggestLoading) return
+    const prevItems = ((this.data.suggest && this.data.suggest.items) || []).slice()
     this.setData({ suggestLoading: true, locationHint: '', suggestActionLabel: '获取中…' })
     try {
       let data
       let locationHint = ''
       let lat
       let lng
+      const exclude = swap
+        ? prevItems.map((c) => c.id).filter(Boolean)
+        : []
 
       if (interactive) {
         console.log('[suggest] 强制刷新，先取定位再 refresh=1')
@@ -175,14 +181,14 @@ Page({
             this.setData({
               locationHint,
               suggestLoading: false,
-              suggestActionLabel: this.data.suggestEngine === 'ai' ? 'AI · 刷新' : '刷新',
+              suggestActionLabel: prevItems.length ? '换一套' : '刷新',
               'suggest.weatherNote': this.data.suggest.weatherNote || '未能获取本地天气，已按当季常识推荐'
             })
             return
           }
         }
         console.log('[suggest] 刷新带坐标', lat, lng)
-        data = await api.suggestOutfit(lat, lng, { refresh: true })
+        data = await api.suggestOutfit(lat, lng, { refresh: true, exclude })
       } else {
         console.log('[suggest] 缓存优先：先不传 lat/lng')
         data = await api.suggestOutfit()
@@ -219,11 +225,16 @@ Page({
       const weatherNote = (data && data.weatherNote) || ''
       const suggestEngine = (data && data.engine) || ''
       if (!locationHint && !(data && data.weather)) {
-        locationHint = '点击刷新并开启定位以获取当地天气'
+        locationHint = '点换一套并开启定位，可按当地天气推荐'
+      }
+      let items = (data && data.items) || []
+      if (swap && prevItems.length && data && data.canSwap === false) {
+        wx.showToast({ title: '再添几件才能换一套', icon: 'none' })
+        items = prevItems
       }
       this.setData({
         suggest: {
-          items: (data && data.items) || [],
+          items,
           reason: (data && data.reason) || '',
           tips: (data && data.tips) || '',
           seasonHint: (data && data.seasonHint) || '',
@@ -232,8 +243,9 @@ Page({
         weather: (data && data.weather) || null,
         locationHint,
         suggestEngine,
+        wardrobeSparse: !!(data && data.wardrobeSparse),
         suggestLoading: false,
-        suggestActionLabel: suggestEngine === 'ai' ? 'AI · 刷新' : '刷新'
+        suggestActionLabel: items.length ? '换一套' : '刷新'
       })
       if (data && data.tips && data.weather) {
         const alerts = (this.data.alerts || []).filter((a) => a.id !== 'weather-tip')
@@ -243,12 +255,11 @@ Page({
     } catch (e) {
       console.warn('[suggest] 请求失败', e)
       if (interactive) {
-        wx.showToast({ title: '刷新失败', icon: 'none' })
+        wx.showToast({ title: '换一套失败', icon: 'none' })
       }
-      const engine = this.data.suggestEngine
       this.setData({
         suggestLoading: false,
-        suggestActionLabel: engine === 'ai' ? 'AI · 刷新' : '刷新'
+        suggestActionLabel: (this.data.suggest && this.data.suggest.items && this.data.suggest.items.length) ? '换一套' : '刷新'
       })
     }
   },

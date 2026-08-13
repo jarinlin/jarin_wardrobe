@@ -1,4 +1,12 @@
-<view class="page detail" wx:if="{{item}}">
+<view class="page detail" wx:if="{{!loggedIn}}">
+  <view class="empty">
+    <view class="empty-title">登录后查看衣物详情</view>
+    <view class="muted">登录后可查看并管理衣柜中的衣物</view>
+    <view class="btn-primary" bindtap="goLogin">去登录</view>
+  </view>
+</view>
+
+<view class="page detail" wx:elif="{{item}}">
   <view class="cover">
     <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" />
     <view wx:else class="cover-placeholder">{{item.categoryName}}</view>

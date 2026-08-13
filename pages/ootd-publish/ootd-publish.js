@@ -1,6 +1,7 @@
 const api = require('../../src/assets/js/api')
 const auth = require('../../src/assets/js/auth')
 const ootd = require('../../src/assets/js/ootd')
+const util = require('../../src/assets/js/util')
 
 Page({
   data: {
@@ -26,6 +27,7 @@ Page({
   },
 
   onLoad(query) {
+    if (!util.ensureLogin()) return
     this.setData({
       outfitId: query.outfitId || '',
       postId: query.postId || ''

@@ -1,4 +1,5 @@
 const api = require('../../src/assets/js/api')
+const util = require('../../src/assets/js/util')
 
 Page({
   data: {
@@ -7,6 +8,7 @@ Page({
   },
 
   onShow() {
+    if (!util.ensureLogin()) return
     this.loadList()
   },
 

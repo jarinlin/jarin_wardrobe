@@ -5,6 +5,7 @@ const { pickOccasionSeasonChips } = require('../../src/assets/js/wardrobe-filter
 
 Page({
   data: {
+    loggedIn: false,
     categories: [],
     activeCategoryId: 0,
     keyword: '',
@@ -15,7 +16,19 @@ Page({
   },
 
   onShow() {
-    if (!auth.requireLogin()) return
+    const loggedIn = auth.isLoggedIn()
+    this.setData({ loggedIn })
+    if (!loggedIn) {
+      this.setData({
+        categories: [],
+        occasionChips: [],
+        list: [],
+        activeCategoryId: 0,
+        activeTag: '',
+        idleOn: false
+      })
+      return
+    }
     const tag = wx.getStorageSync('wardrobe_filter_tag') || ''
     if (tag) {
       wx.removeStorageSync('wardrobe_filter_tag')
@@ -97,5 +110,9 @@ Page({
   goTags() {
     if (!util.ensureLogin()) return
     wx.navigateTo({ url: '/pages/tags/tags' })
+  },
+
+  goLogin() {
+    wx.navigateTo({ url: '/pages/login/login' })
   }
 })

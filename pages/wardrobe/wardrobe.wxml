@@ -1,4 +1,5 @@
 <view class="page wardrobe">
+  <block wx:if="{{loggedIn}}">
   <view class="toolbar anim-rise">
     <view class="search-box">
       <input
@@ -85,5 +86,12 @@
     <view class="empty-title">没有匹配的衣物</view>
     <view class="muted">试试换分类，或看看「很久没穿」</view>
     <view class="btn-primary empty-btn" bindtap="goAdd">添加衣物</view>
+  </view>
+  </block>
+
+  <view class="empty" wx:else>
+    <view class="empty-title">登录后开始收录衣物</view>
+    <view class="muted">登录后可添加、分类并管理你的衣柜</view>
+    <view class="btn-primary empty-btn" bindtap="goLogin">去登录</view>
   </view>
 </view>

@@ -13,6 +13,7 @@
   </view>
 
   <block wx:if="{{tab === 'mine'}}">
+    <block wx:if="{{loggedIn}}">
     <view class="look-list" wx:if="{{list.length}}">
       <view
         class="look-card anim-pop"
@@ -44,9 +45,16 @@
       <view class="empty-title">还没有穿搭记录</view>
       <view class="muted">记录今天的穿搭，开始你的衣橱日志</view>
     </view>
+    </block>
+    <view class="empty" wx:else>
+      <view class="empty-title">登录后记录穿搭</view>
+      <view class="muted">登录后可保存并回顾每天的搭配</view>
+      <view class="btn-primary empty-btn" bindtap="goLogin">去登录</view>
+    </view>
   </block>
 
   <block wx:else>
+    <block wx:if="{{loggedIn}}">
     <view class="plaza-chips">
       <view class="plaza-chip {{feedKey === 'week' ? 'on' : ''}}" data-key="week" bindtap="onFeedKey">本周热门</view>
       <view class="plaza-chip {{feedKey === 'all' ? 'on' : ''}}" data-key="all" bindtap="onFeedKey">总榜</view>
@@ -110,6 +118,12 @@
     <view class="empty" wx:else>
       <view class="empty-title">广场还是空的</view>
       <view class="muted">把你的穿搭发布上来，就会出现在这里</view>
+    </view>
+    </block>
+    <view class="empty" wx:else>
+      <view class="empty-title">登录后看大家的穿搭</view>
+      <view class="muted">登录后可浏览广场并为喜欢的穿搭点赞</view>
+      <view class="btn-primary empty-btn" bindtap="goLogin">去登录</view>
     </view>
   </block>
 </view>

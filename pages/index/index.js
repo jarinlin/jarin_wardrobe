@@ -35,19 +35,35 @@ Page({
   },
 
   onShow() {
-    if (!auth.requireLogin()) return
     this._dietAdviceRetried = false
     this.refresh()
   },
 
   async refresh() {
-    const userInfo = auth.getUserInfo()
+    const loggedIn = auth.isLoggedIn()
+    const userInfo = loggedIn ? auth.getUserInfo() : null
     const today = util.formatDate()
     this.setData({
       userInfo,
-      loggedIn: auth.isLoggedIn(),
+      loggedIn,
       todayLabel: util.formatDisplayDate(today)
     })
+
+    if (!loggedIn) {
+      this.setData({
+        stats: {},
+        statsValue: '¥0',
+        todayOutfit: null,
+        outfitCount: 0,
+        suggest: { items: [], reason: '', tips: '', seasonHint: '', weatherNote: '' },
+        weather: null,
+        locationHint: '',
+        alerts: [],
+        bodyReady: false,
+        diet: { suggestDay: 0, todayKcal: 0, remainText: '—', remainLabel: '还可摄入', remainClass: '', sub: '去记录', aiAdvice: '' }
+      })
+      return
+    }
 
     try {
       const [stats, todayOutfit, outfits] = await Promise.all([
@@ -65,12 +81,8 @@ Page({
       // mock / 网络失败时保持静默
     }
 
-    if (auth.isLoggedIn()) {
-      this.loadSuggest()
-      this.loadDietAndAlerts()
-    } else {
-      this.setData({ alerts: [], diet: { suggestDay: 0, todayKcal: 0, remainText: '—', remainLabel: '还可摄入', remainClass: '', sub: '去记录', aiAdvice: '' } })
-    }
+    this.loadSuggest()
+    this.loadDietAndAlerts()
   },
 
   async loadDietAndAlerts() {

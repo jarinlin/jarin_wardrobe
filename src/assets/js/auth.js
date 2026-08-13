@@ -52,7 +52,7 @@ function isLoginPage() {
   }
 }
 
-/** 未登录则整页进入登录，不能返回空首页。已在登录页时不重复跳。 */
+/** 仅由用户主动登录或写操作调用；保留当前浏览页，登录后可返回。 */
 function requireLogin() {
   if (isLoggedIn()) {
     loginRedirecting = false
@@ -60,7 +60,7 @@ function requireLogin() {
   }
   if (isLoginPage() || loginRedirecting) return false
   loginRedirecting = true
-  wx.reLaunch({
+  wx.navigateTo({
     url: '/pages/login/login',
     complete() {
       loginRedirecting = false

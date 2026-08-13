@@ -2,12 +2,20 @@
   <view class="head anim-rise">
     <view>
       <view class="page-title">饮食记录</view>
-      <view class="page-subtitle">{{bodyReady ? '可拍照识别，也可手填热量；对照档案看今日还能吃多少' : '先完善身体档案，才能记饮食'}}</view>
+      <view class="page-subtitle" wx:if="{{!loggedIn}}">登录后记录每天的饮食</view>
+      <view class="page-subtitle" wx:elif="{{bodyReady}}">可拍照识别，也可手填热量；对照档案看今日还能吃多少</view>
+      <view class="page-subtitle" wx:else>先完善身体档案，才能记饮食</view>
     </view>
-    <view class="head-btn" wx:if="{{bodyReady}}" bindtap="goCreate">记一餐</view>
+    <view class="head-btn" wx:if="{{loggedIn && bodyReady}}" bindtap="goCreate">记一餐</view>
   </view>
 
-  <view wx:if="{{bodyChecked && !bodyReady}}" class="gate surface anim-rise-delay">
+  <view wx:if="{{!loggedIn}}" class="gate surface anim-rise-delay">
+    <view class="gate-title">登录后即可记饮食</view>
+    <view class="muted">登录后可记录餐食，并查看每日热量与饮食建议。</view>
+    <view class="btn-primary gate-btn" bindtap="goLogin">去登录</view>
+  </view>
+
+  <view wx:elif="{{bodyChecked && !bodyReady}}" class="gate surface anim-rise-delay">
     <view class="gate-title">先完善身体档案</view>
     <view class="muted">记饮食需要身高、体重，才能估算热量和建议摄入。填写后即可拍照或手填记一餐。</view>
     <view class="btn-primary gate-btn" bindtap="goBody">去填写档案</view>

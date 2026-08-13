@@ -1,4 +1,12 @@
-<view class="page ootd-detail" wx:if="{{post}}">
+<view class="page ootd-detail" wx:if="{{!loggedIn}}">
+  <view class="empty">
+    <view class="empty-title">登录后查看广场穿搭</view>
+    <view class="muted">登录后可浏览详情并为喜欢的穿搭点赞</view>
+    <view class="btn-primary" bindtap="goLogin">去登录</view>
+  </view>
+</view>
+
+<view class="page ootd-detail" wx:elif="{{post}}">
   <view class="detail-hero" wx:if="{{post.hasPhoto}}">
     <image class="detail-photo" src="{{post.imageUrl}}" mode="aspectFill" />
   </view>

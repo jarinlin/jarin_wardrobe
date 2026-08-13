@@ -60,6 +60,7 @@ Page({
   },
 
   onLoad() {
+    if (!util.ensureLogin()) return
     this.setData({ endDate: util.formatDate() })
     this.load()
   },

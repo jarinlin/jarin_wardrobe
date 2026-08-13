@@ -5,6 +5,7 @@ const ootd = require('../../src/assets/js/ootd')
 
 Page({
   data: {
+    loggedIn: false,
     tab: 'mine',
     list: [],
     feed: [],
@@ -13,7 +14,12 @@ Page({
   },
 
   onShow() {
-    if (!auth.requireLogin()) return
+    const loggedIn = auth.isLoggedIn()
+    this.setData({ loggedIn })
+    if (!loggedIn) {
+      this.setData({ list: [], feed: [] })
+      return
+    }
     if (this.data.tab === 'plaza') this.loadFeed()
     else this.loadList()
   },
@@ -22,6 +28,7 @@ Page({
     const tab = e.currentTarget.dataset.tab
     if (tab === this.data.tab) return
     this.setData({ tab })
+    if (!this.data.loggedIn) return
     if (tab === 'plaza') this.loadFeed()
     else this.loadList()
   },
@@ -30,6 +37,7 @@ Page({
     const feedKey = e.currentTarget.dataset.key
     if (feedKey === this.data.feedKey) return
     this.setData({ feedKey })
+    if (!this.data.loggedIn) return
     this.loadFeed()
   },
 
@@ -70,6 +78,7 @@ Page({
   },
 
   async onLike(e) {
+    if (!util.ensureLogin()) return
     const id = e.currentTarget.dataset.id
     try {
       const res = await api.likeOotdPost(id)
@@ -80,5 +89,9 @@ Page({
       )
       this.setData({ feed })
     } catch (err) {}
+  },
+
+  goLogin() {
+    wx.navigateTo({ url: '/pages/login/login' })
   }
 })

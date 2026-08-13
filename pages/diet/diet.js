@@ -12,6 +12,7 @@ function todayStr() {
 
 Page({
   data: {
+    loggedIn: false,
     date: todayStr(),
     dateLabel: '',
     list: [],
@@ -39,7 +40,21 @@ Page({
   },
 
   onShow() {
-    if (!auth.requireLogin()) return
+    const loggedIn = auth.isLoggedIn()
+    this.setData({ loggedIn })
+    if (!loggedIn) {
+      this.setData({
+        list: [],
+        todayKcal: 0,
+        metrics: {},
+        bodyFatText: '—',
+        bodyReady: false,
+        bodyChecked: false,
+        mealHint: '',
+        weekLine: ''
+      })
+      return
+    }
     this._dietAdviceRetried = false
     this.refresh()
   },
@@ -172,5 +187,9 @@ Page({
   goDetail(e) {
     const id = e.currentTarget.dataset.id
     wx.navigateTo({ url: '/pages/diet-edit/diet-edit?id=' + id })
+  },
+
+  goLogin() {
+    wx.navigateTo({ url: '/pages/login/login' })
   }
 })

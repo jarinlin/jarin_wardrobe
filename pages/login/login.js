@@ -19,8 +19,17 @@ Page({
 
   onLoad() {
     if (auth.isLoggedIn()) {
-      wx.switchTab({ url: '/pages/index/index' })
+      this.finishLogin()
     }
+  },
+
+  finishLogin() {
+    const pages = getCurrentPages()
+    if (pages.length > 1) {
+      wx.navigateBack({ delta: 1 })
+      return
+    }
+    wx.switchTab({ url: '/pages/index/index' })
   },
 
   onChooseAvatar(e) {
@@ -68,7 +77,7 @@ Page({
 
           wx.showToast({ title: '登录成功', icon: 'success' })
           setTimeout(() => {
-            wx.switchTab({ url: '/pages/index/index' })
+            this.finishLogin()
           }, 400)
         } catch (e) {
           wx.showToast({ title: '登录失败', icon: 'none' })
@@ -116,7 +125,7 @@ Page({
       getApp().setUserInfo({ ...user, profileReady: true })
       wx.showToast({ title: '登录成功', icon: 'success' })
       setTimeout(() => {
-        wx.switchTab({ url: '/pages/index/index' })
+        this.finishLogin()
       }, 400)
     } catch (e) {
       wx.showToast({ title: '保存失败', icon: 'none' })

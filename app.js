@@ -40,11 +40,7 @@ App({
 
     const token = auth.getToken()
     const userInfo = auth.getUserInfo()
-    if (token && userInfo) {
-      this.globalData.userInfo = userInfo
-    } else {
-      auth.requireLogin()
-    }
+    this.globalData.userInfo = token && userInfo ? userInfo : null
   },
 
   setUserInfo(userInfo) {

@@ -1,8 +1,10 @@
 const api = require('../../src/assets/js/api')
 const util = require('../../src/assets/js/util')
+const auth = require('../../src/assets/js/auth')
 
 Page({
   data: {
+    loggedIn: false,
     id: null,
     item: null,
     clothesCount: 0,
@@ -16,6 +18,12 @@ Page({
   },
 
   onShow() {
+    const loggedIn = auth.isLoggedIn()
+    this.setData({ loggedIn })
+    if (!loggedIn) {
+      this.setData({ item: null })
+      return
+    }
     if (this.data.id) this.loadDetail()
   },
 
@@ -70,6 +78,7 @@ Page({
   },
 
   goPublish() {
+    if (!util.ensureLogin()) return
     const item = this.data.item || {}
     const postId = item.ootdPostId || ''
     wx.navigateTo({
@@ -78,6 +87,7 @@ Page({
   },
 
   onDelete() {
+    if (!util.ensureLogin()) return
     wx.showModal({
       title: '删除穿搭',
       content: '确定删除这条穿搭记录？已发布到广场的会一并撤回。',
@@ -89,5 +99,9 @@ Page({
         setTimeout(() => wx.navigateBack(), 400)
       }
     })
+  },
+
+  goLogin() {
+    wx.navigateTo({ url: '/pages/login/login' })
   }
 })

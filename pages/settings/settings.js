@@ -22,16 +22,15 @@ Page({
   },
 
   onShow() {
-    if (!auth.requireLogin()) return
     const user = auth.getUserInfo() || {}
-    const loggedIn = !!auth.getToken()
+    const loggedIn = auth.isLoggedIn()
     this.setData({
       loggedIn,
       nickname: user.nickname || '',
       avatarUrl: user.avatarUrl || '',
       isAdmin: false
     })
-    this.refreshAdmin()
+    if (loggedIn) this.refreshAdmin()
   },
 
   async refreshAdmin() {
@@ -136,6 +135,7 @@ Page({
   },
 
   async onExport() {
+    if (!util.ensureLogin()) return
     if (this.data.exporting) return
     this.setData({ exporting: true })
     wx.showLoading({ title: '导出中', mask: true })
@@ -171,7 +171,7 @@ Page({
       success: (res) => {
         if (!res.confirm) return
         getApp().clearSession()
-        wx.reLaunch({ url: '/pages/login/login' })
+        wx.switchTab({ url: '/pages/index/index' })
       }
     })
   }

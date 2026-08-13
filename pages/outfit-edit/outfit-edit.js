@@ -18,6 +18,7 @@ Page({
   },
 
   async onLoad(query) {
+    if (!util.ensureLogin()) return
     const date = util.formatDate()
     this.setData({
       date,

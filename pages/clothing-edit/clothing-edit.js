@@ -1,5 +1,6 @@
 const api = require('../../src/assets/js/api')
 const upload = require('../../src/assets/js/upload')
+const util = require('../../src/assets/js/util')
 
 function isEmpty(v) {
   return v === null || v === undefined || String(v).trim() === ''
@@ -28,6 +29,7 @@ Page({
   },
 
   async onLoad(query) {
+    if (!util.ensureLogin()) return
     const id = query.id || null
     if (id) {
       wx.setNavigationBarTitle({ title: '编辑衣物' })

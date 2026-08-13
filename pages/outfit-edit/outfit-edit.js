@@ -1,6 +1,7 @@
 const api = require('../../src/assets/js/api')
 const util = require('../../src/assets/js/util')
 const upload = require('../../src/assets/js/upload')
+const ootd = require('../../src/assets/js/ootd')
 
 Page({
   data: {
@@ -9,7 +10,11 @@ Page({
     clothes: [],
     selectedIds: [],
     note: '',
-    imageUrl: ''
+    imageUrl: '',
+    publishToPlaza: false,
+    ootdPublished: false,
+    ootdPostId: 0,
+    submitting: false
   },
 
   async onLoad(query) {
@@ -72,10 +77,14 @@ Page({
     const today = await api.fetchTodayOutfit(this.data.date)
     if (!today) return
     const selectedIds = today.clothingIds || (today.clothes || []).map((c) => c.id)
+    const published = !!today.ootdPublished
     this.setData({
       selectedIds,
       note: today.note || '',
-      imageUrl: today.imageUrl || ''
+      imageUrl: today.imageUrl || '',
+      publishToPlaza: published,
+      ootdPublished: published,
+      ootdPostId: today.ootdPostId || 0
     })
     await this.loadClothes()
   },
@@ -87,9 +96,16 @@ Page({
       dateLabel: util.formatDisplayDate(date),
       selectedIds: [],
       note: '',
-      imageUrl: ''
+      imageUrl: '',
+      publishToPlaza: false,
+      ootdPublished: false,
+      ootdPostId: 0
     })
     this.loadClothes().then(() => this.loadToday())
+  },
+
+  onPlaza(e) {
+    this.setData({ publishToPlaza: !!e.detail.value })
   },
 
   toggleCloth(e) {
@@ -119,24 +135,70 @@ Page({
     } catch (e) {}
   },
 
+  async syncPlaza(saved) {
+    const outfitId = saved && saved.id
+    if (!outfitId) return '已保存'
+    const wantPub = !!this.data.publishToPlaza
+    const wasPub = !!saved.ootdPublished
+    const postId = saved.ootdPostId || this.data.ootdPostId
+    if (!wantPub) {
+      if (wasPub && postId) {
+        await api.updateOotdPost(postId, { status: 'withdrawn' })
+      }
+      return '已保存'
+    }
+    const payload = ootd.plazaPayloadFromLook(
+      outfitId,
+      this.data.imageUrl,
+      this.data.note,
+      (this.data.selectedIds || []).length
+    )
+    if (!ootd.hasPublishContent(
+      payload.showPhoto,
+      payload.showCaption,
+      payload.showItems,
+      payload.showPhoto,
+      payload.caption,
+      (this.data.selectedIds || []).length
+    )) {
+      wx.showToast({ title: '广场至少需要照片、备注或单品', icon: 'none' })
+      return ''
+    }
+    if (wasPub && postId) {
+      await api.updateOotdPost(postId, payload)
+      return '已保存'
+    }
+    await api.createOotdPost(payload)
+    return '已发布'
+  },
+
   async onSubmit() {
+    if (this.data.submitting) return
     if (!this.data.selectedIds.length) {
       wx.showToast({ title: '请至少选择一件衣物', icon: 'none' })
       return
     }
-    wx.showLoading({ title: '保存中' })
+    this.setData({ submitting: true })
+    const loadingTitle = this.data.publishToPlaza ? '发布中' : '保存中'
+    wx.showLoading({ title: loadingTitle })
     try {
-      await api.createOutfit({
+      const saved = await api.createOutfit({
         date: this.data.date,
         clothingIds: this.data.selectedIds,
         note: this.data.note,
         imageUrl: this.data.imageUrl
       })
+      const toastTitle = await this.syncPlaza(saved)
       wx.hideLoading()
-      wx.showToast({ title: '已保存', icon: 'success' })
+      if (!toastTitle) {
+        this.setData({ submitting: false })
+        return
+      }
+      wx.showToast({ title: toastTitle, icon: 'success' })
       setTimeout(() => wx.navigateBack(), 400)
     } catch (e) {
       wx.hideLoading()
+      this.setData({ submitting: false })
     }
   }
 })

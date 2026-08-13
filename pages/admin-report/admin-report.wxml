@@ -1,0 +1,72 @@
+<view class="page admin-report">
+  <view class="report-state" wx:if="{{denied}}">
+    <text class="report-state-kicker">管理</text>
+    <text class="report-state-title">无权限</text>
+    <text class="report-state-sub">该页面仅管理员可查看</text>
+  </view>
+
+  <view class="report-state" wx:elif="{{error}}">
+    <text class="report-state-kicker">系统报表</text>
+    <text class="report-state-title">加载失败</text>
+    <text class="report-state-sub">请下拉刷新，或点下方重试</text>
+    <view class="report-retry" bindtap="onRetry">重新加载</view>
+  </view>
+
+  <view class="report-state" wx:elif="{{loading}}">
+    <text class="report-state-kicker">系统报表</text>
+    <text class="report-state-title">加载中</text>
+    <text class="report-state-sub">正在读取全站数据…</text>
+  </view>
+
+  <block wx:else>
+    <view class="report-hero">
+      <text class="report-kicker">全站概览</text>
+      <text class="report-hero-title">系统报表</text>
+      <text class="report-asof">{{asOfLabel}}</text>
+    </view>
+
+    <view class="report-block" wx:for="{{sections}}" wx:key="title">
+      <view class="report-block-head">
+        <text class="report-block-title">{{item.title}}</text>
+        <text class="report-block-extra" wx:if="{{item.extra}}">{{item.extra}}</text>
+      </view>
+      <view class="report-metrics">
+        <view class="report-metric" wx:for="{{item.metrics}}" wx:for-item="stat" wx:key="label">
+          <text class="report-metric-num">{{stat.value}}</text>
+          <text class="report-metric-label">{{stat.label}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="report-block">
+      <view class="report-block-head">
+        <text class="report-block-title">最近广场帖</text>
+      </view>
+      <view class="report-empty" wx:if="{{!hasPosts}}">暂无公开帖</view>
+      <view class="report-list" wx:else>
+        <view class="report-row" wx:for="{{recentPosts}}" wx:key="id">
+          <view class="report-row-main">
+            <text class="report-row-title">{{item.caption}}</text>
+            <text class="report-row-sub">{{item.nickname}} · {{item.createdAtText}}</text>
+          </view>
+          <text class="report-row-stat">{{item.likeCount}} 赞</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="report-block">
+      <view class="report-block-head">
+        <text class="report-block-title">最近注册</text>
+      </view>
+      <view class="report-empty" wx:if="{{!hasUsers}}">暂无用户</view>
+      <view class="report-list" wx:else>
+        <view class="report-row" wx:for="{{recentUsers}}" wx:key="id">
+          <view class="report-row-main">
+            <text class="report-row-title">{{item.nickname}}</text>
+            <text class="report-row-sub">{{item.createdAtText}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+</view>

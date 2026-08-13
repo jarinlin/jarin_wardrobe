@@ -1,7 +1,7 @@
 const api = require('../../src/assets/js/api')
 const util = require('../../src/assets/js/util')
 const auth = require('../../src/assets/js/auth')
-const { buildDayCard, isBodyReady, promptBodyProfile, mealPlaceholderUrl } = require('../../src/assets/js/diet-metrics')
+const { buildDayCard, isBodyReady, promptBodyProfile, mealPlaceholderUrl, scheduleAdviceRetry } = require('../../src/assets/js/diet-metrics')
 
 function todayStr() {
   const d = new Date()
@@ -32,12 +32,14 @@ Page({
       remainClass: '',
       barClass: 'week-bar-fill',
       sub: '对照建议看还能吃多少',
-      tip: ''
+      tip: '',
+      aiAdvice: ''
     }
   },
 
   onShow() {
     if (!auth.requireLogin()) return
+    this._dietAdviceRetried = false
     this.refresh()
   },
 
@@ -69,7 +71,7 @@ Page({
         list: [],
         todayKcal: 0,
         mealHint: '',
-        day: buildDayCard(metrics, 0)
+        day: buildDayCard(metrics, 0, '')
       })
       return
     }
@@ -98,13 +100,19 @@ Page({
       })
       const selectedKcal = Math.round(data.totalCalories || 0)
       todayKcal = selectedKcal
+      let aiAdvice = data.aiAdvice || ''
+      let hasTodayLogs = this.data.date === todayStr() && list.length > 0
       const today = todayStr()
       if (this.data.date !== today) {
         try {
           const todayData = await api.fetchDietLogs({ date: today })
           todayKcal = Math.round(todayData.totalCalories || 0)
+          aiAdvice = todayData.aiAdvice || ''
+          hasTodayLogs = ((todayData.list || []).length > 0) || todayKcal > 0
         } catch (e) {
           todayKcal = 0
+          aiAdvice = ''
+          hasTodayLogs = false
         }
       }
       let mealHint = ''
@@ -119,14 +127,15 @@ Page({
         list,
         todayKcal,
         mealHint,
-        day: buildDayCard(metrics, todayKcal)
+        day: buildDayCard(metrics, todayKcal, aiAdvice)
       })
+      scheduleAdviceRetry(this, hasTodayLogs, aiAdvice)
     } catch (e) {
       this.setData({
         list: [],
         todayKcal: 0,
         mealHint: '',
-        day: buildDayCard(metrics, 0)
+        day: buildDayCard(metrics, 0, '')
       })
     }
   },

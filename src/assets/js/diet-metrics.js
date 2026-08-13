@@ -32,9 +32,10 @@ function promptBodyProfile(opts) {
   })
 }
 
-function buildDayCard(metrics, todayKcal) {
+function buildDayCard(metrics, todayKcal, aiAdvice) {
   const suggestDay = Math.round(Number(metrics && metrics.suggestKcal) || 0)
   const today = Math.round(Number(todayKcal) || 0)
+  const advice = String(aiAdvice || '').trim()
   if (!suggestDay) {
     return {
       suggestDay: 0,
@@ -46,7 +47,8 @@ function buildDayCard(metrics, todayKcal) {
       remainClass: '',
       barClass: 'week-bar-fill',
       sub: '完善档案后可看还能吃多少',
-      tip: '点上方卡片填写身高体重'
+      tip: '点上方卡片填写身高体重',
+      aiAdvice: advice
     }
   }
   const remain = suggestDay - today
@@ -75,13 +77,26 @@ function buildDayCard(metrics, todayKcal) {
     barClass: remainOver ? 'week-bar-fill over' : 'week-bar-fill',
     ratioPct,
     sub,
-    tip
+    tip,
+    aiAdvice: advice
   }
+}
+
+function scheduleAdviceRetry(page, hasTodayLogs, aiAdvice) {
+  if (!page || page._dietAdviceRetried) return
+  if (!hasTodayLogs) return
+  if (String(aiAdvice || '').trim()) return
+  page._dietAdviceRetried = true
+  setTimeout(() => {
+    if (typeof page.refreshDietAdvice === 'function') page.refreshDietAdvice()
+    else if (typeof page.refresh === 'function') page.refresh()
+  }, 1400)
 }
 
 module.exports = {
   buildDayCard,
   isBodyReady,
   promptBodyProfile,
-  mealPlaceholderUrl
+  mealPlaceholderUrl,
+  scheduleAdviceRetry
 }

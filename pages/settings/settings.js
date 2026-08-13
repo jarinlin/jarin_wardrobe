@@ -17,7 +17,8 @@ Page({
     avatarUrl: '',
     defaultAvatar: '/src/assets/icons/mine-active.png',
     savingProfile: false,
-    loggedIn: false
+    loggedIn: false,
+    isAdmin: false
   },
 
   onShow() {
@@ -27,8 +28,30 @@ Page({
     this.setData({
       loggedIn,
       nickname: user.nickname || '',
-      avatarUrl: user.avatarUrl || ''
+      avatarUrl: user.avatarUrl || '',
+      isAdmin: false
     })
+    this.refreshAdmin()
+  },
+
+  async refreshAdmin() {
+    try {
+      const me = await api.fetchMe()
+      this.setData({
+        nickname: me.nickname || this.data.nickname,
+        avatarUrl: me.avatarUrl || this.data.avatarUrl,
+        isAdmin: api.isAdminUser(me)
+      })
+      try {
+        getApp().setUserInfo(me)
+      } catch (e) {}
+    } catch (e) {
+      this.setData({ isAdmin: false })
+    }
+  },
+
+  onAdminReport() {
+    wx.navigateTo({ url: '/pages/admin-report/admin-report' })
   },
 
   onChooseAvatar(e) {

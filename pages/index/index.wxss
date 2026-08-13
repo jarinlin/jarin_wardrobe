@@ -1,3 +1,5 @@
+@import '../../src/assets/css/diet.wxss';
+
 .home {
   padding: 24rpx 28rpx 48rpx;
 }

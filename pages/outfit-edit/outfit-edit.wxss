@@ -1,3 +1,5 @@
+@import '../../src/assets/css/ootd.wxss';
+
 .date-row {
   display: flex;
   justify-content: space-between;
@@ -142,12 +144,6 @@
   font-size: 56rpx;
   line-height: 1;
   color: var(--coral-deep);
-}
-
-.photo-hint {
-  font-size: 22rpx;
-  font-weight: 400;
-  color: var(--muted);
 }
 
 .note-item {

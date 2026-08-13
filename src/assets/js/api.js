@@ -18,6 +18,8 @@ function handleResponse(res, resolve, reject) {
     auth.clear()
     wx.showToast({ title: '请重新登录', icon: 'none' })
     reject(res)
+  } else if (res.statusCode === 403) {
+    reject(res)
   } else {
     wx.showToast({ title: '网络异常', icon: 'none' })
     reject(res)
@@ -90,7 +92,8 @@ function loginWithCode(code, profile = {}) {
       id: 1,
       nickname: nick || '微信用户',
       avatarUrl: avatar,
-      openid: 'mock_openid'
+      openid: 'mock_openid',
+      is_admin: false
     }
     const token = 'mock_token_' + Date.now()
     auth.setToken(token)
@@ -108,12 +111,36 @@ function loginWithCode(code, profile = {}) {
   })
 }
 
+function isAdminUser(user) {
+  return !!(user && (user.is_admin === true || user.isAdmin === true))
+}
+
+function fetchMe() {
+  if (USE_MOCK) {
+    const user = { ...(auth.getUserInfo() || {}), is_admin: false }
+    auth.setUserInfo(user)
+    return Promise.resolve(user)
+  }
+  return request({ url: '/api/me' }).then((user) => {
+    auth.setUserInfo(user)
+    return user
+  })
+}
+
+function fetchAdminReport() {
+  if (USE_MOCK) {
+    return Promise.reject({ statusCode: 403 })
+  }
+  return request({ url: '/api/admin/report' })
+}
+
 function updateProfile(profile = {}) {
   if (USE_MOCK) {
     const user = {
       ...(auth.getUserInfo() || {}),
       nickname: profile.nickName || (auth.getUserInfo() && auth.getUserInfo().nickname) || 'Jarin',
-      avatarUrl: profile.avatarUrl || (auth.getUserInfo() && auth.getUserInfo().avatarUrl) || ''
+      avatarUrl: profile.avatarUrl || (auth.getUserInfo() && auth.getUserInfo().avatarUrl) || '',
+      is_admin: false
     }
     auth.setUserInfo(user)
     return Promise.resolve(user)
@@ -324,7 +351,7 @@ function fetchOutfitDetail(id) {
 function fetchTodayOutfit(date) {
   if (USE_MOCK) {
     const item = mock.getOutfits().find((o) => o.date === date) || null
-    return Promise.resolve(item)
+    return Promise.resolve(item ? withMockOotdFlag(item) : null)
   }
   return request({ url: '/api/outfits/today', data: { date } })
 }
@@ -340,7 +367,7 @@ function createOutfit(payload) {
       mock.saveOutfits(list)
       // 增加衣物使用次数（简化：每次保存 +1，仅对新加的不严格处理）
       bumpWearCount(payload.clothingIds)
-      return Promise.resolve(mock.getOutfits().find((o) => o.id === exists.id))
+      return Promise.resolve(withMockOotdFlag(mock.getOutfits().find((o) => o.id === exists.id)))
     }
     const item = {
       id: mock.nextId('outfit'),
@@ -353,7 +380,7 @@ function createOutfit(payload) {
     list.unshift(item)
     mock.saveOutfits(list)
     bumpWearCount(payload.clothingIds)
-    return Promise.resolve(mock.getOutfits().find((o) => o.id === item.id))
+    return Promise.resolve(withMockOotdFlag(mock.getOutfits().find((o) => o.id === item.id)))
   }
   return request({ url: '/api/outfits', method: 'POST', data: payload })
 }
@@ -385,6 +412,18 @@ function deleteOutfit(id) {
 
 function mockOotdPosts() {
   return wx.getStorageSync('mock_ootd_posts') || []
+}
+
+function withMockOotdFlag(item) {
+  if (!item) return item
+  const post = mockOotdPosts().find(
+    (p) => p.status === 'published' && String(p.outfitId) === String(item.id)
+  )
+  return {
+    ...item,
+    ootdPublished: !!post,
+    ootdPostId: post ? post.id : 0
+  }
 }
 
 function saveMockOotdPosts(list) {
@@ -488,7 +527,14 @@ function createOotdPost(payload) {
     const existing = list.find(
       (p) => String(p.userId) === String(uid) && String(p.outfitId) === String(payload.outfitId)
     )
-    const itemNames = (outfit.clothes || []).map((c) => c.name).filter(Boolean)
+    const clothes = mock.getClothes() || []
+    const ids = outfit.clothingIds || []
+    const itemNames = ids
+      .map((id) => {
+        const c = clothes.find((x) => String(x.id) === String(id))
+        return (c && c.name) || ''
+      })
+      .filter(Boolean)
     const row = {
       id: existing ? existing.id : Date.now(),
       userId: uid,
@@ -731,7 +777,7 @@ function saveBodyProfile(payload) {
 
 function fetchDietLogs(params = {}) {
   if (USE_MOCK) {
-    return Promise.resolve({ list: [], totalCalories: 0 })
+    return Promise.resolve({ list: [], totalCalories: 0, aiAdvice: '' })
   }
   const q = []
   if (params.date) q.push('date=' + encodeURIComponent(params.date))
@@ -774,6 +820,9 @@ function deleteDietLog(id) {
 module.exports = {
   request,
   loginWithCode,
+  fetchMe,
+  fetchAdminReport,
+  isAdminUser,
   updateProfile,
   analyzeClothing,
   analyzeFood,

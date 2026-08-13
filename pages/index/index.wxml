@@ -49,6 +49,10 @@
         <text class="m-label">{{diet.remainLabel}}</text>
       </view>
     </view>
+    <view class="diet-ai" wx:if="{{diet.aiAdvice}}">
+      <text class="diet-ai-tag">AI 生成</text>
+      <text class="diet-ai-text">{{diet.aiAdvice}}</text>
+    </view>
   </view>
 
   <view class="suggest anim-rise-delay" wx:if="{{loggedIn}}">

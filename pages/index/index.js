@@ -2,7 +2,7 @@ const api = require('../../src/assets/js/api')
 const auth = require('../../src/assets/js/auth')
 const util = require('../../src/assets/js/util')
 const location = require('../../src/assets/js/location')
-const { buildDayCard, isBodyReady, promptBodyProfile } = require('../../src/assets/js/diet-metrics')
+const { buildDayCard, isBodyReady, promptBodyProfile, scheduleAdviceRetry } = require('../../src/assets/js/diet-metrics')
 
 Page({
   data: {
@@ -28,12 +28,14 @@ Page({
       remainText: '—',
       remainLabel: '还可摄入',
       remainClass: '',
-      sub: '去记录'
+      sub: '去记录',
+      aiAdvice: ''
     }
   },
 
   onShow() {
     if (!auth.requireLogin()) return
+    this._dietAdviceRetried = false
     this.refresh()
   },
 
@@ -66,7 +68,7 @@ Page({
       this.loadSuggest()
       this.loadDietAndAlerts()
     } else {
-      this.setData({ alerts: [], diet: { suggestDay: 0, todayKcal: 0, remainText: '—', remainLabel: '还可摄入', remainClass: '', sub: '去记录' } })
+      this.setData({ alerts: [], diet: { suggestDay: 0, todayKcal: 0, remainText: '—', remainLabel: '还可摄入', remainClass: '', sub: '去记录', aiAdvice: '' } })
     }
   },
 
@@ -75,6 +77,8 @@ Page({
     let metrics = {}
     let todayKcal = 0
     let bodyReady = false
+    let aiAdvice = ''
+    let hasTodayLogs = false
     try {
       const body = await api.fetchBodyProfile()
       metrics = (body && body.metrics) || {}
@@ -87,6 +91,8 @@ Page({
         const data = await api.fetchDietLogs({ date: today })
         const list = (data && data.list) || []
         todayKcal = Math.round(Number(data && data.totalCalories) || 0)
+        aiAdvice = (data && data.aiAdvice) || ''
+        hasTodayLogs = list.length > 0
         if (meal !== 'other') {
           const hasMeal = list.some((x) => x.mealType === meal)
           if (!hasMeal) {
@@ -100,7 +106,12 @@ Page({
         }
       } catch (e) {}
     }
-    this.setData({ alerts, bodyReady, diet: buildDayCard(metrics, todayKcal) })
+    this.setData({ alerts, bodyReady, diet: buildDayCard(metrics, todayKcal, aiAdvice) })
+    scheduleAdviceRetry(this, hasTodayLogs, aiAdvice)
+  },
+
+  refreshDietAdvice() {
+    this.loadDietAndAlerts()
   },
 
   onAlertTap(e) {

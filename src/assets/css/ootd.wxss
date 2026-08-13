@@ -441,3 +441,18 @@
 .withdraw-btn {
   margin-top: 16rpx;
 }
+
+.plaza-switch {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin: 8rpx 0 24rpx;
+  padding: 20rpx 22rpx;
+  border-radius: 24rpx;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: var(--shadow);
+}
+
+.plaza-switch switch {
+  flex-shrink: 0;
+}

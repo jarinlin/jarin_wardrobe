@@ -13,7 +13,6 @@
       <view wx:else class="photo-empty">
         <text class="plus">＋</text>
         <text>点击添加穿搭照片</text>
-        <text class="photo-hint">可不传，下面先选单品也行</text>
       </view>
     </view>
   </view>
@@ -49,6 +48,13 @@
     <textarea class="form-textarea note-area" placeholder="如：轻松上班" placeholder-class="form-textarea-placeholder" value="{{note}}" bindinput="onNote" />
   </view>
 
-  <view class="btn-primary" bindtap="onSubmit">保存穿搭</view>
+  <view class="plaza-switch">
+    <view class="choice-copy">
+      <text class="opt-title">发布到广场</text>
+    </view>
+    <switch checked="{{publishToPlaza}}" color="#E85D75" bindchange="onPlaza" />
+  </view>
+
+  <view class="btn-primary" bindtap="onSubmit">{{publishToPlaza && !ootdPublished ? '保存并发布' : '保存穿搭'}}</view>
   <view class="safe-bottom"></view>
 </view>

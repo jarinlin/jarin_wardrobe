@@ -47,6 +47,22 @@ function hasPublishContent(showPhoto, showCaption, showItems, hasImage, caption,
   return false
 }
 
+/** 记录页勾选发布时，与发布页默认勾选一致：有图带图、有备注带文案、单品名默认开 */
+function plazaPayloadFromLook(outfitId, imageUrl, note, itemCount) {
+  const caption = String(note || '')
+  const hasImage = !!String(imageUrl || '').trim()
+  const showPhoto = hasImage
+  const showCaption = !!caption.trim()
+  const showItems = Number(itemCount) > 0
+  return {
+    outfitId: Number(outfitId),
+    showPhoto,
+    showCaption,
+    showItems,
+    caption
+  }
+}
+
 function toLookCard(o, formatDisplayDate) {
   const clothes = o.clothes || []
   const thumbs = clothes.slice(0, 4).map((c, i) => ({
@@ -70,5 +86,6 @@ module.exports = {
   normalizePost,
   decorateFeedPost,
   hasPublishContent,
+  plazaPayloadFromLook,
   toLookCard
 }

@@ -1,0 +1,28 @@
+.diet-ai {
+  display: flex;
+  align-items: flex-start;
+  gap: 12rpx;
+  margin-top: 18rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid var(--line);
+}
+
+.diet-ai-tag {
+  flex-shrink: 0;
+  margin-top: 2rpx;
+  padding: 4rpx 10rpx;
+  border-radius: 8rpx;
+  background: var(--accent-soft);
+  color: var(--coral-deep);
+  font-size: 18rpx;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.diet-ai-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 22rpx;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}

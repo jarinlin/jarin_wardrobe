@@ -153,6 +153,43 @@
   margin-bottom: 12rpx;
 }
 
+.kcal-box {
+  position: relative;
+}
+
+.kcal-input {
+  padding-right: 168rpx;
+}
+
+.kcal-unit {
+  position: absolute;
+  right: 88rpx;
+  top: 0;
+  height: 88rpx;
+  line-height: 88rpx;
+  font-size: 22rpx;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.kcal-ai {
+  position: absolute;
+  right: 10rpx;
+  top: 16rpx;
+  height: 56rpx;
+  padding: 0 16rpx;
+  border-radius: 12rpx;
+  background: var(--accent-soft);
+  color: var(--coral-deep);
+  font-size: 22rpx;
+  font-weight: 600;
+  line-height: 56rpx;
+}
+
+.kcal-ai.busy {
+  opacity: 0.55;
+}
+
 .add-item {
   margin-top: 8rpx;
   padding: 20rpx 0;

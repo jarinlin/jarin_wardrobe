@@ -130,6 +130,28 @@
   color: var(--coral-deep);
 }
 
+.gate {
+  padding: 48rpx 36rpx 40rpx;
+  border-radius: 28rpx;
+  text-align: center;
+}
+
+.gate-title {
+  font-family: var(--font-display);
+  font-size: 36rpx;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 16rpx;
+}
+
+.gate .muted {
+  line-height: 1.55;
+}
+
+.gate-btn {
+  margin-top: 36rpx;
+}
+
 .date-row {
   display: flex;
   justify-content: space-between;

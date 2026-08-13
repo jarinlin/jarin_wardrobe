@@ -2,80 +2,88 @@
   <view class="head anim-rise">
     <view>
       <view class="page-title">饮食记录</view>
-      <view class="page-subtitle">可拍照识别，也可手填热量；对照档案看今日还能吃多少</view>
+      <view class="page-subtitle">{{bodyReady ? '可拍照识别，也可手填热量；对照档案看今日还能吃多少' : '先完善身体档案，才能记饮食'}}</view>
     </view>
-    <view class="head-btn" bindtap="goCreate">记一餐</view>
+    <view class="head-btn" wx:if="{{bodyReady}}" bindtap="goCreate">记一餐</view>
   </view>
 
-  <view class="metrics surface anim-rise-delay" bindtap="goBody">
-    <view class="metrics-row">
-      <view class="m">
-        <text class="m-num">{{metrics.bmi || '—'}}</text>
-        <text class="m-label">BMI {{metrics.bmiLevel || ''}}</text>
-      </view>
-      <view class="m">
-        <text class="m-num">{{metrics.bodyFatPct || '—'}}%</text>
-        <text class="m-label">体脂估算</text>
-      </view>
-      <view class="m">
-        <text class="m-num">{{todayKcal}}</text>
-        <text class="m-label">今日摄入</text>
-      </view>
-    </view>
-    <text class="metrics-tip">{{metricsTip}}</text>
+  <view wx:if="{{bodyChecked && !bodyReady}}" class="gate surface anim-rise-delay">
+    <view class="gate-title">先完善身体档案</view>
+    <view class="muted">记饮食需要身高、体重，才能估算热量和建议摄入。填写后即可拍照或手填记一餐。</view>
+    <view class="btn-primary gate-btn" bindtap="goBody">去填写档案</view>
   </view>
 
-  <view class="week-summary surface anim-rise-delay">
-    <view class="week-head">
-      <text class="week-title">今日热量</text>
-      <text class="week-sub">{{day.sub}}</text>
-    </view>
-    <view class="week-nums">
-      <view class="m">
-        <text class="m-num">{{day.suggestDay || '—'}}</text>
-        <text class="m-label">建议日摄入</text>
-      </view>
-      <view class="m">
-        <text class="m-num">{{day.todayKcal}}</text>
-        <text class="m-label">今日摄入</text>
-      </view>
-      <view class="m">
-        <text class="m-num {{day.remainClass}}">{{day.remainText}}</text>
-        <text class="m-label">{{day.remainLabel}}</text>
-      </view>
-    </view>
-    <view class="week-bar" wx:if="{{day.suggestDay}}">
-      <view class="{{day.barClass}}" style="width: {{day.ratioPct}}%;"></view>
-    </view>
-    <text class="week-tip" wx:if="{{day.tip}}">{{day.tip}}</text>
-  </view>
-
-  <view class="date-row">
-    <text class="date-label">{{dateLabel}}</text>
-    <picker mode="date" value="{{date}}" bindchange="onDateChange">
-      <text class="date-pick">换日期</text>
-    </picker>
-  </view>
-
-  <view class="meal-hint" wx:if="{{mealHint}}" bindtap="goCreate">{{mealHint}}</view>
-
-  <view class="list" wx:if="{{list.length}}">
-    <view class="item" wx:for="{{list}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
-      <image wx:if="{{item.imageUrl}}" class="thumb" src="{{item.imageUrl}}" mode="aspectFill" />
-      <view wx:else class="thumb ph">餐</view>
-      <view class="meta">
-        <view class="meta-top">
-          <text class="meal">{{item.mealTypeLabel}}</text>
-          <text class="kcal">{{item.displayKcal}} kcal</text>
+  <block wx:if="{{bodyReady}}">
+    <view class="metrics surface anim-rise-delay" bindtap="goBody">
+      <view class="metrics-row">
+        <view class="m">
+          <text class="m-num">{{metrics.bmi || '—'}}</text>
+          <text class="m-label">BMI {{metrics.bmiLevel || ''}}</text>
         </view>
-        <text class="food">{{item.displayTitle}}</text>
-        <text class="portion">{{item.displaySub}}</text>
+        <view class="m">
+          <text class="m-num">{{metrics.bodyFatPct || '—'}}%</text>
+          <text class="m-label">体脂估算</text>
+        </view>
+        <view class="m">
+          <text class="m-num">{{todayKcal}}</text>
+          <text class="m-label">今日摄入</text>
+        </view>
+      </view>
+      <text class="metrics-tip">{{metricsTip}}</text>
+    </view>
+
+    <view class="week-summary surface anim-rise-delay">
+      <view class="week-head">
+        <text class="week-title">今日热量</text>
+        <text class="week-sub">{{day.sub}}</text>
+      </view>
+      <view class="week-nums">
+        <view class="m">
+          <text class="m-num">{{day.suggestDay || '—'}}</text>
+          <text class="m-label">建议日摄入</text>
+        </view>
+        <view class="m">
+          <text class="m-num">{{day.todayKcal}}</text>
+          <text class="m-label">今日摄入</text>
+        </view>
+        <view class="m">
+          <text class="m-num {{day.remainClass}}">{{day.remainText}}</text>
+          <text class="m-label">{{day.remainLabel}}</text>
+        </view>
+      </view>
+      <view class="week-bar" wx:if="{{day.suggestDay}}">
+        <view class="{{day.barClass}}" style="width: {{day.ratioPct}}%;"></view>
+      </view>
+      <text class="week-tip" wx:if="{{day.tip}}">{{day.tip}}</text>
+    </view>
+
+    <view class="date-row">
+      <text class="date-label">{{dateLabel}}</text>
+      <picker mode="date" value="{{date}}" bindchange="onDateChange">
+        <text class="date-pick">换日期</text>
+      </picker>
+    </view>
+
+    <view class="meal-hint" wx:if="{{mealHint}}" bindtap="goCreate">{{mealHint}}</view>
+
+    <view class="list" wx:if="{{list.length}}">
+      <view class="item" wx:for="{{list}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
+        <image wx:if="{{item.imageUrl}}" class="thumb" src="{{item.imageUrl}}" mode="aspectFill" />
+        <view wx:else class="thumb ph">餐</view>
+        <view class="meta">
+          <view class="meta-top">
+            <text class="meal">{{item.mealTypeLabel}}</text>
+            <text class="kcal">{{item.displayKcal}} 大卡</text>
+          </view>
+          <text class="food">{{item.displayTitle}}</text>
+          <text class="portion">{{item.displaySub}}</text>
+        </view>
       </view>
     </view>
-  </view>
 
-  <view class="empty" wx:else>
-    <view class="empty-title">这天还没有记录</view>
-    <view class="muted">可拍照识别，忘拍照也可手填菜名和热量</view>
-  </view>
+    <view class="empty" wx:else>
+      <view class="empty-title">这天还没有记录</view>
+      <view class="muted">可拍照识别，忘拍照也可手填菜名和热量</view>
+    </view>
+  </block>
 </view>

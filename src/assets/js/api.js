@@ -502,6 +502,20 @@ function analyzeFood(imageUrl, mealType) {
   })
 }
 
+function estimateFoodCalories(foodName, portion) {
+  if (USE_MOCK) {
+    return Promise.resolve({
+      calories: 180,
+      portion: portion || '约150g'
+    })
+  }
+  return request({
+    url: '/api/ai/food/estimate',
+    method: 'POST',
+    data: { foodName, portion: portion || '' }
+  })
+}
+
 function fetchBodyProfile() {
   if (USE_MOCK) {
     return Promise.resolve({
@@ -571,6 +585,7 @@ module.exports = {
   updateProfile,
   analyzeClothing,
   analyzeFood,
+  estimateFoodCalories,
   fetchBodyProfile,
   saveBodyProfile,
   fetchDietLogs,

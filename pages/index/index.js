@@ -2,7 +2,7 @@ const api = require('../../src/assets/js/api')
 const auth = require('../../src/assets/js/auth')
 const util = require('../../src/assets/js/util')
 const location = require('../../src/assets/js/location')
-const { buildDayCard } = require('../../src/assets/js/diet-metrics')
+const { buildDayCard, isBodyReady, promptBodyProfile } = require('../../src/assets/js/diet-metrics')
 
 Page({
   data: {
@@ -21,6 +21,7 @@ Page({
     suggestEngine: '',
     suggestActionLabel: '刷新',
     alerts: [],
+    bodyReady: false,
     diet: {
       suggestDay: 0,
       todayKcal: 0,
@@ -73,29 +74,33 @@ Page({
     const alerts = []
     let metrics = {}
     let todayKcal = 0
+    let bodyReady = false
     try {
       const body = await api.fetchBodyProfile()
       metrics = (body && body.metrics) || {}
+      bodyReady = isBodyReady(body)
     } catch (e) {}
-    try {
-      const meal = util.guessMealType()
-      const today = util.formatDate()
-      const data = await api.fetchDietLogs({ date: today })
-      const list = (data && data.list) || []
-      todayKcal = Math.round(Number(data && data.totalCalories) || 0)
-      if (meal !== 'other') {
-        const hasMeal = list.some((x) => x.mealType === meal)
-        if (!hasMeal) {
-          const label = { breakfast: '早餐', lunch: '午餐', dinner: '晚餐' }[meal] || '这一餐'
-          alerts.push({
-            id: 'diet-meal',
-            text: `还没记${label}，点此记录饮食`,
-            action: 'diet'
-          })
+    if (bodyReady) {
+      try {
+        const meal = util.guessMealType()
+        const today = util.formatDate()
+        const data = await api.fetchDietLogs({ date: today })
+        const list = (data && data.list) || []
+        todayKcal = Math.round(Number(data && data.totalCalories) || 0)
+        if (meal !== 'other') {
+          const hasMeal = list.some((x) => x.mealType === meal)
+          if (!hasMeal) {
+            const label = { breakfast: '早餐', lunch: '午餐', dinner: '晚餐' }[meal] || '这一餐'
+            alerts.push({
+              id: 'diet-meal',
+              text: `还没记${label}，点此记录饮食`,
+              action: 'diet'
+            })
+          }
         }
-      }
-    } catch (e) {}
-    this.setData({ alerts, diet: buildDayCard(metrics, todayKcal) })
+      } catch (e) {}
+    }
+    this.setData({ alerts, bodyReady, diet: buildDayCard(metrics, todayKcal) })
   },
 
   onAlertTap(e) {
@@ -107,6 +112,10 @@ Page({
 
   goDiet() {
     if (!util.ensureLogin()) return
+    if (!this.data.bodyReady) {
+      promptBodyProfile()
+      return
+    }
     wx.switchTab({ url: '/pages/diet/diet' })
   },
 

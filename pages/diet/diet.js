@@ -1,7 +1,7 @@
 const api = require('../../src/assets/js/api')
 const util = require('../../src/assets/js/util')
 const auth = require('../../src/assets/js/auth')
-const { buildDayCard } = require('../../src/assets/js/diet-metrics')
+const { buildDayCard, isBodyReady, promptBodyProfile } = require('../../src/assets/js/diet-metrics')
 
 function todayStr() {
   const d = new Date()
@@ -18,7 +18,8 @@ Page({
     todayKcal: 0,
     metrics: {},
     bodyReady: false,
-    metricsTip: '先完善身高体重，识别建议更准 →',
+    bodyChecked: false,
+    metricsTip: '先完善身高体重才能记饮食 →',
     mealHint: '',
     day: {
       suggestDay: 0,
@@ -46,17 +47,28 @@ Page({
     try {
       const body = await api.fetchBodyProfile()
       metrics = body.metrics || {}
-      bodyReady = !!(body.heightCm && body.weightKg)
+      bodyReady = isBodyReady(body)
       const metricsTip = bodyReady
         ? `建议日摄入约 ${metrics.suggestKcal || '—'} kcal · 点此改档案`
-        : '先完善身高体重，识别建议更准 →'
-      this.setData({ metrics, bodyReady, metricsTip })
+        : '先完善身高体重才能记饮食 →'
+      this.setData({ metrics, bodyReady, bodyChecked: true, metricsTip })
     } catch (e) {
       this.setData({
         metrics: {},
         bodyReady: false,
-        metricsTip: '先完善身高体重，识别建议更准 →'
+        bodyChecked: true,
+        metricsTip: '先完善身高体重才能记饮食 →'
       })
+    }
+
+    if (!bodyReady) {
+      this.setData({
+        list: [],
+        todayKcal: 0,
+        mealHint: '',
+        day: buildDayCard(metrics, 0)
+      })
+      return
     }
 
     let todayKcal = 0
@@ -127,6 +139,10 @@ Page({
 
   goCreate() {
     if (!util.ensureLogin()) return
+    if (!this.data.bodyReady) {
+      promptBodyProfile()
+      return
+    }
     wx.navigateTo({ url: '/pages/diet-edit/diet-edit?date=' + this.data.date })
   },
 

@@ -1,3 +1,26 @@
+function isBodyReady(body) {
+  const h = Number(body && body.heightCm)
+  const w = Number(body && body.weightKg)
+  return Number.isFinite(h) && h > 0 && Number.isFinite(w) && w > 0
+}
+
+function promptBodyProfile(opts) {
+  const redirect = !!(opts && opts.redirect)
+  wx.showModal({
+    title: '先完善身体档案',
+    content: '记饮食需要身高、体重，才能估算热量和建议摄入。',
+    confirmText: '去填写',
+    confirmColor: '#B54A3A',
+    showCancel: !(opts && opts.force),
+    success(res) {
+      if (!res.confirm && !(opts && opts.force)) return
+      const url = '/pages/body-profile/body-profile'
+      if (redirect) wx.redirectTo({ url })
+      else wx.navigateTo({ url })
+    }
+  })
+}
+
 function buildDayCard(metrics, todayKcal) {
   const suggestDay = Math.round(Number(metrics && metrics.suggestKcal) || 0)
   const today = Math.round(Number(todayKcal) || 0)
@@ -46,5 +69,7 @@ function buildDayCard(metrics, todayKcal) {
 }
 
 module.exports = {
-  buildDayCard
+  buildDayCard,
+  isBodyReady,
+  promptBodyProfile
 }

@@ -25,7 +25,7 @@
   <view class="form surface">
     <view class="items-head">
       <text class="form-label">本餐菜品</text>
-      <text class="total-kcal">合计 {{totalCalories}} kcal</text>
+      <text class="total-kcal">合计 {{totalCalories}} 大卡</text>
     </view>
 
     <view class="item-row" wx:for="{{form.items}}" wx:key="index" wx:for-index="index">
@@ -44,7 +44,12 @@
         </view>
         <view class="form-item compact">
           <text class="form-label">热量</text>
-          <input class="form-input" type="digit" placeholder="0" placeholder-class="form-placeholder" value="{{item.calories}}" data-index="{{index}}" data-key="calories" bindinput="onItemInput" />
+          <view class="kcal-box">
+            <input class="form-input kcal-input" type="digit" placeholder="0" placeholder-class="form-placeholder" value="{{item.calories}}" data-index="{{index}}" data-key="calories" bindinput="onItemInput" />
+            <text class="kcal-unit">大卡</text>
+            <view class="kcal-ai busy" wx:if="{{item.estimating}}">…</view>
+            <view class="kcal-ai" wx:else data-index="{{index}}" catchtap="onEstimateCalories">估</view>
+          </view>
         </view>
       </view>
     </view>

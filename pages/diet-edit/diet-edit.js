@@ -1,6 +1,7 @@
 const api = require('../../src/assets/js/api')
 const upload = require('../../src/assets/js/upload')
 const util = require('../../src/assets/js/util')
+const { isBodyReady, promptBodyProfile } = require('../../src/assets/js/diet-metrics')
 
 function todayStr() {
   const d = new Date()
@@ -54,6 +55,7 @@ Page({
     id: null,
     mealDate: '',
     analyzing: false,
+    estimatingIndex: -1,
     // 新建默认隐藏；有图或已有 advice 时再显示
     showAdvice: false,
     totalCalories: 0,
@@ -72,6 +74,17 @@ Page({
   },
 
   async onLoad(query) {
+    if (!util.ensureLogin()) return
+    try {
+      const body = await api.fetchBodyProfile()
+      if (!isBodyReady(body)) {
+        promptBodyProfile({ force: true, redirect: true })
+        return
+      }
+    } catch (e) {
+      promptBodyProfile({ force: true, redirect: true })
+      return
+    }
     const id = query.id || null
     const mealDate = query.date || todayStr()
     // 新建：按时段预选餐次；编辑：以详情为准
@@ -156,6 +169,49 @@ Page({
     }
     this.setData({ 'form.items': items })
     this.refreshTotal()
+  },
+
+  async onEstimateCalories(e) {
+    const index = Number(e.currentTarget.dataset.index)
+    if (this.data.analyzing || this.data.estimatingIndex >= 0) {
+      wx.showToast({ title: '估算中，请稍候', icon: 'none' })
+      return
+    }
+    const item = (this.data.form.items || [])[index]
+    if (!item) return
+    const foodName = (item.foodName || '').trim()
+    if (!foodName) {
+      wx.showToast({ title: '请先填写菜名', icon: 'none' })
+      return
+    }
+    const busyItems = this.data.form.items.slice()
+    busyItems[index] = { ...busyItems[index], estimating: true }
+    this.setData({ 'form.items': busyItems, estimatingIndex: index })
+    wx.showLoading({ title: '估算热量', mask: true })
+    try {
+      const result = await api.estimateFoodCalories(foodName, (item.portion || '').trim())
+      const cal = Math.round(Number(result && result.calories) || 0)
+      const items = this.data.form.items.slice()
+      const next = { ...items[index], calories: String(cal), estimating: false }
+      if (!(next.portion || '').trim() && result && result.portion) {
+        next.portion = result.portion
+      }
+      items[index] = next
+      this.setData({ 'form.items': items })
+      this.refreshTotal()
+    } catch (err) {
+      if (!util.isUserCancel(err)) {
+        console.error('[diet-edit] onEstimateCalories', err)
+      }
+      const items = this.data.form.items.slice()
+      if (items[index]) {
+        items[index] = { ...items[index], estimating: false }
+        this.setData({ 'form.items': items })
+      }
+    } finally {
+      wx.hideLoading()
+      this.setData({ estimatingIndex: -1 })
+    }
   },
 
   async onChooseImage() {

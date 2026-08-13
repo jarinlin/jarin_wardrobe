@@ -3,6 +3,31 @@ function num(v) {
   return Number.isFinite(n) ? n : 0
 }
 
+function pad2(n) {
+  return n < 10 ? '0' + n : String(n)
+}
+
+/** 任意 ISO/时间戳按 Asia/Shanghai（UTC+8，无夏令时）显示 */
+function shanghaiText(value) {
+  if (!value) return ''
+  const raw = String(value).trim()
+  if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(raw)) return raw.slice(0, 16)
+  const d = new Date(raw)
+  if (Number.isNaN(d.getTime())) return raw
+  const sh = new Date(d.getTime() + 8 * 3600 * 1000)
+  return (
+    sh.getUTCFullYear() +
+    '-' +
+    pad2(sh.getUTCMonth() + 1) +
+    '-' +
+    pad2(sh.getUTCDate()) +
+    ' ' +
+    pad2(sh.getUTCHours()) +
+    ':' +
+    pad2(sh.getUTCMinutes())
+  )
+}
+
 function metric(label, value) {
   return { label, value: num(value) }
 }
@@ -22,15 +47,15 @@ function toDashboard(data) {
     caption: p.caption || '无文案',
     nickname: p.nickname || '未设置昵称',
     likeCount: num(p.likeCount),
-    createdAtText: p.createdAtText || ''
+    createdAtText: shanghaiText(p.createdAtText || p.createdAt)
   }))
   const recentUsers = (src.recentUsers || []).map((u) => ({
     id: u.id,
     nickname: u.nickname || '未设置昵称',
-    createdAtText: u.createdAtText || ''
+    createdAtText: shanghaiText(u.createdAtText || u.createdAt)
   }))
   return {
-    asOf: src.asOf || '',
+    asOf: shanghaiText(src.asOf) || src.asOf || '',
     timezone: src.timezone || 'Asia/Shanghai',
     sections: [
       {

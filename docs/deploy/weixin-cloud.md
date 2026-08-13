@@ -23,6 +23,7 @@ git push -u origin main
 2. 创建服务（如 `jarin-api`）→ 填入 `CLOUD_SERVICE`
 3. 代码包上传 `backend/`，使用仓库内 Dockerfile 构建
 4. 配置环境变量（与 `.env.example` 对齐）：
+   - `TZ=Asia/Shanghai`（容器默认 UTC，不设则日志/部分时间会显示成早上的 UTC）
    - `DB_*` / `JWT_SECRET` / `PUBLIC_BASE_URL`
    - `WX_APPID` / `WX_SECRET`（云托管也可依赖网关注入的 `x-wx-openid`）
    - `ALLOW_MOCK_LOGIN=false`（正式环境）

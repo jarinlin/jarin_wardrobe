@@ -2,9 +2,11 @@
   <view class="section profile-section">
     <text class="section-title">个人资料</text>
     <view class="profile-row" wx:if="{{loggedIn}}">
-      <button class="avatar-btn" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
-        <image class="avatar" src="{{avatarUrl || defaultAvatar}}" mode="aspectFill" />
-      </button>
+      <view class="avatar-wrap">
+        <button class="avatar-btn" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
+          <image class="avatar" src="{{avatarUrl || defaultAvatar}}" mode="aspectFill" />
+        </button>
+      </view>
       <view class="profile-fields">
         <input
           class="nickname"

@@ -127,6 +127,8 @@ wardrobe/                         ← 微信开发者工具打开这里
 | 2026-08-14 | 对象存储开关已统一为 `STORAGE_DRIVER=cos|r2`；兼容读取 `STORAGE_PROVIDER`，任一设为 `r2` 即启用 R2；`.env` 保持 `cos`，R2 Access Key ID / Secret Access Key 填齐后再切换。 |
 | 2026-08-14 | 本地 `.env` 已切 `STORAGE_DRIVER=r2` 并去掉重复空 Key；云托管文档补上 R2 环境变量 JSON，原有 `COS_*` 保留。 |
 | 2026-08-14 | 首页今日建议空衣柜文案改为「衣柜暂无可匹配衣物」，去掉「等待 AI 打标」等表述。 |
+| 2026-08-14 | 上传接口按用途限制类型与大小：照片 jpg/png/webp、2KB–8MB；头像 1KB–2MB。`/api/upload` 校验文件头，`/api/upload/sign` 校验声明类型并可带 size。 |
+| 2026-08-14 | 照片上限改为 10MB（避开 callContainer 过大包）；超过 5MB 时小程序先压，本机 `/api/upload` 后端再压成 JPEG。格式为 jpg/png/webp/bmp，HEIC 明确拒绝。 |
 
 ## 配置要点（天气 / 隐私）
 1. 高德控制台创建 **Web 服务** Key → 写入 `backend/.env` 的 `AMAP_KEY=` 或 `AMAP_WEB_KEY=`（勿提交仓库）

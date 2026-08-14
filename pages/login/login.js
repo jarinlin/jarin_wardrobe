@@ -114,7 +114,7 @@ Page({
         /^https?:\/\/tmp/i.test(formAvatar) ||
         (formAvatar.indexOf('http') !== 0)
       if (needUpload && !USE_MOCK) {
-        avatarUrl = await upload.uploadImage(formAvatar)
+        avatarUrl = await upload.uploadImage(formAvatar, 'avatar')
       } else if (/127\.0\.0\.1|localhost/i.test(formAvatar)) {
         avatarUrl = ''
       }

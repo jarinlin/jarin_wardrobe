@@ -2,12 +2,89 @@ const { BASE_URL, USE_MOCK, USE_CLOUD } = require('./config')
 const auth = require('./auth')
 const api = require('./api')
 
+const UPLOAD_LIMITS = {
+  photo: { minBytes: 2 * 1024, maxBytes: 10 * 1024 * 1024, hint: '2KB–10MB' },
+  avatar: { minBytes: 1 * 1024, maxBytes: 2 * 1024 * 1024, hint: '1KB–2MB' }
+}
+const COMPRESS_ABOVE = 5 * 1024 * 1024
+
+function normalizePurpose(purpose) {
+  return purpose === 'avatar' ? 'avatar' : 'photo'
+}
+
+function getFileSize(filePath) {
+  return new Promise((resolve) => {
+    wx.getFileInfo({
+      filePath,
+      success: (res) => resolve(Number(res.size) || 0),
+      fail: () => resolve(0)
+    })
+  })
+}
+
+function assertUploadSize(size, purpose) {
+  const limit = UPLOAD_LIMITS[normalizePurpose(purpose)]
+  if (size > 0 && (size < limit.minBytes || size > limit.maxBytes)) {
+    const title = `${purpose === 'avatar' ? '头像' : '图片'}大小需在 ${limit.hint}`
+    wx.showToast({ title, icon: 'none' })
+    return Promise.reject(new Error(title))
+  }
+  return Promise.resolve()
+}
+
+function compressOnce(src, quality, width) {
+  return new Promise((resolve, reject) => {
+    const opts = {
+      src,
+      quality,
+      success: (r) => resolve(r.tempFilePath || src),
+      fail: reject
+    }
+    if (width) opts.compressedWidth = width
+    wx.compressImage(opts)
+  })
+}
+
+/** 超过 5MB 时在小程序侧先压；云托管直传后端看不到原图，必须在这里做。 */
+async function shrinkPhoto(filePath) {
+  let path = filePath
+  let size = await getFileSize(path)
+  if (size < COMPRESS_ABOVE) {
+    try {
+      const light = await compressOnce(path, 80)
+      const nextSize = await getFileSize(light)
+      if (nextSize > 0 && nextSize <= size) {
+        return light
+      }
+    } catch (e) {}
+    return path
+  }
+  const steps = [
+    { quality: 70, width: 2560 },
+    { quality: 55, width: 1920 },
+    { quality: 40, width: 1600 }
+  ]
+  for (const step of steps) {
+    try {
+      const next = await compressOnce(path, step.quality, step.width)
+      const nextSize = await getFileSize(next)
+      if (nextSize > 0 && nextSize < size) {
+        path = next
+        size = nextSize
+      }
+      if (size < COMPRESS_ABOVE) return path
+    } catch (e) {}
+  }
+  return path
+}
+
 /**
  * 上传本地临时图片到后端，再由服务端写入当前对象存储
  * cloud 模式：callContainer 拿预签名 → 小程序直传 COS/R2（避开 100KB 限制）
  * @returns {Promise<string>} 可访问的图片 URL
  */
-function uploadImage(filePath) {
+function uploadImage(filePath, purpose = 'photo') {
+  purpose = normalizePurpose(purpose)
   if (USE_MOCK) {
     return Promise.resolve(filePath)
   }
@@ -16,15 +93,26 @@ function uploadImage(filePath) {
     return Promise.reject(new Error('请先登录'))
   }
 
-  if (USE_CLOUD) {
-    return uploadImageViaCloud(filePath)
-  }
+  const prepare = purpose === 'photo' ? shrinkPhoto(filePath) : Promise.resolve(filePath)
+  return prepare.then((local) =>
+    getFileSize(local).then((size) =>
+      assertUploadSize(size, purpose).then(() => {
+        if (USE_CLOUD) {
+          return uploadImageViaCloud(local, purpose, size)
+        }
+        return uploadImageViaApi(local, token, purpose)
+      })
+    )
+  )
+}
 
+function uploadImageViaApi(filePath, token, purpose) {
   return new Promise((resolve, reject) => {
     wx.uploadFile({
       url: `${BASE_URL}/api/upload`,
       filePath,
       name: 'file',
+      formData: { purpose },
       header: {
         Authorization: `Bearer ${token}`
       },
@@ -65,18 +153,41 @@ function guessContentType(filePath) {
   const lower = String(filePath || '').toLowerCase()
   if (lower.endsWith('.png')) return 'image/png'
   if (lower.endsWith('.webp')) return 'image/webp'
-  if (lower.endsWith('.gif')) return 'image/gif'
+  if (lower.endsWith('.bmp')) return 'image/bmp'
   return 'image/jpeg'
 }
 
-function uploadImageViaCloud(filePath) {
+function rejectUnsupportedPath(filePath) {
+  const lower = String(filePath || '').toLowerCase()
+  if (lower.endsWith('.gif')) {
+    return '图片仅支持 jpg/png/webp/bmp'
+  }
+  if (lower.endsWith('.heic') || lower.endsWith('.heif')) {
+    return '暂不支持 HEIC，请用系统相册选择'
+  }
+  return ''
+}
+
+function uploadImageViaCloud(filePath, purpose, size) {
+  const bad = rejectUnsupportedPath(filePath)
+  if (bad) {
+    wx.showToast({ title: bad, icon: 'none' })
+    return Promise.reject(new Error(bad))
+  }
   const contentType = guessContentType(filePath)
-  const filename = contentType === 'image/png' ? 'image.png' : 'image.jpg'
+  const filename =
+    contentType === 'image/png'
+      ? 'image.png'
+      : contentType === 'image/webp'
+        ? 'image.webp'
+        : contentType === 'image/bmp'
+          ? 'image.bmp'
+          : 'image.jpg'
   return api
     .request({
       url: '/api/upload/sign',
       method: 'POST',
-      data: { filename, contentType }
+      data: { filename, contentType, purpose, size: size || 0 }
     })
     .then((sign) => {
       if (!sign || !sign.putUrl || !sign.url) {
@@ -123,7 +234,7 @@ function uploadImageViaCloud(filePath) {
 }
 
 /** 选图并压缩后上传，返回对象存储 URL；选图/上传失败会 toast 并 reject */
-function chooseAndUploadImage(count = 1) {
+function chooseAndUploadImage(count = 1, purpose = 'photo') {
   const util = require('./util')
   return util.chooseImage(count).then(async (paths) => {
     if (!paths.length) {
@@ -132,23 +243,9 @@ function chooseAndUploadImage(count = 1) {
     }
     const urls = []
     for (const p of paths) {
-      let local = p
+      wx.showLoading({ title: '处理图片', mask: true })
       try {
-        const compressed = await new Promise((resolve, reject) => {
-          wx.compressImage({
-            src: p,
-            quality: 80,
-            success: (r) => resolve(r.tempFilePath),
-            fail: reject
-          })
-        })
-        local = compressed || p
-      } catch (e) {
-        // 压缩失败则用原图
-      }
-      wx.showLoading({ title: '上传中', mask: true })
-      try {
-        const url = await uploadImage(local)
+        const url = await uploadImage(p, purpose)
         urls.push(url)
       } finally {
         wx.hideLoading()

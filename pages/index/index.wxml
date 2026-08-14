@@ -87,7 +87,7 @@
     </scroll-view>
 
     <view class="suggest-empty" wx:elif="{{!suggestLoading}}">
-      <text class="muted">衣柜里还没有可匹配的单品，先添加几件有标签的衣物</text>
+      <text class="muted">衣柜暂无可匹配衣物</text>
       <text class="loc-action" bindtap="goWardrobe">去衣柜添加</text>
     </view>
 

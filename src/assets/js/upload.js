@@ -3,8 +3,8 @@ const auth = require('./auth')
 const api = require('./api')
 
 /**
- * 上传本地临时图片到后端，再由服务端写入腾讯云 COS
- * cloud 模式：callContainer 拿预签名 → 小程序直传 COS（避开 100KB 限制）
+ * 上传本地临时图片到后端，再由服务端写入当前对象存储
+ * cloud 模式：callContainer 拿预签名 → 小程序直传 COS/R2（避开 100KB 限制）
  * @returns {Promise<string>} 可访问的图片 URL
  */
 function uploadImage(filePath) {
@@ -98,14 +98,14 @@ function uploadImageViaCloud(filePath) {
                   resolve(sign.url)
                   return
                 }
-                console.error('[upload.cos]', putRes.statusCode, putRes.data)
-                wx.showToast({ title: '直传 COS 失败', icon: 'none' })
+                console.error('[upload.storage]', putRes.statusCode, putRes.data)
+                wx.showToast({ title: '直传对象存储失败', icon: 'none' })
                 reject(putRes)
               },
               fail(err) {
-                console.error('[upload.cos]', err)
+                console.error('[upload.storage]', err)
                 wx.showToast({
-                  title: '请配置 COS 合法域名',
+                  title: '请配置存储合法域名',
                   icon: 'none'
                 })
                 reject(err)
@@ -122,7 +122,7 @@ function uploadImageViaCloud(filePath) {
     })
 }
 
-/** 选图并压缩后上传，返回 COS URL；选图/上传失败会 toast 并 reject */
+/** 选图并压缩后上传，返回对象存储 URL；选图/上传失败会 toast 并 reject */
 function chooseAndUploadImage(count = 1) {
   const util = require('./util')
   return util.chooseImage(count).then(async (paths) => {

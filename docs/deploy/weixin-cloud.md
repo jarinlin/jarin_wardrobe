@@ -27,16 +27,17 @@ git push -u origin main
    - `DB_*` / `JWT_SECRET` / `PUBLIC_BASE_URL`
    - `WX_APPID` / `WX_SECRET`（云托管也可依赖网关注入的 `x-wx-openid`）
    - `ALLOW_MOCK_LOGIN=false`（正式环境）
-   - `COS_*` / `AI_*` / `AMAP_KEY`
+   - `STORAGE_DRIVER=cos|r2`，并按后端配置 `COS_*` 或 `R2_*`；R2 的 Access Key ID / Secret Access Key 填齐后再切为 `r2`
+   - `AI_*` / `AMAP_KEY`
    - `REDIS_HOST` / `REDIS_PORT` / `REDIS_USER` / `REDIS_PASSWORD` / `REDIS_TLS`（Upstash 填 `"true"`）/ 可选 `REDIS_DB`
 5. 数据库：使用云托管 PostgreSQL 或自建；首次启动会 auto-migrate
 6. 小程序：`src/assets/js/config.js` 设 `RUN_MODE='cloud'`，填写 `CLOUD_ENV` / `CLOUD_SERVICE`（本项目：`prod-d5grcb82q8a137e9c` / `warerobe-backend`）
 7. 基础库 ≥ 2.23.0；API 走 `wx.cloud.callContainer`，**无需**配置 request 合法域名（业务 API）
-8. 图片上传：cloud 模式先 `POST /api/upload/sign` 再直传 COS；需在公众平台配置：
-   - **request 合法域名**：`https://jarin-1318356458.cos.ap-guangzhou.myqcloud.com`
-   - **downloadFile / 图片**：同上 COS 域名（及 CDN 若使用）
+8. 图片上传：cloud 模式先 `POST /api/upload/sign` 再直传当前对象存储；需在公众平台配置：
+   - COS：**request / downloadFile / 图片合法域名**使用桶域名（及 CDN 若使用）
+   - R2：加入 `https://5c93c53be15906fca262e84d5717e1fb.r2.cloudflarestorage.com`
 9. 开发者工具：重新编译 → 清缓存 → 真机预览/上传体验版；正式发布走「上传 → 提交审核」
-10. 图片：接口一律返回 **COS 预签名 GET**（库内只存 key）。不要配 `PUBLIC_BASE_URL`、不要用 `/api/media` 给小程序当图床。小程序需配置 COS downloadFile/图片域名。
+10. 图片：接口一律返回当前存储的**预签名 GET**（库内只存 key，桶保持私有）。不要用 `/api/media` 给小程序当图床；小程序需配置所选存储的 downloadFile/图片域名。
 
 ## Redis（今日穿搭建议缓存）
 - 用途：缓存 `GET /api/suggest/outfit` 的完整业务 data，按用户 + 上海日历日隔离
@@ -54,6 +55,21 @@ git push -u origin main
   "REDIS_PASSWORD": "<写在控制台，勿提交仓库>",
   "REDIS_TLS": "true",
   "REDIS_DB": "0"
+}
+```
+
+- 对象存储（在原有 `COS_*` 上追加；值全部为字符串）。切 R2 前先填齐 Key，再把 `STORAGE_DRIVER` 设为 `r2`：
+
+```json
+{
+  "STORAGE_DRIVER": "r2",
+  "R2_ACCOUNT_ID": "5c93c53be15906fca262e84d5717e1fb",
+  "R2_ACCESS_KEY_ID": "<写在控制台，勿提交仓库>",
+  "R2_SECRET_ACCESS_KEY": "<写在控制台，勿提交仓库>",
+  "R2_BUCKET": "jarin",
+  "R2_ENDPOINT": "https://5c93c53be15906fca262e84d5717e1fb.r2.cloudflarestorage.com",
+  "R2_REGION": "auto",
+  "R2_PREFIX": "wardrobe"
 }
 ```
 

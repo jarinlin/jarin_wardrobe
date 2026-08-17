@@ -1,3 +1,5 @@
+@import '../../src/assets/css/diet-edit.wxss';
+
 .cover {
   position: relative;
   height: 360rpx;

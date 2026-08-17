@@ -1,16 +1,21 @@
 <view class="page edit">
-  <view class="cover surface" hover-class="cover-hover" bindtap="onChooseImage">
-    <image wx:if="{{form.imageUrl}}" class="cover-img" src="{{form.imageUrl}}" mode="aspectFill" />
-    <view wx:else class="cover-empty">
-      <text class="plus">＋</text>
-      <text>拍照识别（可选）</text>
-      <text class="cover-hint">忘拍照也可直接手填菜名和热量</text>
-    </view>
-    <!-- 识别中全覆盖并拦截点击，避免误触；未识别时不渲染 -->
+  <view class="photos surface">
+    <scroll-view class="photo-scroll" scroll-x enable-flex show-scrollbar="{{false}}">
+      <view class="photo-row">
+        <view class="photo-card" wx:for="{{form.imageUrls}}" wx:key="*this">
+          <image class="photo-img" src="{{item}}" mode="aspectFill" data-url="{{item}}" bindtap="onPreviewImage" />
+          <text class="photo-del" data-index="{{index}}" catchtap="onRemoveImage">×</text>
+        </view>
+        <view class="photo-add" wx:if="{{form.imageUrls.length < 9}}" bindtap="onChooseImage">
+          <text class="plus">＋</text>
+          <text>{{form.imageUrls.length ? '再拍一张' : '拍照识别'}}</text>
+        </view>
+      </view>
+    </scroll-view>
     <view class="analyzing-mask" wx:if="{{analyzing}}" catchtap="noop">AI 识别中…</view>
   </view>
 
-  <view class="skip-photo" wx:if="{{!form.imageUrl}}" bindtap="onSkipPhoto">不拍照，直接手填菜品</view>
+  <view class="skip-photo" wx:if="{{!form.imageUrls.length}}" bindtap="onSkipPhoto">不拍照，直接手填菜品</view>
 
   <view class="meal-row">
     <view
@@ -40,7 +45,11 @@
       <view class="item-grid">
         <view class="form-item compact">
           <text class="form-label">分量</text>
-          <input class="form-input" placeholder="约150g" placeholder-class="form-placeholder" value="{{item.portion}}" data-index="{{index}}" data-key="portion" bindinput="onItemInput" />
+          <view class="portion-box">
+            <input class="form-input portion-input" placeholder="1个" placeholder-class="form-placeholder" value="{{item.portion}}" data-index="{{index}}" data-key="portion" bindinput="onItemInput" />
+            <view class="kcal-ai busy" wx:if="{{item.estimating}}">…</view>
+            <view class="kcal-ai" wx:else data-index="{{index}}" catchtap="onEstimatePortion">估</view>
+          </view>
         </view>
         <view class="form-item compact">
           <text class="form-label">热量</text>
@@ -56,9 +65,13 @@
 
     <view class="add-item" bindtap="onAddItem">＋ 添加一道</view>
 
-    <view class="form-item advice-block" wx:if="{{showAdvice}}">
-      <text class="form-label">饮食建议</text>
-      <textarea class="form-textarea" placeholder="AI 建议可改" placeholder-class="form-textarea-placeholder" value="{{form.advice}}" bindinput="onAdviceInput" />
+    <view class="form-item advice-block">
+      <view class="advice-head">
+        <text class="form-label">饮食建议</text>
+        <text class="advice-action {{advising ? 'busy' : ''}}" bindtap="onGenerateAdvice">{{form.advice ? '重新生成' : '生成建议'}}</text>
+      </view>
+      <text class="advice-tip" wx:if="{{form.advice}}">{{form.advice}}</text>
+      <text class="advice-empty" wx:else>拍完或填完菜品后可生成提示</text>
     </view>
   </view>
 

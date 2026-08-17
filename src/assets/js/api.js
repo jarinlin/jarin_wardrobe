@@ -727,6 +727,7 @@ function analyzeClothing(imageUrl) {
 }
 
 function analyzeFood(imageUrl, mealType) {
+  const imageUrls = Array.isArray(imageUrl) ? imageUrl.filter(Boolean) : [imageUrl].filter(Boolean)
   if (USE_MOCK) {
     return Promise.resolve({
       foodName: '示例米饭套餐',
@@ -740,7 +741,18 @@ function analyzeFood(imageUrl, mealType) {
   return request({
     url: '/api/ai/food/analyze',
     method: 'POST',
-    data: { imageUrl, mealType }
+    data: { imageUrl: imageUrls[0] || '', imageUrls, mealType }
+  })
+}
+
+function suggestFoodAdvice(items, mealType) {
+  if (USE_MOCK) {
+    return Promise.resolve({ advice: '这餐搭配还行，蔬菜可以再多一点。' })
+  }
+  return request({
+    url: '/api/ai/food/advice',
+    method: 'POST',
+    data: { items: items || [], mealType }
   })
 }
 
@@ -834,6 +846,7 @@ module.exports = {
   updateProfile,
   analyzeClothing,
   analyzeFood,
+  suggestFoodAdvice,
   estimateFoodCalories,
   fetchBodyProfile,
   saveBodyProfile,

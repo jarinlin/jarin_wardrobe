@@ -259,11 +259,6 @@ Page({
         suggestLoading: false,
         suggestActionLabel: items.length ? '换一套' : '刷新'
       })
-      if (data && data.tips && data.weather) {
-        const alerts = (this.data.alerts || []).filter((a) => a.id !== 'weather-tip')
-        alerts.unshift({ id: 'weather-tip', text: data.tips, action: '' })
-        this.setData({ alerts: alerts.slice(0, 4) })
-      }
     } catch (e) {
       console.warn('[suggest] 请求失败', e)
       if (interactive) {

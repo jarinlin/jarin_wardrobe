@@ -38,5 +38,8 @@
 
   <view class="btn-primary plaza-btn" bindtap="goPublish">{{item.ootdPublished ? '管理广场帖' : '发布到广场'}}</view>
 
-  <view class="btn-danger" bindtap="onDelete">删除这条穿搭</view>
+  <view class="actions">
+    <view class="btn-ghost" bindtap="onEdit">编辑</view>
+    <view class="btn-danger" bindtap="onDelete">删除</view>
+  </view>
 </view>

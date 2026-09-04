@@ -4,7 +4,7 @@
       <view class="page-title">穿搭</view>
       <view class="page-subtitle">{{tab === 'plaza' ? '看看大家在穿什么' : '记下今天的样子'}}</view>
     </view>
-    <view class="head-btn" wx:if="{{tab === 'mine'}}" bindtap="goCreate">今日穿搭</view>
+    <view class="head-btn" wx:if="{{tab === 'mine'}}" bindtap="goCreate">记今日</view>
   </view>
 
   <view class="seg">

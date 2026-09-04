@@ -77,6 +77,11 @@ Page({
     })
   },
 
+  onEdit() {
+    if (!util.ensureLogin()) return
+    wx.navigateTo({ url: `/pages/outfit-edit/outfit-edit?id=${this.data.id}` })
+  },
+
   goPublish() {
     if (!util.ensureLogin()) return
     const item = this.data.item || {}

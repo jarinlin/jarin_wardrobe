@@ -48,13 +48,9 @@
     <textarea class="form-textarea note-area" placeholder="如：轻松上班" placeholder-class="form-textarea-placeholder" value="{{note}}" bindinput="onNote" />
   </view>
 
-  <view class="plaza-switch">
-    <view class="choice-copy">
-      <text class="opt-title">发布到广场</text>
-    </view>
-    <switch checked="{{publishToPlaza}}" color="#E85D75" bindchange="onPlaza" />
+  <view class="btn-primary" bindtap="onSubmit">保存穿搭</view>
+  <view class="btn-ghost plaza-next" data-plaza="1" bindtap="onSubmit">
+    {{ootdPublished ? '保存后去广场' : '保存并发布到广场'}}
   </view>
-
-  <view class="btn-primary" bindtap="onSubmit">{{publishToPlaza && !ootdPublished ? '保存并发布' : '保存穿搭'}}</view>
   <view class="safe-bottom"></view>
 </view>

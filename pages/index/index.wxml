@@ -106,7 +106,8 @@
   <view class="panel anim-rise-delay">
     <view class="section-head">
       <text class="section-title">今日穿搭</text>
-      <text class="section-action" bindtap="goOutfitEdit">{{todayOutfit ? '查看' : '去记录'}}</text>
+      <text class="section-action" wx:if="{{todayOutfit}}" bindtap="goOutfitDetail">查看</text>
+      <text class="section-action" wx:else bindtap="goOutfitEdit">去记录</text>
     </view>
 
     <view class="today" wx:if="{{todayOutfit}}" bindtap="goOutfitDetail">

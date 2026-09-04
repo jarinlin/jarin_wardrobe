@@ -1,5 +1,3 @@
-@import '../../src/assets/css/ootd.wxss';
-
 .date-row {
   display: flex;
   justify-content: space-between;
@@ -152,4 +150,8 @@
 
 .note-area {
   min-height: 112rpx;
+}
+
+.plaza-next {
+  margin-top: 16rpx;
 }

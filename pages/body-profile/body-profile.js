@@ -175,7 +175,7 @@ Page({
       return
     }
     const needGen = profileKey(form) !== savedKey || !(metrics && metrics.suggestKcal)
-    wx.showLoading({ title: needGen ? '正在生成摄入建议' : '保存中' })
+    wx.showLoading({ title: needGen ? '生成营养建议' : '保存中' })
     try {
       const body = await api.saveBodyProfile({
         gender: form.gender,

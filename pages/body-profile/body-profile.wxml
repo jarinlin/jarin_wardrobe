@@ -1,5 +1,5 @@
 <view class="page body" wx:if="{{booted}}">
-  <view class="page-subtitle tip">BMI / 体脂 / 基础代谢为本地估算；每日热量和营养建议由 AI 根据档案生成，失败时用公式兜底</view>
+  <view class="page-subtitle tip">BMI 与基础代谢按公式估算；体脂和每日营养建议由 AI 结合身体档案生成，失败时使用公式兜底</view>
 
   <view class="form surface">
     <view class="form-item">
@@ -48,8 +48,8 @@
   <view class="metrics surface" wx:if="{{metrics.bmi}}">
     <view class="row"><text class="k">BMI</text><text class="v">{{metrics.bmi}}（{{metrics.bmiLevel}}）</text></view>
     <view class="row" wx:if="{{metrics.bodyFatPct}}">
-      <text class="k">体脂估算</text>
-      <text class="v">{{metrics.bodyFatPct}}%</text>
+      <text class="k">{{metrics.bodyFatSource === 'ai' ? 'AI 体脂估算' : '体脂估算'}}</text>
+      <text class="v">{{metrics.bodyFatText || (metrics.bodyFatPct + '%')}}</text>
     </view>
     <view class="row"><text class="k">理想体重</text><text class="v">{{metrics.idealWeightKg}} kg</text></view>
     <view class="row"><text class="k">基础代谢</text><text class="v">{{metrics.bmr}} kcal</text></view>
@@ -58,7 +58,7 @@
       <text class="k">{{item.label}} · {{item.roleHint}}</text>
       <text class="v">{{item.value}} {{item.unit}}</text>
     </view>
-    <text class="metrics-note">体脂为估算非 AI；每日营养建议在档案变更后重新生成。总糖仅为参考，不是添加糖上限。</text>
+    <text class="metrics-note">体脂为 AI 结合年龄、性别、BMI 与活动量给出的区间估算，并非体测结果；AI 不可用时采用公式估算。总糖仅为参考，不是添加糖上限。</text>
   </view>
 
   <view class="btn-primary" bindtap="onSave">保存档案</view>

@@ -29,7 +29,7 @@
         </view>
         <view class="m">
           <text class="m-num">{{bodyFatText}}</text>
-          <text class="m-label">体脂估算</text>
+          <text class="m-label">体脂区间</text>
         </view>
         <view class="m">
           <text class="m-num">{{todayKcal}}</text>
@@ -63,7 +63,11 @@
       </view>
       <text class="week-tip" wx:if="{{day.tip}}">{{day.tip}}</text>
       <text class="incomplete-tip" wx:if="{{day.incompleteTip}}">{{day.incompleteTip}}</text>
-      <view class="nutrient-list" wx:if="{{day.progress.length}}">
+      <view class="nutrient-toggle" wx:if="{{day.progress.length}}" bindtap="onToggleNutrients">
+        <text>{{nutrientsExpanded ? '收起营养详情' : '展开营养详情'}}</text>
+        <text class="nutrient-toggle-icon">{{nutrientsExpanded ? '▴' : '▾'}}</text>
+      </view>
+      <view class="nutrient-list" wx:if="{{nutrientsExpanded && day.progress.length}}">
         <view class="nutrient-row" wx:for="{{day.progress}}" wx:key="key">
           <view class="nutrient-meta">
             <text class="nutrient-name">{{item.label}}</text>

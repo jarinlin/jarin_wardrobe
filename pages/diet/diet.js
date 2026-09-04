@@ -23,6 +23,7 @@ Page({
     bodyChecked: false,
     metricsTip: '先完善身高体重才能记饮食 →',
     mealHint: '',
+    nutrientsExpanded: false,
     day: {
       suggestDay: 0,
       todayKcal: 0,
@@ -69,7 +70,7 @@ Page({
       const body = await api.fetchBodyProfile()
       metrics = body.metrics || {}
       bodyReady = isBodyReady(body)
-      const bodyFatText = metrics.bodyFatPct ? `${metrics.bodyFatPct}%` : '—'
+      const bodyFatText = metrics.bodyFatText || (metrics.bodyFatPct ? `${metrics.bodyFatPct}%` : '—')
       const metricsTip = bodyReady
         ? `建议热量约 ${metrics.suggestKcal || '—'} kcal · 点此改档案`
         : '先完善身高体重才能记饮食 →'
@@ -167,6 +168,10 @@ Page({
         weekLine
       })
     }
+  },
+
+  onToggleNutrients() {
+    this.setData({ nutrientsExpanded: !this.data.nutrientsExpanded })
   },
 
   onDateChange(e) {

@@ -32,7 +32,7 @@
         bindtap="toggleCloth"
       >
         <view class="cloth-cover">
-          <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" />
+          <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" lazy-load="{{true}}" />
           <view wx:else class="ph">{{item.categoryName}}</view>
           <view class="cloth-mark" wx:if="{{item.selected}}">
             <view class="check"></view>
@@ -41,6 +41,7 @@
         <text class="cloth-name">{{item.name}}</text>
       </view>
     </view>
+    <view class="page-more" wx:if="{{clothes.length}}">{{loadingMore ? '加载中…' : (clothesHasMore ? '上拉加载更多' : '已经到底了')}}</view>
   </view>
 
   <view class="form-item note-item">

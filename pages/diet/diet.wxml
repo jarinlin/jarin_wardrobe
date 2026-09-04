@@ -97,8 +97,8 @@
 
     <view class="list" wx:if="{{list.length}}">
       <view class="item" wx:for="{{list}}" wx:key="id" data-id="{{item.id}}" bindtap="goDetail">
-        <image wx:if="{{item.imageUrl}}" class="thumb" src="{{item.imageUrl}}" mode="aspectFill" />
-        <image wx:else class="thumb" src="{{item.placeholderUrl}}" mode="aspectFill" />
+        <image wx:if="{{item.imageUrl}}" class="thumb" src="{{item.imageUrl}}" mode="aspectFill" lazy-load="{{true}}" />
+        <image wx:else class="thumb" src="{{item.placeholderUrl}}" mode="aspectFill" lazy-load="{{true}}" />
         <view class="meta">
           <view class="meta-top">
             <text class="meal">{{item.mealTypeLabel}}</text>

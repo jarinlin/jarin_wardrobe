@@ -69,7 +69,7 @@
       style="animation-delay: {{index * 40}}ms"
     >
       <view class="cover tone-{{index % 4}}">
-        <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" />
+        <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" lazy-load="{{true}}" />
         <view wx:else class="cover-ph">
           <text class="ph-cat">{{item.categoryName || '衣物'}}</text>
           <text class="ph-name">{{item.name}}</text>
@@ -81,6 +81,7 @@
       </view>
     </view>
   </view>
+  <view class="page-more" wx:if="{{list.length}}">{{loadingMore ? '加载中…' : (hasMore ? '上拉加载更多' : '已经到底了')}}</view>
 
   <view class="empty" wx:else>
     <view class="empty-title">没有匹配的衣物</view>

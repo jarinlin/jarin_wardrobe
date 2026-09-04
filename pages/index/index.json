@@ -1,4 +1,5 @@
 {
   "navigationBarTitleText": "Jarin衣柜",
+  "enablePullDownRefresh": true,
   "usingComponents": {}
 }

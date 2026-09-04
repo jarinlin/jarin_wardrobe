@@ -1,4 +1,5 @@
 {
   "navigationBarTitleText": "记录穿搭",
+  "onReachBottomDistance": 80,
   "usingComponents": {}
 }

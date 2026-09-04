@@ -155,3 +155,10 @@
 .plaza-next {
   margin-top: 16rpx;
 }
+
+.page-more {
+  padding: 20rpx 0 4rpx;
+  text-align: center;
+  font-size: 22rpx;
+  color: var(--muted);
+}

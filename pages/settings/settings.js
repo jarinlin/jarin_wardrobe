@@ -11,7 +11,7 @@ function isPlaceholderNick(name) {
 
 Page({
   data: {
-    about: '今天穿什么、吃什么，打开就能记。衣柜不再是黑洞，天气会帮你搭配，拍张餐也能估热量，好看的还可以丢上广场。',
+    about: '今天穿什么、吃什么，打开就能记。衣柜不再是黑洞，天气会帮你搭配，拍张餐也能估热量，好看的还可以丢上广场。界面字体使用小米 MiSans。',
     exporting: false,
     nickname: '',
     avatarUrl: '',
@@ -124,10 +124,14 @@ Page({
           wx.removeStorageSync('wardrobe_filter_status')
           wx.removeStorageSync('suggest_outfit_ids')
           wx.removeStorageSync('suggest_outfit_note')
+          wx.removeStorageSync('last_fuzzy_location')
           wx.removeStorageSync('mock_clothes')
           wx.removeStorageSync('mock_outfits')
           wx.removeStorageSync('mock_categories')
           wx.removeStorageSync('mock_tags')
+          wx.removeStorageSync('mock_ootd_posts')
+          wx.removeStorageSync('mock_id_seq')
+          wx.removeStorageSync('mock_seeded')
         } catch (e) {}
         wx.showToast({ title: '已清理', icon: 'success' })
       }

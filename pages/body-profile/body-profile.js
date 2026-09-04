@@ -58,7 +58,8 @@ Page({
     metrics: {},
     targetRows: [],
     savedKey: '',
-    booted: false
+    booted: false,
+    saving: false
   },
 
   onLoad() {
@@ -70,6 +71,7 @@ Page({
   onShow() {
     if (!this.data.booted) return
     this.setData({ endDate: util.formatDate() })
+    if (profileKey(this.data.form) !== this.data.savedKey) return
     this.load()
   },
 
@@ -146,6 +148,7 @@ Page({
   },
 
   async onSave() {
+    if (this.data.saving) return
     const { form, metrics, savedKey } = this.data
     const heightCm = Number(form.heightCm)
     const weightKg = Number(form.weightKg)
@@ -175,6 +178,7 @@ Page({
       return
     }
     const needGen = profileKey(form) !== savedKey || !(metrics && metrics.suggestKcal)
+    this.setData({ saving: true })
     wx.showLoading({ title: needGen ? '生成营养建议' : '保存中' })
     try {
       const body = await api.saveBodyProfile({
@@ -207,6 +211,8 @@ Page({
       }, 400)
     } catch (e) {
       wx.hideLoading()
+    } finally {
+      this.setData({ saving: false })
     }
   }
 })

@@ -16,8 +16,7 @@
     "pages/body-profile/body-profile",
     "pages/tags/tags",
     "pages/settings/settings",
-    "pages/admin-report/admin-report",
-    "pages/mine/mine"
+    "pages/admin-report/admin-report"
   ],
   "window": {
     "navigationBarBackgroundColor": "#FAF7F5",

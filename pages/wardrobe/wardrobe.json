@@ -1,4 +1,6 @@
 {
   "navigationBarTitleText": "衣柜",
+  "enablePullDownRefresh": true,
+  "onReachBottomDistance": 80,
   "usingComponents": {}
 }

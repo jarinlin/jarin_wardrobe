@@ -13,6 +13,7 @@ Page({
     categoryNames: [],
     categoryIndex: 0,
     analyzing: false,
+    submitting: false,
     priceEstimated: false,
     priceNote: '',
     form: {
@@ -106,7 +107,9 @@ Page({
         priceNote: ''
       })
       await this.runAnalyze(urls[0])
-    } catch (e) {}
+    } catch (e) {
+      util.toastChooseImageFail(e)
+    }
   },
 
   async runAnalyze(imageUrl) {
@@ -153,6 +156,7 @@ Page({
   },
 
   async onSubmit() {
+    if (this.data.submitting || this.data.analyzing) return
     const { form, id } = this.data
     if (!form.name || !form.name.trim()) {
       wx.showToast({ title: '请填写名称', icon: 'none' })
@@ -169,6 +173,7 @@ Page({
       price: form.price === '' ? 0 : Number(form.price)
     }
 
+    this.setData({ submitting: true })
     wx.showLoading({ title: '保存中' })
     try {
       if (id) await api.updateClothing(id, payload)
@@ -178,6 +183,7 @@ Page({
       setTimeout(() => wx.navigateBack(), 400)
     } catch (e) {
       wx.hideLoading()
+      this.setData({ submitting: false })
     }
   }
 })

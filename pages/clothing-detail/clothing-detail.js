@@ -7,6 +7,7 @@ Page({
     loggedIn: false,
     id: null,
     item: null,
+    loadError: false,
     priceText: '—'
   },
 
@@ -18,7 +19,7 @@ Page({
     const loggedIn = auth.isLoggedIn()
     this.setData({ loggedIn })
     if (!loggedIn) {
-      this.setData({ item: null })
+      this.setData({ item: null, loadError: false })
       return
     }
     if (this.data.id) this.loadDetail()
@@ -29,9 +30,11 @@ Page({
       const item = await api.fetchClothingDetail(this.data.id)
       this.setData({
         item,
+        loadError: false,
         priceText: util.formatPrice(item.price)
       })
     } catch (e) {
+      this.setData({ item: null, loadError: true })
       wx.showToast({ title: '衣物不存在', icon: 'none' })
     }
   },

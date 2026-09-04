@@ -2,11 +2,16 @@ const api = require('../../src/assets/js/api')
 const util = require('../../src/assets/js/util')
 const upload = require('../../src/assets/js/upload')
 
+const PAGE_SIZE = 24
+
 Page({
   data: {
     date: '',
     dateLabel: '',
     clothes: [],
+    clothesPage: 1,
+    clothesHasMore: true,
+    loadingMore: false,
     selectedIds: [],
     note: '',
     imageUrl: '',
@@ -58,6 +63,7 @@ Page({
         selected: selectedSet.has(String(c.id))
       }))
     })
+    this.ensureSelectedVisible()
     wx.showToast({ title: '已带入今日建议', icon: 'none' })
   },
 
@@ -89,15 +95,61 @@ Page({
     return this.loadClothes()
   },
 
-  async loadClothes() {
-    const list = await api.fetchClothes()
+  markSelected(list) {
     const selectedSet = new Set((this.data.selectedIds || []).map(String))
-    this.setData({
-      clothes: list.map((c) => ({
-        ...c,
-        selected: selectedSet.has(String(c.id))
-      }))
-    })
+    return (list || []).map((c) => ({
+      ...c,
+      selected: selectedSet.has(String(c.id))
+    }))
+  },
+
+  async ensureSelectedVisible() {
+    const selected = this.data.selectedIds || []
+    if (!selected.length) return
+    const have = new Set((this.data.clothes || []).map((c) => String(c.id)))
+    const missing = selected.filter((id) => !have.has(String(id)))
+    if (!missing.length) return
+    try {
+      const extra = await api.fetchClothes({ ids: missing.join(',') })
+      const extras = this.markSelected(extra.list || extra)
+      this.setData({ clothes: extras.concat(this.data.clothes || []) })
+    } catch (e) {}
+  },
+
+  async loadClothes(opts) {
+    const reset = !opts || opts.reset !== false
+    if (this._loadingClothes) return
+    if (!reset && (!this.data.clothesHasMore || this.data.loadingMore)) return
+    const page = reset ? 1 : this.data.clothesPage
+    this._loadingClothes = true
+    if (!reset) this.setData({ loadingMore: true })
+    try {
+      const data = await api.fetchClothes({ page, pageSize: PAGE_SIZE })
+      const chunk = this.markSelected(data.list || [])
+      const have = new Set()
+      const merged = reset ? chunk : (this.data.clothes || []).concat(chunk)
+      const clothes = merged.filter((c) => {
+        const key = String(c.id)
+        if (have.has(key)) return false
+        have.add(key)
+        return true
+      })
+      this.setData({
+        clothes,
+        clothesPage: page + 1,
+        clothesHasMore: !!data.hasMore,
+        loadingMore: false
+      })
+      if (reset) await this.ensureSelectedVisible()
+    } catch (e) {
+      this.setData({ loadingMore: false })
+    } finally {
+      this._loadingClothes = false
+    }
+  },
+
+  onReachBottom() {
+    this.loadClothes({ reset: false })
   },
 
   async loadById(id) {
@@ -148,7 +200,9 @@ Page({
     try {
       const urls = await upload.chooseAndUploadImage(1)
       if (urls[0]) this.setData({ imageUrl: urls[0] })
-    } catch (e) {}
+    } catch (e) {
+      util.toastChooseImageFail(e)
+    }
   },
 
   async onSubmit(e) {
@@ -176,7 +230,11 @@ Page({
         return
       }
       wx.showToast({ title: '已保存', icon: 'success' })
-      setTimeout(() => wx.navigateBack(), 400)
+      setTimeout(() => {
+        wx.navigateBack({
+          fail: () => this.setData({ submitting: false })
+        })
+      }, 400)
     } catch (err) {
       wx.hideLoading()
       this.setData({ submitting: false })

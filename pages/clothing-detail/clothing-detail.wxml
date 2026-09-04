@@ -6,6 +6,13 @@
   </view>
 </view>
 
+<view class="page detail" wx:elif="{{loadError}}">
+  <view class="empty">
+    <view class="empty-title">找不到这件衣物</view>
+    <view class="muted">可能已删除，或网络还没连上</view>
+  </view>
+</view>
+
 <view class="page detail" wx:elif="{{item}}">
   <view class="cover">
     <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" />

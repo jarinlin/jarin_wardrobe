@@ -155,3 +155,10 @@
 .empty-btn {
   margin-top: 32rpx;
 }
+
+.page-more {
+  padding: 24rpx 0 8rpx;
+  text-align: center;
+  font-size: 22rpx;
+  color: var(--muted);
+}

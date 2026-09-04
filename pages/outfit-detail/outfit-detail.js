@@ -7,6 +7,7 @@ Page({
     loggedIn: false,
     id: null,
     item: null,
+    loadError: false,
     clothesCount: 0,
     dateLabel: '',
     shareTitle: '',
@@ -21,7 +22,7 @@ Page({
     const loggedIn = auth.isLoggedIn()
     this.setData({ loggedIn })
     if (!loggedIn) {
-      this.setData({ item: null })
+      this.setData({ item: null, loadError: false })
       return
     }
     if (this.data.id) this.loadDetail()
@@ -45,12 +46,14 @@ Page({
       shareText += '\n——来自 Jarin衣柜'
       this.setData({
         item,
+        loadError: false,
         clothesCount: count,
         dateLabel,
         shareTitle,
         shareText
       })
     } catch (e) {
+      this.setData({ item: null, loadError: true })
       wx.showToast({ title: '记录不存在', icon: 'none' })
     }
   },

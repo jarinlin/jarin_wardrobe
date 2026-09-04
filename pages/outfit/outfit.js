@@ -3,6 +3,8 @@ const util = require('../../src/assets/js/util')
 const auth = require('../../src/assets/js/auth')
 const ootd = require('../../src/assets/js/ootd')
 
+const PAGE_SIZE = 12
+
 Page({
   data: {
     loggedIn: false,
@@ -10,6 +12,9 @@ Page({
     list: [],
     feed: [],
     feedKey: 'week',
+    page: 1,
+    hasMore: true,
+    loadingMore: false,
     defaultAvatar: ootd.DEFAULT_AVATAR
   },
 
@@ -17,11 +22,16 @@ Page({
     const loggedIn = auth.isLoggedIn()
     this.setData({ loggedIn })
     if (!loggedIn) {
-      this.setData({ list: [], feed: [] })
+      this.setData({ list: [], feed: [], page: 1, hasMore: true, loadingMore: false })
       return
     }
     if (this.data.tab === 'plaza') this.loadFeed()
     else this.loadList()
+  },
+
+  onPullDownRefresh() {
+    const p = this.data.tab === 'plaza' ? this.loadFeed() : this.loadList()
+    Promise.resolve(p).finally(() => wx.stopPullDownRefresh())
   },
 
   onTab(e) {
@@ -41,13 +51,31 @@ Page({
     this.loadFeed()
   },
 
-  async loadList() {
+  async loadList(opts) {
+    const reset = !opts || opts.reset !== false
+    if (this._loadingList) return
+    if (!reset && (!this.data.hasMore || this.data.loadingMore)) return
+    const page = reset ? 1 : this.data.page
+    this._loadingList = true
+    if (!reset) this.setData({ loadingMore: true })
     try {
-      const list = await api.fetchOutfits()
+      const data = await api.fetchOutfits({ page, pageSize: PAGE_SIZE })
+      const chunk = (data.list || []).map((o) => ootd.toLookCard(o, util.formatDisplayDate))
       this.setData({
-        list: (list || []).map((o) => ootd.toLookCard(o, util.formatDisplayDate))
+        list: reset ? chunk : (this.data.list || []).concat(chunk),
+        page: page + 1,
+        hasMore: !!data.hasMore,
+        loadingMore: false
       })
-    } catch (e) {}
+    } catch (e) {
+      this.setData({ loadingMore: false })
+    } finally {
+      this._loadingList = false
+    }
+  },
+
+  onReachBottom() {
+    if (this.data.tab === 'mine') this.loadList({ reset: false })
   },
 
   async loadFeed() {
@@ -88,7 +116,9 @@ Page({
           : p
       )
       this.setData({ feed })
-    } catch (err) {}
+    } catch (err) {
+      wx.showToast({ title: '点赞失败', icon: 'none' })
+    }
   },
 
   goLogin() {

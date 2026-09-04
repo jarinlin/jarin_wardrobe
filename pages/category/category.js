@@ -4,7 +4,8 @@ const util = require('../../src/assets/js/util')
 Page({
   data: {
     list: [],
-    newName: ''
+    newName: '',
+    busy: false
   },
 
   onShow() {
@@ -13,8 +14,12 @@ Page({
   },
 
   async loadList() {
-    const list = await api.fetchCategories()
-    this.setData({ list })
+    try {
+      const list = await api.fetchCategories()
+      this.setData({ list: list || [] })
+    } catch (e) {
+      wx.showToast({ title: '分类加载失败', icon: 'none' })
+    }
   },
 
   onInput(e) {
@@ -22,18 +27,27 @@ Page({
   },
 
   async onAdd() {
+    if (this.data.busy) return
     const name = (this.data.newName || '').trim()
     if (!name) {
       wx.showToast({ title: '请输入名称', icon: 'none' })
       return
     }
-    await api.createCategory(name)
-    this.setData({ newName: '' })
-    this.loadList()
-    wx.showToast({ title: '已添加', icon: 'success' })
+    this.setData({ busy: true })
+    try {
+      await api.createCategory(name)
+      this.setData({ newName: '' })
+      await this.loadList()
+      wx.showToast({ title: '已添加', icon: 'success' })
+    } catch (e) {
+      wx.showToast({ title: '添加失败', icon: 'none' })
+    } finally {
+      this.setData({ busy: false })
+    }
   },
 
   onRename(e) {
+    if (this.data.busy) return
     const { id, name } = e.currentTarget.dataset
     wx.showModal({
       title: '修改分类名',
@@ -41,25 +55,40 @@ Page({
       placeholderText: '分类名称',
       content: name,
       success: async (res) => {
-        if (!res.confirm) return
+        if (!res.confirm || this.data.busy) return
         const next = (res.content || '').trim()
         if (!next) return
-        await api.updateCategory(id, next)
-        this.loadList()
+        this.setData({ busy: true })
+        try {
+          await api.updateCategory(id, next)
+          await this.loadList()
+        } catch (err) {
+          wx.showToast({ title: '修改失败', icon: 'none' })
+        } finally {
+          this.setData({ busy: false })
+        }
       }
     })
   },
 
   onDelete(e) {
+    if (this.data.busy) return
     const id = e.currentTarget.dataset.id
     wx.showModal({
       title: '删除分类',
       content: '删除后，已有衣物的分类需手动调整',
       confirmColor: '#B54A3A',
       success: async (res) => {
-        if (!res.confirm) return
-        await api.deleteCategory(id)
-        this.loadList()
+        if (!res.confirm || this.data.busy) return
+        this.setData({ busy: true })
+        try {
+          await api.deleteCategory(id)
+          await this.loadList()
+        } catch (err) {
+          wx.showToast({ title: '删除失败', icon: 'none' })
+        } finally {
+          this.setData({ busy: false })
+        }
       }
     })
   }

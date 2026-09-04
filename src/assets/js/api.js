@@ -17,6 +17,7 @@ function handleResponse(res, resolve, reject) {
   } else if (res.statusCode === 401) {
     auth.clear()
     wx.showToast({ title: '请重新登录', icon: 'none' })
+    auth.requireLogin()
     reject(res)
   } else if (res.statusCode === 403) {
     reject(res)
@@ -156,9 +157,27 @@ function updateProfile(profile = {}) {
 }
 
 /** ---------- 衣物 ---------- */
+function asPage(raw, page, pageSize) {
+  if (Array.isArray(raw)) {
+    return { list: raw, total: raw.length, page: page || 1, pageSize: pageSize || raw.length, hasMore: false }
+  }
+  const list = (raw && raw.list) || []
+  return {
+    list,
+    total: Number(raw && raw.total) || list.length,
+    page: Number(raw && raw.page) || page || 1,
+    pageSize: Number(raw && raw.pageSize) || pageSize || list.length,
+    hasMore: !!(raw && raw.hasMore)
+  }
+}
+
 function fetchClothes(params = {}) {
   if (USE_MOCK) {
     let list = mock.getClothes()
+    if (params.ids) {
+      const want = new Set(String(params.ids).split(',').map((s) => s.trim()).filter(Boolean))
+      list = list.filter((c) => want.has(String(c.id)))
+    }
     if (params.categoryId) {
       list = list.filter((c) => String(c.categoryId) === String(params.categoryId))
     }
@@ -183,12 +202,25 @@ function fetchClothes(params = {}) {
         list = list.filter((c) => c.tagsStatus === ts)
       }
     }
-    if (params.idleDays) {
-      return Promise.resolve(list)
+    if (params.page) {
+      const page = Number(params.page) || 1
+      const pageSize = Number(params.pageSize) || 24
+      const start = (page - 1) * pageSize
+      const slice = list.slice(start, start + pageSize)
+      return Promise.resolve({
+        list: slice,
+        total: list.length,
+        page,
+        pageSize,
+        hasMore: start + pageSize < list.length
+      })
     }
     return Promise.resolve(list)
   }
-  return request({ url: '/api/clothes', data: params })
+  return request({ url: '/api/clothes', data: params }).then((raw) => {
+    if (params.page || params.ids) return asPage(raw, params.page, params.pageSize)
+    return raw
+  })
 }
 
 function fetchClothingDetail(id) {
@@ -317,22 +349,36 @@ function deleteCategory(id) {
 }
 
 /** ---------- 穿搭 ---------- */
-function fetchOutfits() {
+function fetchOutfits(params = {}) {
   if (USE_MOCK) {
-    return Promise.resolve(
-      mock.getOutfits().sort((a, b) => (a.date < b.date ? 1 : -1)).map((o) => {
-        const post = mockOotdPosts().find(
-          (p) => p.status === 'published' && String(p.outfitId) === String(o.id)
-        )
-        return {
-          ...o,
-          ootdPublished: !!post,
-          ootdPostId: post ? post.id : 0
-        }
+    const all = mock.getOutfits().sort((a, b) => (a.date < b.date ? 1 : -1)).map((o) => {
+      const post = mockOotdPosts().find(
+        (p) => p.status === 'published' && String(p.outfitId) === String(o.id)
+      )
+      return {
+        ...o,
+        ootdPublished: !!post,
+        ootdPostId: post ? post.id : 0
+      }
+    })
+    if (params.page) {
+      const page = Number(params.page) || 1
+      const pageSize = Number(params.pageSize) || 12
+      const start = (page - 1) * pageSize
+      return Promise.resolve({
+        list: all.slice(start, start + pageSize),
+        total: all.length,
+        page,
+        pageSize,
+        hasMore: start + pageSize < all.length
       })
-    )
+    }
+    return Promise.resolve(all)
   }
-  return request({ url: '/api/outfits' })
+  return request({ url: '/api/outfits', data: params }).then((raw) => {
+    if (params.page) return asPage(raw, params.page, params.pageSize)
+    return raw
+  })
 }
 
 function fetchOutfitDetail(id) {
@@ -697,7 +743,14 @@ function fetchStats() {
     const mostWorn = [...clothes].sort((a, b) => (b.wearCount || 0) - (a.wearCount || 0))[0]
     const leastWorn = [...clothes].sort((a, b) => (a.wearCount || 0) - (b.wearCount || 0))[0]
     const recent = [...clothes].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1)).slice(0, 3)
-    return Promise.resolve({ total, value, mostWorn, leastWorn, recent })
+    return Promise.resolve({
+      total,
+      value,
+      outfitCount: mock.getOutfits().length,
+      mostWorn,
+      leastWorn,
+      recent
+    })
   }
   return request({ url: '/api/stats' })
 }

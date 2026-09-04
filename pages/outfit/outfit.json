@@ -1,4 +1,6 @@
 {
   "navigationBarTitleText": "穿搭",
+  "enablePullDownRefresh": true,
+  "onReachBottomDistance": 80,
   "usingComponents": {}
 }

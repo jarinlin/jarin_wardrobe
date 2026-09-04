@@ -26,6 +26,7 @@ Page({
     analyzing: false,
     advising: false,
     estimatingIndex: -1,
+    submitting: false,
     totals: nutrition.sumItems([]).totals,
     mealTypes: [
       { value: 'breakfast', label: '早餐' },
@@ -345,6 +346,11 @@ Page({
   },
 
   async onSubmit() {
+    if (this.data.submitting) return
+    if (this.data.analyzing || this.data.advising || this.data.estimatingIndex >= 0) {
+      wx.showToast({ title: '识别还没结束', icon: 'none' })
+      return
+    }
     const { form, id } = this.data
     const items = (form.items || []).map((it) => nutrition.itemToPayload(it)).filter((it) => it.foodName || it.portion || it.calories)
     if (!items.length || !items.some((it) => it.foodName)) {
@@ -369,6 +375,7 @@ Page({
         ? new Date().toISOString()
         : mealDate + 'T12:00:00+08:00'
     }
+    this.setData({ submitting: true })
     wx.showLoading({ title: '保存中' })
     try {
       if (id) await api.updateDietLog(id, payload)
@@ -378,6 +385,7 @@ Page({
       setTimeout(() => wx.navigateBack(), 400)
     } catch (e) {
       wx.hideLoading()
+      this.setData({ submitting: false })
     }
   },
 

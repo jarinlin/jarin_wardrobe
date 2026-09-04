@@ -13,7 +13,8 @@
       { "value": ".git", "type": "folder" },
       { "value": ".gitignore", "type": "file" },
       { "value": "**/*.md", "type": "glob" },
-      { "value": "src/assets/fonts/MiSans-Medium.woff", "type": "file" }
+      { "value": "tests", "type": "folder" },
+      { "value": "scripts", "type": "folder" }
     ],
     "include": []
   },

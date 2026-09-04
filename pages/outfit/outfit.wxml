@@ -25,11 +25,11 @@
         style="animation-delay: {{index * 40}}ms"
       >
         <view class="look-cover" wx:if="{{item.hasCover}}">
-          <image class="look-photo" src="{{item.imageUrl}}" mode="aspectFill" />
+          <image class="look-photo" src="{{item.imageUrl}}" mode="aspectFill" lazy-load="{{true}}" />
         </view>
         <view class="look-cover look-mosaic n{{item.thumbN}}" wx:else>
           <view class="look-cell" wx:for="{{item.thumbs}}" wx:for-item="t" wx:key="id">
-            <image wx:if="{{t.imageUrl}}" class="look-thumb" src="{{t.imageUrl}}" mode="aspectFill" />
+            <image wx:if="{{t.imageUrl}}" class="look-thumb" src="{{t.imageUrl}}" mode="aspectFill" lazy-load="{{true}}" />
             <view wx:else class="look-ph">{{t.name}}</view>
             <view class="look-more" wx:if="{{t.more}}">+{{t.more}}</view>
           </view>
@@ -41,6 +41,7 @@
         </view>
       </view>
     </view>
+    <view class="page-more" wx:if="{{list.length}}">{{loadingMore ? '加载中…' : (hasMore ? '上拉加载更多' : '已经到底了')}}</view>
     <view class="empty" wx:else>
       <view class="empty-title">还没有穿搭记录</view>
       <view class="muted">记录今天的穿搭，开始你的衣橱日志</view>
@@ -71,7 +72,7 @@
         style="animation-delay: {{index * 40}}ms"
       >
         <view class="mag-cover" wx:if="{{item.hasPhoto}}">
-          <image class="mag-photo" src="{{item.imageUrl}}" mode="aspectFill" />
+          <image class="mag-photo" src="{{item.imageUrl}}" mode="aspectFill" lazy-load="{{true}}" />
           <text class="rank-badge r{{item.rank}}" wx:if="{{item.showRank}}">{{item.rank}}</text>
           <view class="mag-cover-bar">
             <image class="mag-avatar" src="{{item.author.avatarUrl || defaultAvatar}}" mode="aspectFill" />

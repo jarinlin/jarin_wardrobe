@@ -20,9 +20,12 @@ App({
       this.globalData.userInfo = null
     }
 
-    loadMiSans().then((results) => {
-      this.globalData.fontReady = results.some(Boolean)
-    })
+    // 等首屏请求先走，避免 600K 字体抢启动带宽
+    setTimeout(() => {
+      loadMiSans().then((results) => {
+        this.globalData.fontReady = results.some(Boolean)
+      })
+    }, 400)
 
     if (USE_CLOUD) {
       if (!CLOUD_ENV) {

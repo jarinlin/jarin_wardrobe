@@ -36,11 +36,15 @@ Page({
   },
 
   onShow() {
-    this._dietAdviceRetried = false
     this.refresh()
   },
 
-  async refresh() {
+  onPullDownRefresh() {
+    this.refresh({ force: true }).finally(() => wx.stopPullDownRefresh())
+  },
+
+  async refresh(opts) {
+    const force = !!(opts && opts.force)
     const loggedIn = auth.isLoggedIn()
     const userInfo = loggedIn ? auth.getUserInfo() : null
     const today = util.formatDate()
@@ -51,6 +55,7 @@ Page({
     })
 
     if (!loggedIn) {
+      this._suggestAt = 0
       this.setData({
         stats: {},
         statsValue: '¥0',
@@ -67,22 +72,25 @@ Page({
     }
 
     try {
-      const [stats, todayOutfit, outfits] = await Promise.all([
+      const [stats, todayOutfit] = await Promise.all([
         api.fetchStats(),
-        api.fetchTodayOutfit(today),
-        api.fetchOutfits()
+        api.fetchTodayOutfit(today)
       ])
       this.setData({
         stats,
         statsValue: util.formatPrice(stats.value || 0),
         todayOutfit,
-        outfitCount: (outfits || []).length
+        outfitCount: Number(stats.outfitCount) || 0
       })
     } catch (e) {
       // mock / 网络失败时保持静默
     }
 
-    this.loadSuggest()
+    const hasSuggest = !!(this.data.suggest && this.data.suggest.items && this.data.suggest.items.length)
+    const suggestFresh = Date.now() - (this._suggestAt || 0) < 3 * 60 * 1000
+    if (force || !hasSuggest || !suggestFresh) {
+      this.loadSuggest(force ? { refresh: true } : undefined)
+    }
     this.loadDietAndAlerts()
   },
 
@@ -161,6 +169,7 @@ Page({
   async loadSuggest(opts) {
     const interactive = !!(opts && opts.interactive)
     const swap = !!(opts && opts.swap)
+    const bustCache = !!(opts && opts.refresh)
     if (!auth.isLoggedIn() || this.data.suggestLoading) return
     const prevItems = ((this.data.suggest && this.data.suggest.items) || []).slice()
     this.setData({ suggestLoading: true, locationHint: '', suggestActionLabel: '获取中…' })
@@ -205,8 +214,8 @@ Page({
         console.log('[suggest] 刷新带坐标', lat, lng)
         data = await api.suggestOutfit(lat, lng, { refresh: true, exclude })
       } else {
-        console.log('[suggest] 缓存优先：先不传 lat/lng')
-        data = await api.suggestOutfit()
+        console.log(bustCache ? '[suggest] 下拉刷新，refresh=1' : '[suggest] 缓存优先：先不传 lat/lng')
+        data = await api.suggestOutfit(undefined, undefined, bustCache ? { refresh: true } : undefined)
         if (data && data.needLocation) {
           console.log('[suggest] 后端 needLocation，开始 getFuzzyLocation')
           const loc = await location.getFuzzyLocation({ forceOpenSetting: false })
@@ -262,6 +271,7 @@ Page({
         suggestLoading: false,
         suggestActionLabel: items.length ? '换一套' : '刷新'
       })
+      this._suggestAt = Date.now()
     } catch (e) {
       console.warn('[suggest] 请求失败', e)
       if (interactive) {

@@ -81,7 +81,7 @@ wardrobe/                         ← 微信开发者工具打开这里
 | 2026-08-12 | 修复表单 input placeholder 被裁切：公共 form-input 定高/去上下 padding，并加 placeholder-class |
 | 2026-08-12 | 衣柜分类标签重做：胶囊选中态珊瑚实心，「管理分类」改为文字入口 |
 | 2026-08-12 | 衣柜页：去掉重复大标题；分类条改 inline-flex 横向滚动；标签改圆角软底非全圆胶囊 |
-| 2026-08-12 | 产出 wx.getFuzzyLocation 审核示意截图：docs/audit-screenshots/ |
+| 2026-08-12 | 产出 wx.getFuzzyLocation 审核示意截图：docs/audit-screenshots/（后压缩为 jpg，见 2026-09-04） |
 | 2026-08-12 | 天气/穿搭建议/标签/设置落地；兼容 AMAP_KEY 与 AMAP_WEB_KEY |
 | 2026-08-12 | **天气+穿搭建议+标签/设置**：设计见 docs/superpowers/specs/2026-08-12-weather-outfit-suggest-design.md；后端 amap/suggest；首页今日建议；标签/设置页接通；app.json 声明 getFuzzyLocation；`.env.example` 增加 AMAP_KEY；云托管骨架 docs/deploy/weixin-cloud.md |
 | 2026-08-12 | 手动 SQL：本次无新增表/列（复用 clothes.tags / tags_status / tags 表） |
@@ -142,6 +142,13 @@ wardrobe/                         ← 微信开发者工具打开这里
 | 2026-08-17 | 饮食建议重新入库：保存写入 `diet_logs.advice`，翻旧记录回显当时的提示，不再被空态盖住。 |
 | 2026-09-04 | 饮食从单一热量扩展为核心 7 项：热量、蛋白质、碳水、脂肪、总糖、钠、膳食纤维。识图/估算/档案每日目标/日建议提示词按既有优化风格扩写；旧记录缺宏量显示为暂无，不误判超标。 |
 | 2026-09-04 | 体脂并入档案营养建议的同一次 AI 生成，结合年龄、性别、BMI 与活动量估算；公式值负责限制异常偏离并在 AI 不可用时兜底，前端改为展示估算区间。 |
+| 2026-09-04 | 穿搭记录与广场发布拆开：编辑页只存私人记录，发广场统一走发布页；详情页补「编辑」；首页有记录时「查看」进详情。 |
+| 2026-09-04 | 代码质量「图片和音频资源不超过 200K」未通过：docs/audit-screenshots 三张 1.1–1.4MB 审核截图压成 768 宽 jpg（各约 79K）；docs 虽已 packOptions.ignore，但质量扫描仍看项目目录。 |
+| 2026-09-04 | 继续瘦质量扫描：删未引用的 MiSans-Medium.woff、废弃 mine 页与 mine.png；packOptions 忽略 tests/scripts。 |
+| 2026-09-04 | 首页不再整表拉穿搭列表（stats 带 outfitCount）；建议 3 分钟内切 Tab 不重算；字体延后加载；登录过期回登录页；四个主 Tab 可下拉刷新。 |
+| 2026-09-04 | 饮食列表补回餐次名与中文日期；衣物/饮食/档案保存防连点，识别中不可存；档案未保存不重载；详情失败有空态；衣柜搜索即时筛选；列表图懒加载。 |
+| 2026-09-04 | 分类增删改防连点并处理失败；选图失败不再吞掉；衣柜切回只刷新列表；饮食周汇总 1 分钟内复用。 |
+| 2026-09-04 | 衣柜 / 穿搭列表 / 记穿搭选衣分页加载（24/12 条），已选单品不在首页时单独补齐；不带 page 的旧接口仍返回全量。 |
 
 ## 配置要点（天气 / 隐私）
 1. 高德控制台创建 **Web 服务** Key → 写入 `backend/.env` 的 `AMAP_KEY=` 或 `AMAP_WEB_KEY=`（勿提交仓库）

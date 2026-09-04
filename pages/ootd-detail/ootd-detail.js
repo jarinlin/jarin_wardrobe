@@ -8,6 +8,7 @@ Page({
     loggedIn: false,
     id: null,
     post: null,
+    loadError: false,
     defaultAvatar: ootd.DEFAULT_AVATAR
   },
 
@@ -19,7 +20,7 @@ Page({
     const loggedIn = auth.isLoggedIn()
     this.setData({ loggedIn })
     if (!loggedIn) {
-      this.setData({ post: null })
+      this.setData({ post: null, loadError: false })
       return
     }
     if (this.data.id) this.loadDetail()
@@ -28,8 +29,9 @@ Page({
   async loadDetail() {
     try {
       const post = ootd.decorateFeedPost(await api.fetchOotdPost(this.data.id), 'new')
-      this.setData({ post })
+      this.setData({ post, loadError: false })
     } catch (e) {
+      this.setData({ post: null, loadError: true })
       wx.showToast({ title: '帖子不存在', icon: 'none' })
     }
   },
@@ -47,7 +49,9 @@ Page({
           likeCount: Number(res.likeCount) || 0
         }
       })
-    } catch (e) {}
+    } catch (e) {
+      wx.showToast({ title: '点赞失败', icon: 'none' })
+    }
   },
 
   goManage() {

@@ -58,12 +58,16 @@ Page({
       })
       return
     }
-    this._dietAdviceRetried = false
     this.refresh()
   },
 
-  async refresh() {
-    this.setData({ dateLabel: this.data.date })
+  onPullDownRefresh() {
+    this.refresh({ force: true }).finally(() => wx.stopPullDownRefresh())
+  },
+
+  async refresh(opts) {
+    const force = !!(opts && opts.force)
+    this.setData({ dateLabel: util.formatDisplayDate(this.data.date) })
     let metrics = {}
     let bodyReady = false
     try {
@@ -96,16 +100,21 @@ Page({
       return
     }
 
-    let weekLine = ''
-    try {
-      const week = await api.fetchDietWeekSummary()
-      weekLine = buildWeekLine(week)
-    } catch (e) {}
+    let weekLine = this.data.weekLine || ''
+    const weekFresh = Date.now() - (this._weekAt || 0) < 60 * 1000
+    if (force || !weekLine || !weekFresh) {
+      try {
+        const week = await api.fetchDietWeekSummary()
+        weekLine = buildWeekLine(week)
+        this._weekAt = Date.now()
+      } catch (e) {}
+    }
 
     let todayKcal = 0
     try {
       const data = await api.fetchDietLogs({ date: this.data.date })
       const rawList = data.list || []
+      const mealLabels = { breakfast: '早餐', lunch: '午餐', dinner: '晚餐', other: '其他' }
       const list = rawList.map((item) => {
         const items = Array.isArray(item.items) ? item.items : []
         const count = item.itemCount != null ? item.itemCount : items.length
@@ -118,6 +127,7 @@ Page({
         }
         return {
           ...item,
+          mealTypeLabel: mealLabels[item.mealType] || '其他',
           displayTitle: item.foodName || (items[0] && items[0].foodName) || '未命名',
           displaySub: subtitle,
           displayKcal: Math.round(Number(item.calories) || 0),

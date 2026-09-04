@@ -6,6 +6,13 @@
   </view>
 </view>
 
+<view class="page ootd-detail" wx:elif="{{loadError}}">
+  <view class="empty">
+    <view class="empty-title">找不到这条广场帖</view>
+    <view class="muted">可能已撤回，或网络还没连上</view>
+  </view>
+</view>
+
 <view class="page ootd-detail" wx:elif="{{post}}">
   <view class="detail-hero" wx:if="{{post.hasPhoto}}">
     <image class="detail-photo" src="{{post.imageUrl}}" mode="aspectFill" />

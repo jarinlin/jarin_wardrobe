@@ -34,7 +34,9 @@ Page({
       barClass: 'week-bar-fill',
       sub: '对照建议看还能吃多少',
       tip: '',
-      aiAdvice: ''
+      aiAdvice: '',
+      progress: [],
+      incompleteTip: ''
     },
     weekLine: ''
   },
@@ -69,7 +71,7 @@ Page({
       bodyReady = isBodyReady(body)
       const bodyFatText = metrics.bodyFatPct ? `${metrics.bodyFatPct}%` : '—'
       const metricsTip = bodyReady
-        ? `建议日摄入约 ${metrics.suggestKcal || '—'} kcal · 点此改档案`
+        ? `建议热量约 ${metrics.suggestKcal || '—'} kcal · 点此改档案`
         : '先完善身高体重才能记饮食 →'
       this.setData({ metrics, bodyFatText, bodyReady, bodyChecked: true, metricsTip })
     } catch (e) {
@@ -87,7 +89,7 @@ Page({
         list: [],
         todayKcal: 0,
         mealHint: '',
-        day: buildDayCard(metrics, 0, ''),
+        day: buildDayCard(metrics, { totalCalories: 0 }, ''),
         weekLine: ''
       })
       return
@@ -118,23 +120,25 @@ Page({
           displayTitle: item.foodName || (items[0] && items[0].foodName) || '未命名',
           displaySub: subtitle,
           displayKcal: Math.round(Number(item.calories) || 0),
+          macroLine: item.nutrition && item.nutrition.hasMacros
+            ? `蛋白 ${Math.round(item.nutrition.proteinG || 0)}g · 碳水 ${Math.round(item.nutrition.carbsG || 0)}g · 脂肪 ${Math.round(item.nutrition.fatG || 0)}g`
+            : '',
           placeholderUrl: mealPlaceholderUrl(item.mealType)
         }
       })
       const selectedKcal = Math.round(data.totalCalories || 0)
-      todayKcal = selectedKcal
-      let aiAdvice = data.aiAdvice || ''
-      let hasTodayLogs = this.data.date === todayStr() && list.length > 0
       const today = todayStr()
-      if (this.data.date !== today) {
+      const isToday = this.data.date === today
+      todayKcal = isToday ? selectedKcal : 0
+      let aiAdvice = isToday ? (data.aiAdvice || '') : ''
+      let hasTodayLogs = isToday && list.length > 0
+      if (!isToday) {
         try {
           const todayData = await api.fetchDietLogs({ date: today })
           todayKcal = Math.round(todayData.totalCalories || 0)
-          aiAdvice = todayData.aiAdvice || ''
           hasTodayLogs = ((todayData.list || []).length > 0) || todayKcal > 0
         } catch (e) {
           todayKcal = 0
-          aiAdvice = ''
           hasTodayLogs = false
         }
       }
@@ -150,7 +154,7 @@ Page({
         list,
         todayKcal,
         mealHint,
-        day: buildDayCard(metrics, todayKcal, aiAdvice),
+        day: buildDayCard(metrics, data, aiAdvice),
         weekLine
       })
       scheduleAdviceRetry(this, hasTodayLogs, aiAdvice)
@@ -159,7 +163,7 @@ Page({
         list: [],
         todayKcal: 0,
         mealHint: '',
-        day: buildDayCard(metrics, 0, ''),
+        day: buildDayCard(metrics, { totalCalories: 0 }, ''),
         weekLine
       })
     }

@@ -1,6 +1,7 @@
 const api = require('../../src/assets/js/api')
 const upload = require('../../src/assets/js/upload')
 const util = require('../../src/assets/js/util')
+const nutrition = require('../../src/assets/js/nutrition')
 const { isBodyReady, promptBodyProfile } = require('../../src/assets/js/diet-metrics')
 
 function todayStr() {
@@ -10,49 +11,12 @@ function todayStr() {
   return `${d.getFullYear()}-${m}-${day}`
 }
 
-function emptyItem() {
-  return { foodName: '', portion: '', calories: '' }
-}
-
 function filledItems(items) {
-  return (items || []).filter((it) => it.foodName || it.portion || it.calories)
+  return (items || []).filter((it) => it.foodName || it.portion || nutrition.hasValue(it.calories))
 }
 
 function tagSource(items, sourceImage) {
   return (items || []).map((it) => ({ ...it, sourceImage: sourceImage || '' }))
-}
-
-function normalizeItems(rawItems, foodName, portion, calories) {
-  const list = Array.isArray(rawItems) ? rawItems : []
-  const items = list
-    .map((it) => {
-      if (typeof it === 'string') {
-        return { foodName: it, portion: '', calories: '', sourceImage: '' }
-      }
-      return {
-        foodName: (it && it.foodName) || '',
-        portion: (it && it.portion) || '',
-        calories: it && it.calories != null && it.calories !== '' ? String(it.calories) : '',
-        sourceImage: (it && it.sourceImage) || ''
-      }
-    })
-    .filter((it) => it.foodName || it.portion || it.calories)
-  if (!items.length && (foodName || portion || calories)) {
-    items.push({
-      foodName: foodName || '',
-      portion: portion || '',
-      calories: calories != null && calories !== '' ? String(calories) : ''
-    })
-  }
-  if (!items.length) items.push(emptyItem())
-  return items
-}
-
-function calcTotalCalories(items) {
-  return (items || []).reduce((sum, it) => {
-    const n = Number(it.calories)
-    return sum + (Number.isFinite(n) ? n : 0)
-  }, 0)
 }
 
 Page({
@@ -62,7 +26,7 @@ Page({
     analyzing: false,
     advising: false,
     estimatingIndex: -1,
-    totalCalories: 0,
+    totals: nutrition.sumItems([]).totals,
     mealTypes: [
       { value: 'breakfast', label: '早餐' },
       { value: 'lunch', label: '午餐' },
@@ -74,7 +38,7 @@ Page({
       imageUrl: '',
       imageUrls: [],
       advice: '',
-      items: [emptyItem()]
+      items: [nutrition.emptyItem()]
     }
   },
 
@@ -92,16 +56,14 @@ Page({
     }
     const id = query.id || null
     const mealDate = query.date || todayStr()
-    // 新建：按时段预选餐次；编辑：以详情为准
     const mealType = util.guessMealType()
     this.setData({ id, mealDate, 'form.mealType': mealType })
     if (id) {
       wx.setNavigationBarTitle({ title: '编辑饮食' })
       await this.loadDetail(id)
     } else {
-      this.refreshTotal()
+      this.refreshTotals()
     }
-    // 进入页即预拉隐私（失败不打扰；点上传时会再鉴权并 toast）
     this.warmupPrivacy()
   },
 
@@ -116,8 +78,9 @@ Page({
       })
   },
 
-  refreshTotal() {
-    this.setData({ totalCalories: Math.round(calcTotalCalories(this.data.form.items)) })
+  refreshTotals() {
+    const { totals } = nutrition.sumItems(this.data.form.items)
+    this.setData({ totals })
   },
 
   async loadDetail(id) {
@@ -125,17 +88,17 @@ Page({
     const imageUrls = Array.isArray(item.imageUrls) && item.imageUrls.length
       ? item.imageUrls.filter(Boolean)
       : (item.imageUrl ? [item.imageUrl] : [])
-    const items = normalizeItems(item.items, item.foodName, item.portion, item.calories)
+    const items = nutrition.normalizeItems(item.items, item.foodName, item.portion, item.calories)
     this.setData({
       form: {
         mealType: item.mealType || 'other',
         imageUrl: imageUrls[0] || '',
         imageUrls,
-        advice: '',
+        advice: item.advice || '',
         items
-      },
-      totalCalories: Math.round(calcTotalCalories(items))
+      }
     })
+    this.refreshTotals()
   },
 
   noop() {},
@@ -148,16 +111,24 @@ Page({
     wx.pageScrollTo({ selector: '.form', duration: 280 })
   },
 
+  onToggleNutrients(e) {
+    const index = Number(e.currentTarget.dataset.index)
+    const items = this.data.form.items.slice()
+    if (!items[index]) return
+    items[index] = { ...items[index], expanded: !items[index].expanded }
+    this.setData({ 'form.items': items })
+  },
+
   onItemInput(e) {
     const { index, key } = e.currentTarget.dataset
     const items = this.data.form.items.slice()
     items[index] = { ...items[index], [key]: e.detail.value }
     this.setData({ 'form.items': items })
-    if (key === 'calories') this.refreshTotal()
+    if (key !== 'foodName' && key !== 'portion') this.refreshTotals()
   },
 
   onAddItem() {
-    const items = this.data.form.items.concat([emptyItem()])
+    const items = this.data.form.items.concat([nutrition.emptyItem()])
     this.setData({ 'form.items': items })
   },
 
@@ -165,12 +136,12 @@ Page({
     const index = e.currentTarget.dataset.index
     let items = this.data.form.items.slice()
     if (items.length <= 1) {
-      items = [emptyItem()]
+      items = [nutrition.emptyItem()]
     } else {
       items.splice(index, 1)
     }
     this.setData({ 'form.items': items })
-    this.refreshTotal()
+    this.refreshTotals()
   },
 
   onEstimatePortion(e) {
@@ -196,18 +167,15 @@ Page({
     const busyItems = this.data.form.items.slice()
     busyItems[index] = { ...busyItems[index], estimating: true }
     this.setData({ 'form.items': busyItems, estimatingIndex: index })
-    wx.showLoading({ title: mode === 'portion' ? '估算分量' : '估算热量', mask: true })
+    wx.showLoading({ title: mode === 'portion' ? '估算分量' : '估算营养', mask: true })
     try {
       const portionHint = mode === 'portion' ? '' : (item.portion || '').trim()
       const result = await api.estimateFoodCalories(foodName, portionHint)
-      const cal = Math.round(Number(result && result.calories) || 0)
       const items = this.data.form.items.slice()
-      const next = { ...items[index], estimating: false }
-      if (result && result.portion) next.portion = result.portion
-      if (cal > 0) next.calories = String(cal)
+      const next = nutrition.applyEstimate({ ...items[index], estimating: false }, result)
       items[index] = next
       this.setData({ 'form.items': items })
-      this.refreshTotal()
+      this.refreshTotals()
     } catch (err) {
       if (!util.isUserCancel(err)) {
         console.error('[diet-edit] estimateItem', err)
@@ -237,30 +205,25 @@ Page({
     const removed = imageUrls[index]
     imageUrls.splice(index, 1)
     let items = (this.data.form.items || []).filter((it) => it.sourceImage !== removed)
-    if (!filledItems(items).length) items = [emptyItem()]
+    if (!filledItems(items).length) items = [nutrition.emptyItem()]
     const patch = {
       'form.imageUrls': imageUrls,
       'form.imageUrl': imageUrls[0] || '',
-      'form.items': items,
-      totalCalories: Math.round(calcTotalCalories(items))
+      'form.items': items
     }
     if (!imageUrls.length) {
       patch['form.advice'] = ''
       this.setData(patch)
+      this.refreshTotals()
       return
     }
     this.setData(patch)
+    this.refreshTotals()
     this.regenerateAdviceSilent()
   },
 
   adviceItems() {
-    return (this.data.form.items || [])
-      .map((it) => ({
-        foodName: (it.foodName || '').trim(),
-        portion: (it.portion || '').trim(),
-        calories: it.calories === '' || it.calories == null ? 0 : Number(it.calories)
-      }))
-      .filter((it) => it.foodName)
+    return filledItems(this.data.form.items).map((it) => nutrition.itemToPayload(it)).filter((it) => it.foodName)
   },
 
   async regenerateAdviceSilent() {
@@ -329,18 +292,18 @@ Page({
       for (const url of urls) {
         const result = await api.analyzeFood([url], this.data.form.mealType)
         const aiItems = tagSource(
-          normalizeItems(result.items, result.foodName, result.portion, result.calories),
+          nutrition.normalizeItems(result.items, result.foodName, result.portion, result.calories),
           url
         )
-        items = items.concat(aiItems)
+        items = items.concat(aiItems.filter((it) => it.foodName || nutrition.hasValue(it.calories)))
         if (!advice && result.advice) advice = result.advice
       }
-      if (!items.length) items = [emptyItem()]
+      if (!items.length) items = [nutrition.emptyItem()]
       this.setData({
         'form.items': items,
-        'form.advice': advice,
-        totalCalories: Math.round(calcTotalCalories(items))
+        'form.advice': advice
       })
+      this.refreshTotals()
     } catch (e) {
       if (!util.isUserCancel(e)) {
         console.error('[diet-edit] runAnalyze', e)
@@ -383,18 +346,12 @@ Page({
 
   async onSubmit() {
     const { form, id } = this.data
-    const items = (form.items || [])
-      .map((it) => ({
-        foodName: (it.foodName || '').trim(),
-        portion: (it.portion || '').trim(),
-        calories: it.calories === '' || it.calories == null ? 0 : Number(it.calories)
-      }))
-      .filter((it) => it.foodName || it.portion || it.calories)
+    const items = (form.items || []).map((it) => nutrition.itemToPayload(it)).filter((it) => it.foodName || it.portion || it.calories)
     if (!items.length || !items.some((it) => it.foodName)) {
       wx.showToast({ title: '请至少填写一道菜名', icon: 'none' })
       return
     }
-    const total = items.reduce((s, it) => s + (Number.isFinite(it.calories) ? it.calories : 0), 0)
+    const { totals } = nutrition.sumItems(form.items)
     const imageUrls = form.imageUrls || (form.imageUrl ? [form.imageUrl] : [])
     const payload = {
       mealType: form.mealType,
@@ -403,7 +360,8 @@ Page({
       items,
       foodName: items.map((it) => it.foodName).filter(Boolean).join('+'),
       portion: items.length ? `共${items.length}道` : '',
-      calories: total
+      calories: totals.calories,
+      advice: (form.advice || '').trim()
     }
     if (!id) {
       const mealDate = this.data.mealDate || todayStr()

@@ -89,6 +89,48 @@
   line-height: 1.45;
 }
 
+.incomplete-tip {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 20rpx;
+  color: var(--muted);
+}
+
+.nutrient-list {
+  margin-top: 18rpx;
+}
+
+.nutrient-row {
+  padding: 10rpx 0;
+}
+
+.nutrient-meta {
+  display: flex;
+  justify-content: space-between;
+}
+
+.nutrient-name {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.nutrient-role {
+  font-size: 20rpx;
+  color: var(--muted);
+}
+
+.nutrient-vals {
+  margin: 4rpx 0 8rpx;
+  font-size: 22rpx;
+  color: var(--ink);
+}
+
+.week-bar.slim {
+  margin-top: 0;
+  height: 8rpx;
+}
+
 .meal-hint {
   margin: -8rpx 0 20rpx;
   padding: 18rpx 22rpx;

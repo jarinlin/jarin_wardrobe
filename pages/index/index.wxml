@@ -32,21 +32,28 @@
 
   <view class="diet-strip surface anim-rise-delay" wx:if="{{loggedIn}}" bindtap="goDiet">
     <view class="diet-head">
-      <text class="diet-title">今日热量</text>
+      <text class="diet-title">今日营养</text>
       <text class="diet-go">{{diet.sub || '去记录'}} →</text>
     </view>
     <view class="diet-nums">
       <view class="m">
         <text class="m-num">{{diet.suggestDay || '—'}}</text>
-        <text class="m-label">建议日摄入</text>
+        <text class="m-label">建议热量</text>
       </view>
       <view class="m">
         <text class="m-num">{{diet.todayKcal}}</text>
-        <text class="m-label">今日摄入</text>
+        <text class="m-label">今日热量</text>
       </view>
       <view class="m">
         <text class="m-num {{diet.remainClass}}">{{diet.remainText}}</text>
         <text class="m-label">{{diet.remainLabel}}</text>
+      </view>
+    </view>
+    <view class="diet-macros" wx:if="{{diet.homeMacros.length}}">
+      <view class="macro" wx:for="{{diet.homeMacros}}" wx:key="key">
+        <text class="macro-num {{item.over ? 'over' : ''}}">{{item.consumedText}}</text>
+        <text class="macro-label">{{item.label}}</text>
+        <text class="macro-sub">/ {{item.targetText}}{{item.unit}}</text>
       </view>
     </view>
     <text class="diet-ai" wx:if="{{diet.aiAdvice}}">建议：{{diet.aiAdvice}}<text class="diet-ai-tag">AI</text></text>

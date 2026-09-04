@@ -10,13 +10,13 @@
 
   <view wx:if="{{!loggedIn}}" class="gate surface anim-rise-delay">
     <view class="gate-title">登录后即可记饮食</view>
-    <view class="muted">登录后可记录餐食，并查看每日热量与饮食建议。</view>
+    <view class="muted">登录后可记录餐食，并查看每日热量与营养建议。</view>
     <view class="btn-primary gate-btn" bindtap="goLogin">去登录</view>
   </view>
 
   <view wx:elif="{{bodyChecked && !bodyReady}}" class="gate surface anim-rise-delay">
     <view class="gate-title">先完善身体档案</view>
-    <view class="muted">记饮食需要身高、体重，才能估算热量和建议摄入。填写后即可拍照或手填记一餐。</view>
+    <view class="muted">记饮食需要身高、体重，才能估算热量和每日营养建议。填写后即可拍照或手填记一餐。</view>
     <view class="btn-primary gate-btn" bindtap="goBody">去填写档案</view>
   </view>
 
@@ -41,17 +41,17 @@
 
     <view class="week-summary surface anim-rise-delay">
       <view class="week-head">
-        <text class="week-title">今日热量</text>
+        <text class="week-title">今日营养</text>
         <text class="week-sub">{{day.sub}}</text>
       </view>
       <view class="week-nums">
         <view class="m">
           <text class="m-num">{{day.suggestDay || '—'}}</text>
-          <text class="m-label">建议日摄入</text>
+          <text class="m-label">建议热量</text>
         </view>
         <view class="m">
           <text class="m-num">{{day.todayKcal}}</text>
-          <text class="m-label">今日摄入</text>
+          <text class="m-label">今日热量</text>
         </view>
         <view class="m">
           <text class="m-num {{day.remainClass}}">{{day.remainText}}</text>
@@ -62,6 +62,22 @@
         <view class="{{day.barClass}}" style="width: {{day.ratioPct}}%;"></view>
       </view>
       <text class="week-tip" wx:if="{{day.tip}}">{{day.tip}}</text>
+      <text class="incomplete-tip" wx:if="{{day.incompleteTip}}">{{day.incompleteTip}}</text>
+      <view class="nutrient-list" wx:if="{{day.progress.length}}">
+        <view class="nutrient-row" wx:for="{{day.progress}}" wx:key="key">
+          <view class="nutrient-meta">
+            <text class="nutrient-name">{{item.label}}</text>
+            <text class="nutrient-role">{{item.roleHint}}</text>
+          </view>
+          <view class="nutrient-vals">
+            <text class="{{item.over ? 'over' : ''}}">{{item.consumedText}}</text>
+            <text class="muted"> / {{item.targetText}} {{item.unit}}</text>
+          </view>
+          <view class="week-bar slim">
+            <view class="{{item.over ? 'week-bar-fill over' : 'week-bar-fill'}}" style="width: {{item.ratioPct}}%;"></view>
+          </view>
+        </view>
+      </view>
       <text class="diet-ai" wx:if="{{day.aiAdvice}}">建议：{{day.aiAdvice}}<text class="diet-ai-tag">AI</text></text>
     </view>
     <text class="week-7" wx:if="{{weekLine}}">{{weekLine}}</text>
@@ -86,6 +102,7 @@
           </view>
           <text class="food">{{item.displayTitle}}</text>
           <text class="portion">{{item.displaySub}}</text>
+          <text class="portion" wx:if="{{item.macroLine}}">{{item.macroLine}}</text>
         </view>
       </view>
     </view>

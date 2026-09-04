@@ -30,7 +30,8 @@ Page({
       remainLabel: '还可摄入',
       remainClass: '',
       sub: '去记录',
-      aiAdvice: ''
+      aiAdvice: '',
+      homeMacros: []
     }
   },
 
@@ -60,7 +61,7 @@ Page({
         locationHint: '',
         alerts: [],
         bodyReady: false,
-        diet: { suggestDay: 0, todayKcal: 0, remainText: '—', remainLabel: '还可摄入', remainClass: '', sub: '去记录', aiAdvice: '' }
+        diet: { suggestDay: 0, todayKcal: 0, remainText: '—', remainLabel: '还可摄入', remainClass: '', sub: '去记录', aiAdvice: '', homeMacros: [] }
       })
       return
     }
@@ -97,11 +98,13 @@ Page({
       metrics = (body && body.metrics) || {}
       bodyReady = isBodyReady(body)
     } catch (e) {}
+    let dietData = { totalCalories: 0 }
     if (bodyReady) {
       try {
         const meal = util.guessMealType()
         const today = util.formatDate()
         const data = await api.fetchDietLogs({ date: today })
+        dietData = data || dietData
         const list = (data && data.list) || []
         todayKcal = Math.round(Number(data && data.totalCalories) || 0)
         aiAdvice = (data && data.aiAdvice) || ''
@@ -119,7 +122,7 @@ Page({
         }
       } catch (e) {}
     }
-    this.setData({ alerts, bodyReady, diet: buildDayCard(metrics, todayKcal, aiAdvice) })
+    this.setData({ alerts, bodyReady, diet: buildDayCard(metrics, dietData, aiAdvice) })
     scheduleAdviceRetry(this, hasTodayLogs, aiAdvice)
   },
 

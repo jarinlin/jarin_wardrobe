@@ -733,8 +733,17 @@ function analyzeFood(imageUrl, mealType) {
       foodName: '示例米饭套餐',
       portion: '约400g',
       calories: 620,
+      proteinG: 22,
+      carbsG: 80,
+      fatG: 18,
+      sugarG: 8,
+      sodiumMg: 900,
+      fiberG: 6,
       advice: '分量适中，可搭配蔬菜。',
-      items: ['米饭', '青菜'],
+      items: [
+        { foodName: '米饭', portion: '1碗', calories: 200, proteinG: 4, carbsG: 45, fatG: 1, sugarG: 0, sodiumMg: 5, fiberG: 1 },
+        { foodName: '青菜', portion: '1份', calories: 40, proteinG: 2, carbsG: 6, fatG: 1, sugarG: 2, sodiumMg: 180, fiberG: 3 }
+      ],
       confidence: 0.8
     })
   }
@@ -760,7 +769,13 @@ function estimateFoodCalories(foodName, portion) {
   if (USE_MOCK) {
     return Promise.resolve({
       calories: 180,
-      portion: portion || '约150g'
+      portion: portion || '约150g',
+      proteinG: 8,
+      carbsG: 20,
+      fatG: 6,
+      sugarG: 4,
+      sodiumMg: 220,
+      fiberG: 2
     })
   }
   return request({
@@ -780,7 +795,32 @@ function fetchBodyProfile() {
       weightKg: 52,
       activityLevel: 'light',
       goal: 'maintain',
-      metrics: { bmi: 19.1, bmiLevel: '正常', bodyFatPct: 24, idealWeightKg: 60, bmr: 1300, suggestKcal: 1800 }
+      metrics: {
+        bmi: 19.1,
+        bmiLevel: '正常',
+        bodyFatPct: 24,
+        idealWeightKg: 60,
+        bmr: 1300,
+        suggestKcal: 1800,
+        dailyTargets: {
+          calories: 1800,
+          proteinG: 80,
+          carbsG: 200,
+          fatG: 55,
+          sugarG: 45,
+          sodiumMg: 2000,
+          fiberG: 25
+        },
+        targetRoles: {
+          calories: 'target',
+          proteinG: 'target',
+          carbsG: 'target',
+          fatG: 'target',
+          sugarG: 'reference',
+          sodiumMg: 'upper',
+          fiberG: 'lower'
+        }
+      }
     })
   }
   return request({ url: '/api/profile/body' })
@@ -795,7 +835,7 @@ function saveBodyProfile(payload) {
 
 function fetchDietLogs(params = {}) {
   if (USE_MOCK) {
-    return Promise.resolve({ list: [], totalCalories: 0, aiAdvice: '' })
+    return Promise.resolve({ list: [], totalCalories: 0, totalNutrition: { calories: 0 }, aiAdvice: '' })
   }
   const q = []
   if (params.date) q.push('date=' + encodeURIComponent(params.date))

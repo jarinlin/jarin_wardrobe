@@ -1,5 +1,6 @@
 const api = require('../../src/assets/js/api')
 const util = require('../../src/assets/js/util')
+const { targetRows } = require('../../src/assets/js/diet-metrics')
 
 const ACTIVITY_HINTS = {
   sedentary: '长时间坐着办公，很少运动',
@@ -55,6 +56,7 @@ Page({
     startDate: '1920-01-01',
     endDate: util.formatDate(),
     metrics: {},
+    targetRows: [],
     savedKey: '',
     booted: false
   },
@@ -93,6 +95,7 @@ Page({
       activityHint: ACTIVITY_HINTS[activityLevel] || '',
       goalHint: GOAL_HINTS[goal] || '',
       metrics: (body && body.metrics) || {},
+      targetRows: targetRows((body && body.metrics) || {}),
       savedKey: profileKey(form),
       booted: true
     })

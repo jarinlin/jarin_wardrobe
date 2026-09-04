@@ -30,7 +30,12 @@
   <view class="form surface">
     <view class="items-head">
       <text class="form-label">本餐菜品</text>
-      <text class="total-kcal">合计 {{totalCalories}} 大卡</text>
+      <text class="total-kcal">合计 {{totals.calories || 0}} 大卡</text>
+    </view>
+    <view class="meal-totals" wx:if="{{totals.proteinG || totals.carbsG || totals.fatG}}">
+      <text>蛋白 {{totals.proteinG || 0}}g</text>
+      <text>碳水 {{totals.carbsG || 0}}g</text>
+      <text>脂肪 {{totals.fatG || 0}}g</text>
     </view>
 
     <view class="item-row" wx:for="{{form.items}}" wx:key="index" wx:for-index="index">
@@ -59,6 +64,33 @@
             <view class="kcal-ai busy" wx:if="{{item.estimating}}">…</view>
             <view class="kcal-ai" wx:else data-index="{{index}}" catchtap="onEstimateCalories">估</view>
           </view>
+        </view>
+      </view>
+      <view class="more-toggle" data-index="{{index}}" bindtap="onToggleNutrients">{{item.expanded ? '收起营养' : '更多营养'}}</view>
+      <view class="nutrient-grid" wx:if="{{item.expanded}}">
+        <view class="form-item compact">
+          <text class="form-label">蛋白质 g</text>
+          <input class="form-input" type="digit" placeholder="—" value="{{item.proteinG}}" data-index="{{index}}" data-key="proteinG" bindinput="onItemInput" />
+        </view>
+        <view class="form-item compact">
+          <text class="form-label">碳水 g</text>
+          <input class="form-input" type="digit" placeholder="—" value="{{item.carbsG}}" data-index="{{index}}" data-key="carbsG" bindinput="onItemInput" />
+        </view>
+        <view class="form-item compact">
+          <text class="form-label">脂肪 g</text>
+          <input class="form-input" type="digit" placeholder="—" value="{{item.fatG}}" data-index="{{index}}" data-key="fatG" bindinput="onItemInput" />
+        </view>
+        <view class="form-item compact">
+          <text class="form-label">总糖 g</text>
+          <input class="form-input" type="digit" placeholder="—" value="{{item.sugarG}}" data-index="{{index}}" data-key="sugarG" bindinput="onItemInput" />
+        </view>
+        <view class="form-item compact">
+          <text class="form-label">钠 mg</text>
+          <input class="form-input" type="digit" placeholder="—" value="{{item.sodiumMg}}" data-index="{{index}}" data-key="sodiumMg" bindinput="onItemInput" />
+        </view>
+        <view class="form-item compact">
+          <text class="form-label">纤维 g</text>
+          <input class="form-input" type="digit" placeholder="—" value="{{item.fiberG}}" data-index="{{index}}" data-key="fiberG" bindinput="onItemInput" />
         </view>
       </view>
     </view>

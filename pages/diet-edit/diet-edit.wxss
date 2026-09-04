@@ -114,6 +114,31 @@
   color: var(--coral-deep);
 }
 
+.meal-totals {
+  display: flex;
+  gap: 20rpx;
+  margin: 0 0 12rpx;
+  font-size: 22rpx;
+  color: var(--ink-soft);
+}
+
+.more-toggle {
+  margin: 4rpx 0 8rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+  color: var(--coral-deep);
+}
+
+.nutrient-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 16rpx;
+}
+
+.nutrient-grid .form-item {
+  width: calc(50% - 8rpx);
+}
+
 .item-row {
   padding: 18rpx 0 8rpx;
   border-top: 1rpx solid var(--line);

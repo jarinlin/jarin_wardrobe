@@ -1,5 +1,5 @@
 <view class="page body" wx:if="{{booted}}">
-  <view class="page-subtitle tip">BMI / 体脂 / 基础代谢为本地估算；建议摄入由 AI 根据档案生成</view>
+  <view class="page-subtitle tip">BMI / 体脂 / 基础代谢为本地估算；每日热量和营养建议由 AI 根据档案生成，失败时用公式兜底</view>
 
   <view class="form surface">
     <view class="form-item">
@@ -53,8 +53,12 @@
     </view>
     <view class="row"><text class="k">理想体重</text><text class="v">{{metrics.idealWeightKg}} kg</text></view>
     <view class="row"><text class="k">基础代谢</text><text class="v">{{metrics.bmr}} kcal</text></view>
-    <view class="row"><text class="k">建议摄入</text><text class="v">{{metrics.suggestKcal}} kcal/日</text></view>
-    <text class="metrics-note">体脂为估算非 AI；建议摄入在档案变更后重新生成</text>
+    <view class="row"><text class="k">建议热量</text><text class="v">{{metrics.suggestKcal}} kcal/日</text></view>
+    <view class="row" wx:for="{{targetRows}}" wx:key="key">
+      <text class="k">{{item.label}} · {{item.roleHint}}</text>
+      <text class="v">{{item.value}} {{item.unit}}</text>
+    </view>
+    <text class="metrics-note">体脂为估算非 AI；每日营养建议在档案变更后重新生成。总糖仅为参考，不是添加糖上限。</text>
   </view>
 
   <view class="btn-primary" bindtap="onSave">保存档案</view>

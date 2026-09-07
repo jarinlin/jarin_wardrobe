@@ -8,6 +8,16 @@ function isPlaceholderNick(name) {
   return !n || n === '微信用户'
 }
 
+function toastError(err, fallback) {
+  const raw = (err && (err.message || err.errMsg)) || fallback
+  const title = String(raw || fallback).replace(/\s+/g, ' ').slice(0, 20)
+  wx.showToast({ title: title || fallback, icon: 'none' })
+}
+
+function isMockOpenID(user) {
+  return !!(user && String(user.openid || '').indexOf('mock_') === 0)
+}
+
 Page({
   data: {
     nickname: '',
@@ -20,7 +30,24 @@ Page({
   onLoad() {
     if (auth.isLoggedIn()) {
       this.finishLogin()
+      return
     }
+    this.ensureWxSession()
+  },
+
+  ensureWxSession() {
+    return new Promise((resolve) => {
+      wx.login({
+        success: (res) => {
+          this.pendingCode = res.code || ''
+          resolve(this.pendingCode)
+        },
+        fail: () => {
+          this.pendingCode = ''
+          resolve('')
+        }
+      })
+    })
   },
 
   finishLogin() {
@@ -38,8 +65,26 @@ Page({
     this.setData({ avatarUrl: tempUrl })
   },
 
+  onChooseFromAlbum() {
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sourceType: ['album', 'camera'],
+      success: (res) => {
+        const file = res.tempFiles && res.tempFiles[0]
+        const path = (file && (file.tempFilePath || file.filePath)) || ''
+        if (path) this.setData({ avatarUrl: path })
+      }
+    })
+  },
+
   onNickname(e) {
     this.setData({ nickname: (e.detail && e.detail.value) || '' })
+  },
+
+  onSkipProfile() {
+    if (!auth.isLoggedIn()) return
+    this.finishLogin()
   },
 
   onPrimaryTap() {
@@ -58,15 +103,25 @@ Page({
     wx.login({
       success: async (res) => {
         try {
-          const data = await api.loginWithCode(res.code || 'mock_code', {
+          const code = res.code || this.pendingCode || ''
+          if (!code && !USE_MOCK) {
+            toastError(null, '微信登录失败，请重试')
+            return
+          }
+          const data = await api.loginWithCode(code, {
             nickName: '',
             avatarUrl: ''
           })
+          if (!USE_MOCK && isMockOpenID(data.user)) {
+            auth.clear()
+            toastError(null, '微信登录失败，请重试')
+            return
+          }
           const app = getApp()
           app.setUserInfo(data.user)
 
           if (data.needProfile) {
-            // 新用户：停留本页补头像/昵称
+            this.ensureWxSession()
             this.setData({
               needProfile: true,
               nickname: '',
@@ -80,27 +135,23 @@ Page({
             this.finishLogin()
           }, 400)
         } catch (e) {
-          wx.showToast({ title: '登录失败', icon: 'none' })
+          toastError(e, '登录失败')
         } finally {
           this.setData({ loading: false })
         }
       },
       fail: () => {
         this.setData({ loading: false })
-        wx.showToast({ title: 'wx.login 失败', icon: 'none' })
+        wx.showToast({ title: '微信登录失败，请重试', icon: 'none' })
       }
     })
   },
 
-  /** 第二步：新用户补齐头像昵称并写入服务端 */
+  /** 第二步：新用户补昵称；头像可选，选不了也能进 */
   async completeProfile() {
     if (this.data.loading) return
     const nick = (this.data.nickname || '').trim()
     const formAvatar = this.data.avatarUrl || ''
-    if (!formAvatar) {
-      wx.showToast({ title: '请选择头像', icon: 'none' })
-      return
-    }
     if (isPlaceholderNick(nick)) {
       wx.showToast({ title: '请填写昵称', icon: 'none' })
       return
@@ -110,9 +161,10 @@ Page({
     try {
       let avatarUrl = formAvatar
       const needUpload =
-        formAvatar.indexOf('wxfile://') === 0 ||
-        /^https?:\/\/tmp/i.test(formAvatar) ||
-        (formAvatar.indexOf('http') !== 0)
+        !!formAvatar &&
+        (formAvatar.indexOf('wxfile://') === 0 ||
+          /^https?:\/\/tmp/i.test(formAvatar) ||
+          formAvatar.indexOf('http') !== 0)
       if (needUpload && !USE_MOCK) {
         avatarUrl = await upload.uploadImage(formAvatar, 'avatar')
       } else if (/127\.0\.0\.1|localhost/i.test(formAvatar)) {
@@ -128,7 +180,7 @@ Page({
         this.finishLogin()
       }, 400)
     } catch (e) {
-      wx.showToast({ title: '保存失败', icon: 'none' })
+      toastError(e, '保存失败')
     } finally {
       this.setData({ loading: false })
     }

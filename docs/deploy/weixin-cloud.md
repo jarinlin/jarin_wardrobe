@@ -25,8 +25,8 @@ git push -u origin main
 4. 配置环境变量（与 `.env.example` 对齐）：
    - `TZ=Asia/Shanghai`（容器默认 UTC，不设则日志/部分时间会显示成早上的 UTC）
    - `DB_*` / `JWT_SECRET` / `PUBLIC_BASE_URL`
-   - `WX_APPID` / `WX_SECRET`（云托管也可依赖网关注入的 `x-wx-openid`）
-   - `ALLOW_MOCK_LOGIN=false`（正式环境）
+   - `WX_APPID` / `WX_SECRET`（必须与小程序 `project.config.json` 的 appid 一致，现为 `wx2d9b0046273333db`；云托管优先用网关注入的 `x-wx-openid`）
+   - `ALLOW_MOCK_LOGIN=false`（正式环境必关；未配置时后端默认 false。开着时 code2session 失败会写成 `mock_` openid，审核登录会报用户信息/openid 错误）
    - `STORAGE_DRIVER=cos|r2`，并按后端配置 `COS_*` 或 `R2_*`；R2 的 Access Key ID / Secret Access Key 填齐后再切为 `r2`
    - `AI_*` / `AMAP_KEY`
    - `REDIS_HOST` / `REDIS_PORT` / `REDIS_USER` / `REDIS_PASSWORD` / `REDIS_TLS`（Upstash 填 `"true"`）/ 可选 `REDIS_DB`

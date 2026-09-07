@@ -123,6 +123,19 @@
   text-align: center;
 }
 
+.avatar-fallback {
+  display: block;
+  margin: -16rpx 0 28rpx;
+  font-size: 24rpx;
+  color: var(--coral-deep);
+}
+
+.skip {
+  margin-top: 28rpx;
+  font-size: 24rpx;
+  color: var(--ink-soft);
+}
+
 .saved-name {
   display: block;
   margin: -8rpx 0 16rpx;
